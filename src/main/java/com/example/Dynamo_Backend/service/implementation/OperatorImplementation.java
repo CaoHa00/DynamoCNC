@@ -23,9 +23,10 @@ public class OperatorImplementation implements OperatorService {
     @Override
     public OperatorDto addOperator(OperatorDto operatorDto) {
         Operator operator = OperatorMapper.mapToOperator(operatorDto);
-        String dateAdd = LocalDate.now().toString();
+        long createdTimestamp = System.currentTimeMillis();
         int status = 1;
-        operator.setDateAdd(dateAdd);
+        operator.setCreatedDate(createdTimestamp);
+        operator.setUpdatedDate(createdTimestamp);
         operator.setStatus(status);
         Operator savOperator = operatorRepository.save(operator);
         return OperatorMapper.mapToOperatorDto(savOperator);
@@ -57,6 +58,8 @@ public class OperatorImplementation implements OperatorService {
     public OperatorDto updateOperator(String Id, OperatorDto operatorDto) {
         Operator operator = operatorRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Operator is not found:" + Id));
+
+        long updatedTimestamp = System.currentTimeMillis();
         operator.setOperatorName(operatorDto.getOperatorName());
         operator.setOperatorId(operatorDto.getOperatorId());
         operator.setOperatorOffice(operatorDto.getOperatorOffice());
@@ -64,6 +67,7 @@ public class OperatorImplementation implements OperatorService {
         operator.setOperatorStep(operatorDto.getOperatorStep());
         operator.setKpi(operatorDto.getKpi());
         operator.setStatus(operatorDto.getStatus());
+        operator.setUpdatedDate(updatedTimestamp);
 
         Operator updatedOperator = operatorRepository.save(operator);
         return OperatorMapper.mapToOperatorDto(updatedOperator);

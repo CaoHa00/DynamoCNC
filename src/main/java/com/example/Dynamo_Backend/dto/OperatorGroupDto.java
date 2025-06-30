@@ -13,4 +13,6 @@ public class OperatorGroupDto {
     private String operatorId;
     private String operatorName;
     private int status;
+    private String createdDate;
+    private String updatedDate;
 }

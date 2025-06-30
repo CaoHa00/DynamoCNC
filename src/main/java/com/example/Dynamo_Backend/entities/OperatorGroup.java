@@ -39,4 +39,9 @@ public class OperatorGroup {
     @JsonBackReference(value = "operator-group")
     private Operator operator;
 
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
+
 }

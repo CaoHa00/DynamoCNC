@@ -39,6 +39,10 @@ public class OperatorGroupImplementation implements OperatorGroupService {
         Group newGroup = GroupMapper.mapToGroup(group);
 
         Operator newOperator = OperatorMapper.mapToOperator(operator);
+
+        long createdTimestamp = System.currentTimeMillis();
+        operatorGroup.setCreatedDate(createdTimestamp);
+        operatorGroup.setUpdatedDate(createdTimestamp);
         operatorGroup.setGroup(newGroup);
         operatorGroup.setOperator(newOperator);
 
@@ -54,6 +58,9 @@ public class OperatorGroupImplementation implements OperatorGroupService {
         OperatorDto operator = operatorService.getOperatorById(operatorGroupDto.getOperatorId());
         Group updateGroup = GroupMapper.mapToGroup(group);
         Operator updateOperator = OperatorMapper.mapToOperator(operator);
+        long updatedTimestamp = System.currentTimeMillis();
+
+        operatorGroup.setUpdatedDate(updatedTimestamp);
         operatorGroup.setOperator(updateOperator);
         operatorGroup.setGroup(updateGroup);
         OperatorGroup updatedoperatorGroup = operatorGroupRepository.save(operatorGroup);

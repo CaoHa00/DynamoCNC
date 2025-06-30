@@ -43,4 +43,9 @@ public class Group {
     @JsonManagedReference(value = "group-machine")
     private List<MachineGroup> machineGroups;
 
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
+
 }

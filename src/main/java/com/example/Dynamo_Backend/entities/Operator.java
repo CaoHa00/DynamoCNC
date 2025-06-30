@@ -50,8 +50,10 @@ public class Operator {
     @Column(name = "status", nullable = false)
     private Integer status;
 
-    @Column(name = "date_add", nullable = false)
-    private String dateAdd;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @OneToMany(mappedBy = "operator", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "operator-group")

@@ -13,6 +13,7 @@ public class LogMapper {
                 stats.getOperator().getId());
     }
 
+    // chuye data
     public static Log mapToStats(LogDto statsDto) {
         Log stats = new Log();
         stats.setLogId(statsDto.getLogId());

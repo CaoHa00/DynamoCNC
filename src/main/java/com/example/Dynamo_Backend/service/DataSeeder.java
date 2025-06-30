@@ -17,16 +17,17 @@ public class DataSeeder {
         return args -> {
             if (groupRepository.count() == 0) {
                 groupRepository.saveAll(List.of(
-                        new Group(null, "Group 1", null, null),
-                        new Group(null, "Group 2", null, null),
-                        new Group(null, "Group 3", null, null),
-                        new Group(null, "Group 4", null, null),
-                        new Group(null, "Group 5", null, null),
-                        new Group(null, "Group 6", null, null),
-                        new Group(null, "Group 7", null, null),
-                        new Group(null, "Group 8", null, null),
-                        new Group(null, "Group 9", null, null),
-                        new Group(null, "Group 10", null, null)));
+                        new Group(null, "Group 1", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 2", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 3", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 4", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 5", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 6", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 7", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 8", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 9", null, null, System.currentTimeMillis(), System.currentTimeMillis()),
+                        new Group(null, "Group 10", null, null, System.currentTimeMillis(),
+                                System.currentTimeMillis())));
             }
         };
     }

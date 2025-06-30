@@ -14,4 +14,6 @@ public class GroupDto {
     private String groupName;
     private List<OperatorGroupDto> operatorGroups;
     private List<MachineGroupDto> machineGroups;
+    private String createdDate;
+    private String updatedDate;
 }

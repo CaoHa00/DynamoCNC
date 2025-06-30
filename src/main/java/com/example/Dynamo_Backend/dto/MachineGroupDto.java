@@ -12,4 +12,6 @@ public class MachineGroupDto {
     private String groupId;
     private Integer machineId;
     private String machineName;
+    private String createdDate;
+    private String updatedDate;
 }

@@ -11,4 +11,6 @@ public class OrderDto {
     private String orderId;
     private String poNumber;
     private String drawingCodeId;
+    private String createdDate;
+    private String updatedDate;
 }

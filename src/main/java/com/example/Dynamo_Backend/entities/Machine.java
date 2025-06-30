@@ -44,8 +44,10 @@ public class Machine {
 
     @Column(name = "status", nullable = true)
     private int status;
-    @Column(name = "add_date", nullable = true)
-    private String addDate;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "machine-group")

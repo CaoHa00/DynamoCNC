@@ -25,11 +25,15 @@ public class OrderImplementation implements OrderService {
     @Override
     public OrderDto addOrder(OrderDto orderDto) {
         Order order = OrderMapper.mapToOrder(orderDto);
+        long createdTimestamp = System.currentTimeMillis();
 
         DrawingCodeDto drawingCode = drawingCodeService.getDrawingCodeById(orderDto.getDrawingCodeId());
         DrawingCode newDrawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCode);
 
         order.setDrawingCode(newDrawingCode);
+
+        order.setCreatedDate(createdTimestamp);
+        order.setUpdatedDate(createdTimestamp);
 
         Order saveOrder = orderRepository.save(order);
         return OrderMapper.mapToOrderDto(saveOrder);
@@ -42,6 +46,10 @@ public class OrderImplementation implements OrderService {
 
         DrawingCodeDto drawingCode = drawingCodeService.getDrawingCodeById(orderDto.getDrawingCodeId());
         DrawingCode newDrawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCode);
+
+        long updatedTimestamp = System.currentTimeMillis();
+
+        order.setUpdatedDate(updatedTimestamp);
 
         order.setPoNumber(orderDto.getPoNumber());
         order.setDrawingCode(newDrawingCode);

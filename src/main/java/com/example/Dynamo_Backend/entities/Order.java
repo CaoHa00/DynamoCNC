@@ -28,6 +28,10 @@ public class Order {
     private String orderId;
     @Column(name = "PO_number", nullable = false)
     private String poNumber;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @ManyToOne
     @JoinColumn(name = "drawing_code_id", nullable = false)

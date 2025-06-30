@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 public class OperateHistoryDto {
     private String operateHistoryId;
     private Integer manufacturingPoint;
-    private String startTime;
-    private String stopTime;
+    private Long startTime;
+    private Long stopTime;
     private String operatorId;
     private String drawingCodeProcessId;
 }

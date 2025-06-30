@@ -12,6 +12,8 @@ public class DrawingCodeDto {
     private String drawingCodeName;
     private String addDate;
     private int status;
+    private String createdDate;
+    private String updatedDate;
     // private List<Order> orders;
     // private List<DrawingCodeProcess> drawingCodeProcesses;
 }

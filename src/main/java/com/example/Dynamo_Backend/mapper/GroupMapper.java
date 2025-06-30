@@ -1,5 +1,8 @@
 package com.example.Dynamo_Backend.mapper;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -16,8 +19,16 @@ public class GroupMapper {
 
     public static GroupDto mapToGroupDto(Group group) {
         GroupDto dto = new GroupDto();
+        String formattedCreatedDate = Instant.ofEpochMilli(group.getCreatedDate())
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String formattedUpdatedDate = Instant.ofEpochMilli(group.getCreatedDate())
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         dto.setGroupId(group.getGroupId());
         dto.setGroupName(group.getGroupName());
+        dto.setCreatedDate(formattedCreatedDate);
+        dto.setUpdatedDate(formattedUpdatedDate);
         dto.setOperatorGroups(group.getOperatorGroups() != null ? group.getOperatorGroups().stream()
                 .map(OperatorGroupMapper::mapToOperatorGroupDto).collect(Collectors.toList()) : new ArrayList<>());
 
