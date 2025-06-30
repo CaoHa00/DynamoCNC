@@ -1,0 +1,49 @@
+package com.example.Dynamo_Backend.entities;
+
+import java.util.List;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Entity
+@Table(name = "drawing_code")
+public class DrawingCode {
+    @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(columnDefinition = "CHAR(36)")
+    private String drawingCodeId;
+
+    @Column(name = "drawing_code_name", nullable = false)
+    private String drawingCodeName;
+
+    @Column(name = "add_date", nullable = false)
+    private String addDate;
+
+    @Column(name = "status", nullable = false)
+    private int status;
+
+    @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "drawing-code-order")
+    private List<Order> orders;
+
+    @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "drawing-code-process")
+    private List<DrawingCodeProcess> drawingCodeProcesses;
+
+}

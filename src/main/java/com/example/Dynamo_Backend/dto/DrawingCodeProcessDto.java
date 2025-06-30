@@ -1,0 +1,29 @@
+package com.example.Dynamo_Backend.dto;
+
+import java.util.List;
+
+import com.example.Dynamo_Backend.entities.OperateHistory;
+import com.example.Dynamo_Backend.entities.Log;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class DrawingCodeProcessDto {
+    private String processId;
+    private Integer partNumber;
+    private Integer stepNumber;
+    private Integer manufacturingPoint;
+    private Integer pgTime;
+    private String startTime;
+    private String endTime;
+    private String addDate;
+    private Integer status;
+    private String drawingCodeId;
+    private Integer machineId;
+    private List<OperateHistory> operatorHistories;
+    private List<Log> statstistics;
+}
