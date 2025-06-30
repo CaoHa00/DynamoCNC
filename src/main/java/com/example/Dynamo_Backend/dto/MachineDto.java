@@ -14,6 +14,6 @@ public class MachineDto {
     private String machineGroup;
     private String machineOffice;
     private int status;
-    private long createdDate;
-    private long updatedDate;
+    private String createdDate;
+    private String updatedDate;
 }

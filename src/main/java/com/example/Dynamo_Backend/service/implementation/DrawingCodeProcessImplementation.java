@@ -91,7 +91,6 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
                 drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getPartNumber());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
-                drawingCodeProcess.setCreatedDate(drawingCodeProcessDto.getCreatedDate());
                 drawingCodeProcess.setUpdatedDate(updatedTimestamp);
 
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);

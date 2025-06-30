@@ -67,7 +67,6 @@ public class OperatorImplementation implements OperatorService {
         operator.setOperatorStep(operatorDto.getOperatorStep());
         operator.setKpi(operatorDto.getKpi());
         operator.setStatus(operatorDto.getStatus());
-        operator.setCreatedDate(operatorDto.getCreatedDate());
         operator.setUpdatedDate(updatedTimestamp);
 
         Operator updatedOperator = operatorRepository.save(operator);
