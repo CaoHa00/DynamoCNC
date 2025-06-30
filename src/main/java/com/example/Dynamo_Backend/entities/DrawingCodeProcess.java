@@ -40,16 +40,18 @@ public class DrawingCodeProcess {
     private Integer manufacturingPoint;
 
     @Column(name = "pg_time", nullable = false)
-    private Integer pgTime;
+    private Long pgTime;
 
     @Column(name = "start_time", nullable = true)
-    private String startTime;
+    private Long startTime;
 
     @Column(name = "end_time", nullable = true)
-    private String endTime;
+    private Long endTime;
 
-    @Column(name = "addDate", nullable = false)
-    private String addDate;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @Column(name = "status", nullable = false)
     private Integer status;

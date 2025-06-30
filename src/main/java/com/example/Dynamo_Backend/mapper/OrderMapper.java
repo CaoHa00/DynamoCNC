@@ -8,6 +8,8 @@ public class OrderMapper {
         Order order = new Order();
         order.setOrderId(orderDto.getOrderId());
         order.setPoNumber(orderDto.getPoNumber());
+        order.setCreatedDate(orderDto.getCreatedDate());
+        order.setUpdatedDate(orderDto.getUpdatedDate());
         return order;
     }
 
@@ -15,7 +17,9 @@ public class OrderMapper {
         return new OrderDto(
                 order.getOrderId(),
                 order.getPoNumber(),
-                order.getDrawingCode() != null ? order.getDrawingCode().getDrawingCodeId() : null);
+                order.getDrawingCode() != null ? order.getDrawingCode().getDrawingCodeId() : null,
+                order.getCreatedDate(),
+                order.getUpdatedDate());
 
     }
 

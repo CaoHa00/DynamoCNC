@@ -29,7 +29,8 @@ public class OperatorMapper {
                 operatorDto.setOperatorSection(operator.getOperatorSection());
                 operatorDto.setKpi(operator.getKpi());
                 operatorDto.setStatus(operator.getStatus());
-                operatorDto.setDateAdd(operator.getDateAdd());
+                operatorDto.setCreatedDate(operator.getCreatedDate());
+                operatorDto.setUpdatedDate(operator.getUpdatedDate());
 
                 return operatorDto;
         }

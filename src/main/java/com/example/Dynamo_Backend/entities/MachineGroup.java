@@ -37,4 +37,9 @@ public class MachineGroup {
     @JsonBackReference(value = "machine-group")
     private Machine machine;
 
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
+
 }

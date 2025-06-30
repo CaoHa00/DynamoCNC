@@ -17,6 +17,8 @@ public class DrawingCodeProcessMapper {
         drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
         drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getOperatorHistories());
         drawingCodeProcess.setLogs(drawingCodeProcessDto.getStatstistics());
+        drawingCodeProcess.setCreatedDate(drawingCodeProcessDto.getCreatedDate());
+        drawingCodeProcess.setUpdatedDate(drawingCodeProcessDto.getUpdatedDate());
         return drawingCodeProcess;
     }
 
@@ -29,7 +31,8 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.getPgTime(),
                 drawingCodeProcess.getStartTime(),
                 drawingCodeProcess.getEndTime(),
-                drawingCodeProcess.getAddDate(),
+                drawingCodeProcess.getCreatedDate(),
+                drawingCodeProcess.getUpdatedDate(),
                 drawingCodeProcess.getStatus(),
                 drawingCodeProcess.getDrawingCode() != null ? drawingCodeProcess.getDrawingCode().getDrawingCodeId()
                         : null,
@@ -48,7 +51,8 @@ public class DrawingCodeProcessMapper {
         dto.setPgTime(drawingCodeProcess.getPgTime());
         dto.setStartTime(drawingCodeProcess.getStartTime());
         dto.setEndTime(drawingCodeProcess.getEndTime());
-        dto.setAddDate(drawingCodeProcess.getAddDate());
+        dto.setCreatedDate(drawingCodeProcess.getCreatedDate());
+        dto.setUpdatedDate(drawingCodeProcess.getUpdatedDate());
         dto.setStatus(drawingCodeProcess.getStatus());
         if (machineDto != null) {
             dto.setMachineDto(machineDto);

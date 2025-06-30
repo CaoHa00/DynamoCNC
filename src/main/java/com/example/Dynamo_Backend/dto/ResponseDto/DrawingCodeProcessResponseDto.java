@@ -15,10 +15,11 @@ public class DrawingCodeProcessResponseDto {
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Integer pgTime;
-    private String startTime;
-    private String endTime;
-    private String addDate;
+    private Long pgTime;
+    private Long startTime;
+    private Long endTime;
+    private long createdDate;
+    private long updatedDate;
     private Integer status;
     private DrawingCodeDto drawingCodeDto;
     private MachineDto machineDto;

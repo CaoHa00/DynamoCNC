@@ -35,8 +35,12 @@ public class MachineGroupImplementaion implements MachineGroupService {
         GroupDto group = groupService.getGroupById(machineGroupDto.getGroupId());
         Group newGroup = GroupMapper.mapToGroup(group);
         Machine newMachine = MachineMapper.mapToMachine(machine);
+        long createdTimestamp = System.currentTimeMillis();
+
         machineGroup.setGroup(newGroup);
         machineGroup.setMachine(newMachine);
+        machineGroup.setCreatedDate(createdTimestamp);
+        machineGroup.setUpdatedDate(createdTimestamp);
 
         MachineGroup saveMachineGroup = machineGroupRepository.save(machineGroup);
         return MachineGroupMapper.mapToMachineGroupDto(saveMachineGroup);
@@ -50,9 +54,12 @@ public class MachineGroupImplementaion implements MachineGroupService {
         GroupDto group = groupService.getGroupById(machineGroupDto.getGroupId());
         MachineDto machine = machineService.getMachineById(machineGroupDto.getMachineId());
         Group updateGroup = GroupMapper.mapToGroup(group);
+        long updatedTimestamp = System.currentTimeMillis();
+
         Machine updateMachine = MachineMapper.mapToMachine(machine);
         machineGroup.setMachine(updateMachine);
         machineGroup.setGroup(updateGroup);
+        machineGroup.setUpdatedDate(updatedTimestamp);
         MachineGroup updatedMachineGroup = machineGroupRepository.save(machineGroup);
         return MachineGroupMapper.mapToMachineGroupDto(updatedMachineGroup);
     }

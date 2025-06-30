@@ -10,6 +10,8 @@ public class MachineGroupMapper {
         machineGroupDto.setGroupId(machineGroup.getGroup().getGroupId());
         machineGroupDto.setMachineId(machineGroup.getMachine().getMachineId());
         machineGroupDto.setMachineName(machineGroup.getMachine().getMachineName());
+        machineGroupDto.setCreatedDate(machineGroup.getCreatedDate());
+        machineGroupDto.setUpdatedDate(machineGroup.getUpdatedDate());
         return machineGroupDto;
     }
 

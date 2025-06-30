@@ -12,7 +12,8 @@ public class MachineMapper {
         machine.setMachineGroup(machineDto.getMachineGroup());
         machine.setMachineOffice(machineDto.getMachineOffice());
         machine.setStatus(machineDto.getStatus());
-        machine.setAddDate(machineDto.getAddDate());
+        machine.setCreatedDate(machineDto.getCreatedDate());
+        machine.setUpdatedDate(machineDto.getUpdatedDate());
         return machine;
 
     }
@@ -25,7 +26,8 @@ public class MachineMapper {
         machineDto.setMachineGroup(machine.getMachineGroup());
         machineDto.setMachineOffice(machine.getMachineOffice());
         machineDto.setStatus(machine.getStatus());
-        machineDto.setAddDate(machine.getAddDate());
+        machineDto.setCreatedDate(machine.getCreatedDate());
+        machineDto.setUpdatedDate(machine.getUpdatedDate());
         return machineDto;
 
     }

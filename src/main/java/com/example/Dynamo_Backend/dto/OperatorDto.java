@@ -16,5 +16,6 @@ public class OperatorDto {
     private String operatorStep;
     private Double kpi;
     private Integer status;
-    private String dateAdd;
+    private long createdDate;
+    private long updatedDate;
 }

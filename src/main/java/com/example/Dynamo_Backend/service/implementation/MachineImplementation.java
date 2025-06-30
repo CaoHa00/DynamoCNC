@@ -23,10 +23,11 @@ public class MachineImplementation implements MachineService {
     @Override
     public MachineDto addMachine(MachineDto machineDto) {
         int status = 1;
-        String date = LocalDate.now().toString();
+        long createdTimestamp = System.currentTimeMillis();
         Machine machine = MachineMapper.mapToMachine(machineDto);
         machine.setStatus(status);
-        machine.setAddDate(date);
+        machine.setCreatedDate(createdTimestamp);
+        machine.setUpdatedDate(createdTimestamp);
         Machine saveMachine = machineRepository.save(machine);
         return MachineMapper.mapToMachineDto(saveMachine);
 
@@ -36,11 +37,13 @@ public class MachineImplementation implements MachineService {
     public MachineDto updateMachine(Integer Id, MachineDto machineDto) {
         Machine machine = machineRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+        long updatedTimestamp = System.currentTimeMillis();
         machine.setMachineGroup(machineDto.getMachineGroup());
         machine.setMachineName(machineDto.getMachineName());
         machine.setMachineOffice(machineDto.getMachineOffice());
         machine.setMachineType(machineDto.getMachineType());
         machine.setStatus(machineDto.getStatus());
+        machine.setUpdatedDate(updatedTimestamp);
         Machine updatedMachine = machineRepository.save(machine);
         return MachineMapper.mapToMachineDto(updatedMachine);
     }

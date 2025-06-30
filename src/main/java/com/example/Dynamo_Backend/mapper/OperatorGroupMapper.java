@@ -9,6 +9,8 @@ public class OperatorGroupMapper {
         operatorGroup.setOperatorGroupId(operatorGroupDto.getOperatorGroupId());
         operatorGroup.setGroup(operatorGroup.getGroup());
         operatorGroup.setOperator(operatorGroup.getOperator());
+        operatorGroup.setCreatedDate(operatorGroupDto.getCreatedDate());
+        operatorGroup.setUpdatedDate(operatorGroupDto.getUpdatedDate());
         return operatorGroup;
     }
 
@@ -20,6 +22,8 @@ public class OperatorGroupMapper {
                 .setOperatorId(operatorGroup.getOperator() != null ? operatorGroup.getOperator().getId() : null);
         operatorGroupDto.setOperatorName(
                 operatorGroup.getOperator() != null ? operatorGroup.getOperator().getOperatorName() : null);
+        operatorGroupDto.setCreatedDate(operatorGroup.getCreatedDate());
+        operatorGroupDto.setUpdatedDate(operatorGroup.getUpdatedDate());
         return operatorGroupDto;
     }
 

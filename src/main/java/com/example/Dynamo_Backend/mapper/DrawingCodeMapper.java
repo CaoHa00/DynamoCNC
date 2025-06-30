@@ -8,7 +8,8 @@ public class DrawingCodeMapper {
         DrawingCode drawingCode = new DrawingCode();
         drawingCode.setDrawingCodeId(drawingCodeDto.getDrawingCodeId());
         drawingCode.setDrawingCodeName(drawingCodeDto.getDrawingCodeName());
-        drawingCode.setAddDate(drawingCodeDto.getAddDate());
+        drawingCode.setCreatedDate(drawingCodeDto.getCreatedDate());
+        drawingCode.setUpdatedDate(drawingCodeDto.getUpdatedDate());
         drawingCode.setStatus(drawingCodeDto.getStatus());
         return drawingCode;
         // return new DrawingCode(
@@ -22,7 +23,8 @@ public class DrawingCodeMapper {
         DrawingCodeDto drawingCodeDto = new DrawingCodeDto();
         drawingCodeDto.setDrawingCodeId(drawingCode.getDrawingCodeId());
         drawingCodeDto.setDrawingCodeName(drawingCode.getDrawingCodeName());
-        drawingCodeDto.setAddDate(drawingCode.getAddDate());
+        drawingCodeDto.setCreatedDate(drawingCode.getCreatedDate());
+        drawingCodeDto.setUpdatedDate(drawingCode.getUpdatedDate());
         drawingCodeDto.setStatus(drawingCode.getStatus());
         return drawingCodeDto;
         // return new DrawingCodeDto(

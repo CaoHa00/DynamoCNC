@@ -43,7 +43,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
         @Override
         public DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessDto drawingCodeProcessDto) {
-                String addDate = LocalDateTime.now().toString();
+                long createdTimestamp = System.currentTimeMillis();
                 int status = 1;
                 DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeProcessDto.getDrawingCodeId())
                                 .orElseThrow(() -> new RuntimeException(
@@ -53,7 +53,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 DrawingCodeProcess drawingCodeProcess = DrawingCodeProcessMapper
                                 .mapToDrawingCodeProcess(drawingCodeProcessDto);
                 drawingCodeProcess.setDrawingCode(drawingCode);
-                drawingCodeProcess.setAddDate(addDate);
+                drawingCodeProcess.setCreatedDate(createdTimestamp);
+                drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
 
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
@@ -80,6 +81,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                                         + drawingCodeProcessId));
                         drawingCodeProcess.setMachine(updateMachine);
                 }
+                long updatedTimestamp = System.currentTimeMillis();
+
                 drawingCodeProcess.setDrawingCode(drawingCode);
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getOperatorHistories());
@@ -88,6 +91,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
                 drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getPartNumber());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
+                drawingCodeProcess.setCreatedDate(drawingCodeProcessDto.getCreatedDate());
+                drawingCodeProcess.setUpdatedDate(updatedTimestamp);
 
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
                 return DrawingCodeProcessMapper.toDto(updateDrawingCode, machine, savedrawingCodeProcess);

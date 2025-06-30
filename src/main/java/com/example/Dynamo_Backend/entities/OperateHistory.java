@@ -31,10 +31,10 @@ public class OperateHistory {
     private Integer manufacturingPoint;
 
     @Column(name = "start_time", nullable = false)
-    private String startTime;
+    private Long startTime;
 
     @Column(name = "stop_time", nullable = false)
-    private String stopTime;
+    private Long stopTime;
 
     @ManyToOne
     @JoinColumn(name = "operator_id", nullable = false)

@@ -32,8 +32,10 @@ public class DrawingCode {
     @Column(name = "drawing_code_name", nullable = false)
     private String drawingCodeName;
 
-    @Column(name = "add_date", nullable = false)
-    private String addDate;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @Column(name = "status", nullable = false)
     private int status;
