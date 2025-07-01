@@ -56,6 +56,9 @@ public class DrawingCodeProcess {
     @Column(name = "status", nullable = false)
     private Integer status;
 
+    @Column(name = "processStatus", nullable = false)
+    private Integer processStatus;
+
     @ManyToOne
     @JoinColumn(name = "drawing_code_id", nullable = false)
     @JsonBackReference(value = "drawing-code-process")
