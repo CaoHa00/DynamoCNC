@@ -18,8 +18,8 @@ public class DrawingCodeProcessResponseDto {
     private Long pgTime;
     private Long startTime;
     private Long endTime;
-    private long createdDate;
-    private long updatedDate;
+    private String createdDate;
+    private String updatedDate;
     private Integer status;
     private DrawingCodeDto drawingCodeDto;
     private MachineDto machineDto;

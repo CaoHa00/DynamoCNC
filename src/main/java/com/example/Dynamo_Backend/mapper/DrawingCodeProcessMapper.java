@@ -55,6 +55,12 @@ public class DrawingCodeProcessMapper {
     public static DrawingCodeProcessResponseDto toDto(DrawingCodeDto drawingCodeDto, MachineDto machineDto,
             DrawingCodeProcess drawingCodeProcess) {
         DrawingCodeProcessResponseDto dto = new DrawingCodeProcessResponseDto();
+        String formattedCreatedDate = Instant.ofEpochMilli(drawingCodeProcess.getCreatedDate())
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String formattedUpdatedDate = Instant.ofEpochMilli(drawingCodeProcess.getCreatedDate())
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         dto.setProcessId(drawingCodeProcess.getProcessId());
         dto.setPartNumber(drawingCodeProcess.getPartNumber());
         dto.setStepNumber(drawingCodeProcess.getStepNumber());
@@ -62,8 +68,8 @@ public class DrawingCodeProcessMapper {
         dto.setPgTime(drawingCodeProcess.getPgTime());
         dto.setStartTime(drawingCodeProcess.getStartTime());
         dto.setEndTime(drawingCodeProcess.getEndTime());
-        dto.setCreatedDate(drawingCodeProcess.getCreatedDate());
-        dto.setUpdatedDate(drawingCodeProcess.getUpdatedDate());
+        dto.setCreatedDate(formattedCreatedDate);
+        dto.setUpdatedDate(formattedUpdatedDate);
         dto.setStatus(drawingCodeProcess.getStatus());
         if (machineDto != null) {
             dto.setMachineDto(machineDto);
