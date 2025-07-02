@@ -17,38 +17,40 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 @Entity
-@Table(name = "drawing_code")
-public class DrawingCode {
+@Table(name = "quality_control")
+public class QualityControl {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(columnDefinition = "CHAR(36)")
-    private String drawingCodeId;
+    private String Id;
 
-    @Column(name = "drawing_code_name", nullable = false)
-    private String drawingCodeName;
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "email", nullable = false)
+    private String email;
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "phone_number", nullable = false)
+    private String phoneNumber;
+
+    @Column(name = "status", nullable = false)
+    private boolean status;
 
     @Column(name = "createdDate", nullable = false)
     private long createdDate;
+
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
 
-    @Column(name = "status", nullable = false)
-    private int status;
-
-    @Column(name = "status", nullable = false)
-    private String productStatus;
-
-    @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "drawing-code-order")
-    private List<Order> orders;
-
-    @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quality_control", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "drawing-code-process")
-    private List<DrawingCodeProcess> drawingCodeProcesses;
-
+    private List<DrawingCodeProcess> drawingCodeProcess;
 }

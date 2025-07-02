@@ -56,8 +56,11 @@ public class DrawingCodeProcess {
     @Column(name = "status", nullable = false)
     private Integer status;
 
-    @Column(name = "processStatus", nullable = false)
+    @Column(name = "process_status", nullable = false)
     private Integer processStatus;
+
+    @Column(name = "qc_note", nullable = false)
+    private String qcNote;
 
     @ManyToOne
     @JoinColumn(name = "drawing_code_id", nullable = false)
@@ -68,6 +71,11 @@ public class DrawingCodeProcess {
     @JoinColumn(name = "machine_id", nullable = true)
     @JsonBackReference(value = "machine-process")
     private Machine machine;
+
+    @ManyToOne
+    @JoinColumn(name = "quality_control_id", nullable = true)
+    @JsonBackReference(value = "quality-control-process")
+    private QualityControl qualityControl;
 
     @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "history-process")
