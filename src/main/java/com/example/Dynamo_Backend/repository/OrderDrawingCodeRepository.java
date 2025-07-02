@@ -1,11 +1,11 @@
 package com.example.Dynamo_Backend.repository;
 
-import com.example.Dynamo_Backend.entities.QuantityControl;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.example.Dynamo_Backend.entities.OrderDrawingCode;
+
 @Repository
-public interface QuantityControlRepository extends JpaRepository<QuantityControl, String> {
+public interface OrderDrawingCodeRepository extends JpaRepository<OrderDrawingCode, String> {
 
 }

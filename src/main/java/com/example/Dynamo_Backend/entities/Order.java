@@ -28,13 +28,30 @@ public class Order {
     private String orderId;
     @Column(name = "PO_number", nullable = false)
     private String poNumber;
-    @Column(name = "createdDate", nullable = false)
-    private long createdDate;
-    @Column(name = "updatedDate", nullable = false)
-    private long updatedDate;
-
-    @ManyToOne
-    @JoinColumn(name = "drawing_code_id", nullable = false)
-    @JsonBackReference(value = "drawing-code-order")
-    private DrawingCode drawingCode;
+    @Column(name = "order_name", nullable = false)
+    private String orderName;
+    @Column(name = "customer_name", nullable = false)
+    private String customerName;
+    @Column(name = "phone_number", nullable = false)
+    private String phoneNumber;
+    @Column(name = "address", nullable = false)
+    private String address;
+    @Column(name = "created_date", nullable = false)
+    private Long createdDate;
+    @Column(name = "updated_date", nullable = false)
+    private Long updatedDate;
+    @Column(name = "order_date", nullable = false)
+    private Long orderDate;
+    @Column(name = "delivery_date", nullable = false)
+    private Long deliveryDate;
+    @Column(name = "completion_date", nullable = false)
+    private Long completionDate;
+    @Column(name = "shippingMethod", nullable = false)
+    private String shippingMethod;
+    @Column(name = "remark", nullable = false)
+    private String remark;
+    @Column(name = "status", nullable = false)
+    private int status;
+    @Column(name = "order_status", nullable = false)
+    private int orderstatus;
 }

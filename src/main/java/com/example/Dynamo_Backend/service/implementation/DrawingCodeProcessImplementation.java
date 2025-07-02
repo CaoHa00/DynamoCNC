@@ -2,6 +2,7 @@ package com.example.Dynamo_Backend.service.implementation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.integration.support.MessageBuilder;
@@ -133,13 +134,25 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         @Override
         public List<DrawingCodeProcessDto> getAllDrawingCodeProcess() {
                 List<DrawingCodeProcess> drawingCodeProcesses = drawingCodeProcessRepository.findAll();
-                return drawingCodeProcesses.stream().map(DrawingCodeProcessMapper::mapToDrawingCodeProcessDto).toList();
+                List<DrawingCodeProcess> inProgressProcesses = new ArrayList<>();
+                for (DrawingCodeProcess process : drawingCodeProcesses) {
+                        if (process.getProcessStatus() != 1) {
+                                inProgressProcesses.add(process);
+                        }
+                }
+                return inProgressProcesses.stream().map(DrawingCodeProcessMapper::mapToDrawingCodeProcessDto).toList();
         }
 
         @Override
         public List<DrawingCodeProcessResponseDto> getAll() {
                 List<DrawingCodeProcess> all = drawingCodeProcessRepository.findAll();
-                return all.stream().map(process -> {
+                List<DrawingCodeProcess> inProgressProcesses = new ArrayList<>();
+                for (DrawingCodeProcess process : all) {
+                        if (process.getProcessStatus() != 1) {
+                                inProgressProcesses.add(process);
+                        }
+                }
+                return inProgressProcesses.stream().map(process -> {
                         DrawingCodeDto drawingDto = DrawingCodeMapper.mapToDrawingCodeDto(process.getDrawingCode());
                         Machine machine = process.getMachine();
                         MachineDto machineDto = (machine != null)
