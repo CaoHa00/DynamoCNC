@@ -58,6 +58,10 @@ public class DrawingCodeProcess {
 
     @Column(name = "process_status", nullable = false)
     private Integer processStatus;
+    // 1: to do
+    // 2: in progress
+    // 3: waiting for qc
+    // 4:
 
     @Column(name = "qc_note", nullable = false)
     private String qcNote;
