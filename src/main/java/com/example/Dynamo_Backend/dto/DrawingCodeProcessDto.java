@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class DrawingCodeProcessDto {
+
     private String processId;
     private Integer partNumber;
     private Integer stepNumber;
@@ -23,8 +24,10 @@ public class DrawingCodeProcessDto {
     private String createdDate;
     private String updatedDate;
     private Integer status;
+    private String qcNote;
     private String drawingCodeId;
     private Integer machineId;
+    private String quantityControlId;
     private List<OperateHistory> operatorHistories;
     private List<Log> statstistics;
 }

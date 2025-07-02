@@ -20,6 +20,7 @@ public class DrawingCodeProcessResponseDto {
     private Long endTime;
     private String createdDate;
     private String updatedDate;
+    private String qcNote;
     private Integer status;
     private DrawingCodeDto drawingCodeDto;
     private MachineDto machineDto;
