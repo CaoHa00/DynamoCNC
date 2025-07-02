@@ -73,9 +73,9 @@ public class DrawingCodeProcess {
     private Machine machine;
 
     @ManyToOne
-    @JoinColumn(name = "quantity_control_id", nullable = true)
-    @JsonBackReference(value = "quantity-control-process")
-    private QuantityControl quantityControl;
+    @JoinColumn(name = "quality_control_id", nullable = true)
+    @JsonBackReference(value = "quality-control-process")
+    private QualityControl qualityControl;
 
     @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "history-process")

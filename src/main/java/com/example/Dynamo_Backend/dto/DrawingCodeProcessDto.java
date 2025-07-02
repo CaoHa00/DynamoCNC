@@ -27,7 +27,7 @@ public class DrawingCodeProcessDto {
     private String qcNote;
     private String drawingCodeId;
     private Integer machineId;
-    private String quantityControlId;
+    private String qualityControlId;
     private List<OperateHistory> operatorHistories;
     private List<Log> statstistics;
 }

@@ -13,6 +13,7 @@ public class DrawingCodeDto {
     private int status;
     private String createdDate;
     private String updatedDate;
+    private String productStatus;
     // private List<Order> orders;
     // private List<DrawingCodeProcess> drawingCodeProcesses;
 }

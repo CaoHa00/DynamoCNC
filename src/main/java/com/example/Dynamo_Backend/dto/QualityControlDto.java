@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class QuantityControlDto {
+public class QualityControlDto {
     private String Id;
     private String name;
     private String email;
