@@ -13,6 +13,8 @@ public interface DrawingCodeProcessService {
 
     DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
 
+    DrawingCodeProcessDto getDrawingCodeProcessByMachineId(Integer machineId);
+
     void deleteDrawingCodeProcess(String drawingCodeProcessId);
 
     List<DrawingCodeProcessDto> getAllDrawingCodeProcess();

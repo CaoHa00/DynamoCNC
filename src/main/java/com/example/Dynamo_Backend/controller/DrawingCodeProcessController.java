@@ -71,4 +71,10 @@ public class DrawingCodeProcessController {
         return ResponseEntity.ok(drawingCodeProcess);
     }
 
+    public ResponseEntity<DrawingCodeProcessDto> getDrawingCodeProcessByMachineId(
+            @PathVariable("machineId") Integer Id) {
+        DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService.getDrawingCodeProcessByMachineId(Id);
+        return ResponseEntity.ok(drawingCodeProcess);
+    }
+
 }

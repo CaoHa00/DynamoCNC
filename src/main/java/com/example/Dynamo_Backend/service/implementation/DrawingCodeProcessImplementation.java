@@ -106,6 +106,23 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         }
 
         @Override
+        public DrawingCodeProcessDto getDrawingCodeProcessByMachineId(Integer machineId) {
+                DrawingCodeProcess drawingCodeProcess;
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_Id(machineId);
+                for (DrawingCodeProcess process : processes) {
+                        if (process.getProcessStatus() != 2) {
+                                processes.remove(process);
+                        }
+                }
+                if (processes.size() > 1) {
+                        new RuntimeException("Have more than 1 processes in progess!");
+                }
+                drawingCodeProcess = processes.get(0);
+
+                return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(drawingCodeProcess);
+        }
+
+        @Override
         public void deleteDrawingCodeProcess(String drawingCodeProcessId) {
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(drawingCodeProcessId)
                                 .orElseThrow(() -> new RuntimeException(
@@ -137,9 +154,18 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId)
                                 .orElseThrow(() -> new RuntimeException(
                                                 "DrawingCode is not found:" + drawingCodeProcessId));
+                // Xử lý: chuyển trạng thái các process khác dùng máy thànhh off
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_Id(machineId);
+                for (DrawingCodeProcess process2 : processes) {
+                        if (process2.getProcessStatus() == 2) {
+                                process2.setProcessStatus(3);
+                        }
+                }
+
                 Machine machine = machineRepository.findById(machineId).orElseThrow(() -> new RuntimeException(
-                                "DrawingCode is not found:" + machineId));
+                                "Machine is not found:" + machineId));
                 process.setMachine(machine);
+                process.setProcessStatus(2);
 
                 Operator operator = operatorRepository.findById(operatorId).orElseThrow(() -> new RuntimeException(
                                 "Operator is not found:" + operatorId));
