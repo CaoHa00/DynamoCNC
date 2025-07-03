@@ -21,8 +21,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "quantity_control")
-public class QuantityControl {
+@Table(name = "quality_control")
+public class QualityControl {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
@@ -50,7 +50,7 @@ public class QuantityControl {
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
 
-    @OneToMany(mappedBy = "quantity_control", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quality_control", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "drawing-code-process")
     private List<DrawingCodeProcess> drawingCodeProcess;
 }

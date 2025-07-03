@@ -40,6 +40,9 @@ public class DrawingCode {
     @Column(name = "status", nullable = false)
     private int status;
 
+    @Column(name = "status", nullable = false)
+    private String productStatus;
+
     @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "drawing-code-order")
     private List<Order> orders;

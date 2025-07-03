@@ -52,8 +52,8 @@ public class DrawingCodeProcessMapper {
                                                 : null,
                                 drawingCodeProcess.getMachine() != null ? drawingCodeProcess.getMachine().getMachineId()
                                                 : null,
-                                drawingCodeProcess.getQuantityControl() != null
-                                                ? drawingCodeProcess.getQuantityControl().getId()
+                                drawingCodeProcess.getQualityControl() != null
+                                                ? drawingCodeProcess.getQualityControl().getId()
                                                 : null,
                                 drawingCodeProcess.getOperateHistories(),
                                 drawingCodeProcess.getLogs());
