@@ -50,7 +50,7 @@ public class QualityControl {
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
 
-    @OneToMany(mappedBy = "quality_control", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "qualityControl", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "drawing-code-process")
     private List<DrawingCodeProcess> drawingCodeProcess;
 }

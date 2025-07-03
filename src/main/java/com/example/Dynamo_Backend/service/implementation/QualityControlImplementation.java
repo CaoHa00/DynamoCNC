@@ -2,12 +2,15 @@ package com.example.Dynamo_Backend.service.implementation;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.example.Dynamo_Backend.dto.QualityControlDto;
 import com.example.Dynamo_Backend.entities.QualityControl;
 import com.example.Dynamo_Backend.mapper.QualityControlMapper;
 import com.example.Dynamo_Backend.repository.QualityControlRepository;
 import com.example.Dynamo_Backend.service.QualityControlService;
 
+@Service
 public class QualityControlImplementation implements QualityControlService {
     QualityControlRepository qualityControlRepository;
 
