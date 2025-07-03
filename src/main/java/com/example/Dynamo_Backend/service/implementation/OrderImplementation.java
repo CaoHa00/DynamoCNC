@@ -27,11 +27,6 @@ public class OrderImplementation implements OrderService {
         Order order = OrderMapper.mapToOrder(orderDto);
         long createdTimestamp = System.currentTimeMillis();
 
-        DrawingCodeDto drawingCode = drawingCodeService.getDrawingCodeById(orderDto.getDrawingCodeId());
-        DrawingCode newDrawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCode);
-
-        order.setDrawingCode(newDrawingCode);
-
         order.setCreatedDate(createdTimestamp);
         order.setUpdatedDate(createdTimestamp);
 
@@ -44,15 +39,11 @@ public class OrderImplementation implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order is not found:" + orderId));
 
-        DrawingCodeDto drawingCode = drawingCodeService.getDrawingCodeById(orderDto.getDrawingCodeId());
-        DrawingCode newDrawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCode);
-
         long updatedTimestamp = System.currentTimeMillis();
 
         order.setUpdatedDate(updatedTimestamp);
 
         order.setPoNumber(orderDto.getPoNumber());
-        order.setDrawingCode(newDrawingCode);
 
         Order updateOrder = orderRepository.save(order);
         return OrderMapper.mapToOrderDto(updateOrder);

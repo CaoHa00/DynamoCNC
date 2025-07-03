@@ -3,7 +3,6 @@ package com.example.Dynamo_Backend.dto;
 import java.util.List;
 
 import com.example.Dynamo_Backend.entities.DrawingCode;
-import com.example.Dynamo_Backend.entities.Log;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
