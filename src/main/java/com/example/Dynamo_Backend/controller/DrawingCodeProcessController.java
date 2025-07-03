@@ -71,6 +71,7 @@ public class DrawingCodeProcessController {
         return ResponseEntity.ok(drawingCodeProcess);
     }
 
+    @GetMapping("/getProcessByMachineId")
     public ResponseEntity<DrawingCodeProcessDto> getDrawingCodeProcessByMachineId(
             @PathVariable("machineId") Integer Id) {
         DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService.getDrawingCodeProcessByMachineId(Id);
