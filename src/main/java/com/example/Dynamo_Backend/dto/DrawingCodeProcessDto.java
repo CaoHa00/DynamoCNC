@@ -18,7 +18,10 @@ public class DrawingCodeProcessDto {
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Long pgTime;
+    private Long totalRunningTime;
+    private Long totalStopTime;
+    private Long offsetRunTime;
+    private Long pgRunTime;
     private Long startTime;
     private Long endTime;
     private String createdDate;

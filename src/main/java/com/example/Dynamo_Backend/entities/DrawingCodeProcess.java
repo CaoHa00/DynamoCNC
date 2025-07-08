@@ -39,8 +39,17 @@ public class DrawingCodeProcess {
     @Column(name = "manufacturing_point", nullable = false)
     private Integer manufacturingPoint;
 
-    @Column(name = "pg_time", nullable = false)
-    private Long pgTime;
+    @Column(name = "total_running_time", nullable = false)
+    private Long totalRunningTime;
+
+    @Column(name = "total_stop_time", nullable = false)
+    private Long totalStopTime;
+
+    @Column(name = "pg_run_time", nullable = false)
+    private Long pgRunTime;
+
+    @Column(name = "offset_run_time", nullable = false)
+    private Long offsetRunTime;
 
     @Column(name = "start_time", nullable = true)
     private Long startTime;

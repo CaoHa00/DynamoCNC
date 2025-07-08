@@ -23,6 +23,10 @@ public class OrderDetailMapper {
         orderDetailDto.setOrderId(OrderDetail.getOrder().getOrderId());
         orderDetailDto.setCreatedDate(formattedCreatedDate);
         orderDetailDto.setUpdatedDate(formattedUpdatedDate);
+        orderDetailDto.setOrderCode(OrderDetail.getOrderCode());
+        orderDetailDto.setPgTime(OrderDetail.getPgTime());
+        orderDetailDto.setProductionStep(OrderDetail.getProductionStep());
+        orderDetailDto.setQuantity(OrderDetail.getQuantity());
         return orderDetailDto;
     }
 
