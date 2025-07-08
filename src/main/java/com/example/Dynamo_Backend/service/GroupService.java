@@ -15,5 +15,5 @@ public interface GroupService {
 
     List<GroupDto> getGroups();
 
-    List<GroupDto> getOperatorStatusGroup();
+    List<GroupDto> getStaffStatusGroup();
 }

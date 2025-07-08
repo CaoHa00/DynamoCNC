@@ -14,19 +14,23 @@ import com.example.Dynamo_Backend.config.IdGenerator;
 import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
-import com.example.Dynamo_Backend.entities.Operator;
+import com.example.Dynamo_Backend.entities.OrderDetail;
+import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.Protocol;
 import com.example.Dynamo_Backend.mapper.DrawingCodeMapper;
 import com.example.Dynamo_Backend.mapper.DrawingCodeProcessMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
+import com.example.Dynamo_Backend.mapper.OrderDetailMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.DrawingCodeRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
-import com.example.Dynamo_Backend.repository.OperatorRepository;
+import com.example.Dynamo_Backend.repository.OrderDetailRepository;
+import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.repository.ProtocolRepository;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 
@@ -35,25 +39,25 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class DrawingCodeProcessImplementation implements DrawingCodeProcessService {
-        DrawingCodeRepository drawingCodeRepository;
+        OrderDetailRepository orderDetailRepository;
         ProtocolRepository protocolRepository;
         MachineRepository machineRepository;
         DrawingCodeProcessRepository drawingCodeProcessRepository;
         private MessageChannel mqttOutboundChannel;
-        OperatorRepository operatorRepository;
+        StaffRepository staffRepository;
 
         @Override
         public DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessDto drawingCodeProcessDto) {
                 long createdTimestamp = System.currentTimeMillis();
                 int status = 1;
-                DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeProcessDto.getDrawingCodeId())
+                OrderDetail orderDetail = orderDetailRepository.findById(drawingCodeProcessDto.getOrderDetailId())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "DrawingCode is not found:"
-                                                                + drawingCodeProcessDto.getDrawingCodeId()));
+                                                                + drawingCodeProcessDto.getOrderDetailId()));
 
                 DrawingCodeProcess drawingCodeProcess = DrawingCodeProcessMapper
                                 .mapToDrawingCodeProcess(drawingCodeProcessDto);
-                drawingCodeProcess.setDrawingCode(drawingCode);
+                drawingCodeProcess.setOrderDetail(orderDetail);
                 drawingCodeProcess.setCreatedDate(createdTimestamp);
                 drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
@@ -71,11 +75,11 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(drawingCodeProcessId)
                                 .orElseThrow(() -> new RuntimeException(
                                                 "DrawingCode Process is not found:" + drawingCodeProcessId));
-                DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeProcessDto.getDrawingCodeId())
+                OrderDetail orderDetail = orderDetailRepository.findById(drawingCodeProcessDto.getOrderDetailId())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "DrawingCode is not found:"
-                                                                + drawingCodeProcessDto.getDrawingCodeId()));
-                DrawingCodeDto updateDrawingCode = DrawingCodeMapper.mapToDrawingCodeDto(drawingCode);
+                                                                + drawingCodeProcessDto.getOrderDetailId()));
+                OrderDetailDto updateOrderDetail = OrderDetailMapper.mapToOrderDetailDto(orderDetail);
                 if (drawingCodeProcessDto.getMachineId() != null) {
 
                         Machine updateMachine = machineRepository.findById(drawingCodeProcessDto.getMachineId())
@@ -86,9 +90,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
                 long updatedTimestamp = System.currentTimeMillis();
 
-                drawingCodeProcess.setDrawingCode(drawingCode);
+                drawingCodeProcess.setOrderDetail(orderDetail);
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
-                drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getOperatorHistories());
+                drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getStaffHistories());
                 drawingCodeProcess.setLogs(drawingCodeProcess.getLogs());
                 drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
@@ -97,7 +101,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setUpdatedDate(updatedTimestamp);
 
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
-                return DrawingCodeProcessMapper.toDto(updateDrawingCode, machine, savedrawingCodeProcess);
+                return DrawingCodeProcessMapper.toDto(updateOrderDetail, machine, savedrawingCodeProcess);
         }
 
         @Override
@@ -155,17 +159,17 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         }
                 }
                 return inProgressProcesses.stream().map(process -> {
-                        DrawingCodeDto drawingDto = DrawingCodeMapper.mapToDrawingCodeDto(process.getDrawingCode());
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapToOrderDetailDto(process.getOrderDetail());
                         Machine machine = process.getMachine();
                         MachineDto machineDto = (machine != null)
                                         ? MachineMapper.mapToMachineDto(machine)
                                         : null;
-                        return DrawingCodeProcessMapper.toDto(drawingDto, machineDto, process);
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process);
                 }).toList();
         }
 
         @Override
-        public void recieveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String operatorId) {
+        public void recieveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId) {
                 DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId)
                                 .orElseThrow(() -> new RuntimeException(
                                                 "DrawingCode is not found:" + drawingCodeProcessId));
@@ -182,8 +186,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 process.setMachine(machine);
                 process.setProcessStatus(2);
 
-                Operator operator = operatorRepository.findById(operatorId).orElseThrow(() -> new RuntimeException(
-                                "Operator is not found:" + operatorId));
+                Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new RuntimeException(
+                                "Staff is not found:" + staffId));
 
                 Protocol protocol = new Protocol();
                 if (protocol.getId() == null
@@ -196,7 +200,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
                 protocol.setProcess(process);
                 protocol.setMachine(machine);
-                protocol.setOperator(operator);
+                protocol.setStaff(staff);
                 protocolRepository.save(protocol);
                 String sendMachine = "";
                 if (machineId < 10) {

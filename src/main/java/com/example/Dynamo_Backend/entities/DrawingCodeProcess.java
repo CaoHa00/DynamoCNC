@@ -67,19 +67,14 @@ public class DrawingCodeProcess {
     private String qcNote;
 
     @ManyToOne
-    @JoinColumn(name = "drawing_code_id", nullable = false)
-    @JsonBackReference(value = "drawing-code-process")
-    private DrawingCode drawingCode;
+    @JoinColumn(name = "order_detail_id", nullable = false)
+    @JsonBackReference
+    private OrderDetail orderDetail;
 
     @ManyToOne
     @JoinColumn(name = "machine_id", nullable = true)
     @JsonBackReference(value = "machine-process")
     private Machine machine;
-
-    @ManyToOne
-    @JoinColumn(name = "quality_control_id", nullable = true)
-    @JsonBackReference(value = "quality-control-process")
-    private QualityControl qualityControl;
 
     @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "history-process")

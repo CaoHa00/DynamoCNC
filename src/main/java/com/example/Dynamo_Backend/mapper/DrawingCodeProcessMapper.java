@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 
@@ -20,7 +21,7 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
-                drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getOperatorHistories());
+                drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getStaffHistories());
                 drawingCodeProcess.setLogs(drawingCodeProcessDto.getStatstistics());
                 drawingCodeProcess.setCreatedDate(0);
                 drawingCodeProcess.setUpdatedDate(0);
@@ -47,19 +48,16 @@ public class DrawingCodeProcessMapper {
                                 formattedUpdatedDate,
                                 drawingCodeProcess.getStatus(),
                                 drawingCodeProcess.getQcNote(),
-                                drawingCodeProcess.getDrawingCode() != null
-                                                ? drawingCodeProcess.getDrawingCode().getDrawingCodeId()
+                                drawingCodeProcess.getOrderDetail() != null
+                                                ? drawingCodeProcess.getOrderDetail().getOrderDetailId()
                                                 : null,
                                 drawingCodeProcess.getMachine() != null ? drawingCodeProcess.getMachine().getMachineId()
-                                                : null,
-                                drawingCodeProcess.getQualityControl() != null
-                                                ? drawingCodeProcess.getQualityControl().getId()
                                                 : null,
                                 drawingCodeProcess.getOperateHistories(),
                                 drawingCodeProcess.getLogs());
         }
 
-        public static DrawingCodeProcessResponseDto toDto(DrawingCodeDto drawingCodeDto, MachineDto machineDto,
+        public static DrawingCodeProcessResponseDto toDto(OrderDetailDto orderDetailDto, MachineDto machineDto,
                         DrawingCodeProcess drawingCodeProcess) {
                 DrawingCodeProcessResponseDto dto = new DrawingCodeProcessResponseDto();
                 String formattedCreatedDate = Instant.ofEpochMilli(drawingCodeProcess.getCreatedDate())
@@ -82,7 +80,7 @@ public class DrawingCodeProcessMapper {
                 if (machineDto != null) {
                         dto.setMachineDto(machineDto);
                 }
-                dto.setDrawingCodeDto(drawingCodeDto);
+                dto.setOrderDetailDto(orderDetailDto);
                 return dto;
 
         }

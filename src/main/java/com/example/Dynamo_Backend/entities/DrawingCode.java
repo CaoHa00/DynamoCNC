@@ -43,12 +43,8 @@ public class DrawingCode {
     @Column(name = "product_status", nullable = false)
     private String productStatus;
 
-    // @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
-    // @JsonManagedReference(value = "drawing-code-order")
-    // private List<Order> orders;
-
     @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "drawing-code-process")
-    private List<DrawingCodeProcess> drawingCodeProcesses;
+    @JsonManagedReference
+    private List<OrderDetail> orderDetails;
 
 }

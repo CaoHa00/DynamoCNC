@@ -21,6 +21,6 @@ public interface DrawingCodeProcessService {
 
     List<DrawingCodeProcessResponseDto> getAll();
 
-    void recieveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String operatorId);
+    void recieveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
 
 }

@@ -21,28 +21,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "operator")
-public class Operator {
+@Table(name = "staff")
+public class Staff {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(columnDefinition = "CHAR(36)")
     private String Id;
 
-    @Column(name = "operator_id", nullable = false)
-    private Integer operatorId;
+    @Column(name = "staff_id", nullable = false)
+    private Integer staffId;
 
-    @Column(name = "operator_name", nullable = false)
-    private String operatorName;
+    @Column(name = "staff_name", nullable = false)
+    private String staffName;
 
-    @Column(name = "operator_office", nullable = false)
-    private String operatorOffice;
+    @Column(name = "staff_office", nullable = false)
+    private String staffOffice;
 
-    @Column(name = "operator_section", nullable = false)
-    private String operatorSection;
+    @Column(name = "staff_section", nullable = false)
+    private String staffSection;
 
-    @Column(name = "operator_step", nullable = false)
-    private String operatorStep;
+    @Column(name = "staff_step", nullable = false)
+    private String staffStep;
 
     @Column(name = "kpi", nullable = false)
     private Double kpi;
@@ -55,15 +55,23 @@ public class Operator {
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
 
-    @OneToMany(mappedBy = "operator", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "operator-group")
-    private List<OperatorGroup> operatorGroups;
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "staff-group")
+    private List<StaffGroup> staffGroups;
 
-    @OneToMany(mappedBy = "operator", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "history-operator")
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "history-staff")
     private List<OperateHistory> operateHistories;
 
-    @OneToMany(mappedBy = "operator", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "stats-operator")
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "stats-staff")
     private List<Log> statstistics;
+
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<StaffKpi> staffKpis;
+
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<OrderDetail> orderDetails;
 }

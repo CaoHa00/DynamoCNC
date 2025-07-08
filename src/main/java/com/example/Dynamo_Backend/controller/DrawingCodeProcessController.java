@@ -43,8 +43,8 @@ public class DrawingCodeProcessController {
 
     @PostMapping("/receive")
     public ResponseEntity<Void> receiveDataFromTablet(@RequestParam("drawingCodeProcess_id") String Id,
-            @RequestParam("operatorId") String operatorId, @RequestParam("machineId") Integer machineId) {
-        drawingCodeProcessService.recieveProcessFromTablet(Id, machineId, operatorId);
+            @RequestParam("staffId") String staffId, @RequestParam("machineId") Integer machineId) {
+        drawingCodeProcessService.recieveProcessFromTablet(Id, machineId, staffId);
         return ResponseEntity.ok().build();
     }
 

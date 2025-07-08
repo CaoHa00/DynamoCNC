@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderDrawingCodeDto {
-    private String orderDrawingCodeId;
+public class OrderDetailDto {
+    private String orderDetailId;
     private String drawingCodeId;
     private String orderId;
     private String createdDate;

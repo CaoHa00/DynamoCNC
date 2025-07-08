@@ -36,8 +36,8 @@ public class Group {
     private String groupName;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "group-operator")
-    private List<OperatorGroup> operatorGroups;
+    @JsonManagedReference(value = "group-staff")
+    private List<StaffGroup> staffGroups;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "group-machine")

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class GroupDto {
     private String groupId;
     private String groupName;
-    private List<OperatorGroupDto> operatorGroups;
+    private List<StaffGroupDto> staffGroups;
     private List<MachineGroupDto> machineGroups;
     private String createdDate;
     private String updatedDate;

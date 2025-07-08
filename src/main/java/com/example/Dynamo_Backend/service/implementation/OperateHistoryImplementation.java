@@ -6,18 +6,18 @@ import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.OperateHistoryDto;
-import com.example.Dynamo_Backend.dto.OperatorDto;
+import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.OperateHistory;
-import com.example.Dynamo_Backend.entities.Operator;
+import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.mapper.DrawingCodeProcessMapper;
 
 import com.example.Dynamo_Backend.mapper.OperateHistoryMapper;
-import com.example.Dynamo_Backend.mapper.OperatorMapper;
+import com.example.Dynamo_Backend.mapper.StaffMapper;
 import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 import com.example.Dynamo_Backend.service.OperateHistoryService;
-import com.example.Dynamo_Backend.service.OperatorService;
+import com.example.Dynamo_Backend.service.StaffService;
 
 import lombok.AllArgsConstructor;
 
@@ -25,7 +25,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class OperateHistoryImplementation implements OperateHistoryService {
         DrawingCodeProcessService drawingCodeProcessService;
-        OperatorService operatorService;
+        StaffService staffService;
         OperateHistoryRepository operateHistoryRepository;
 
         @Override
@@ -34,12 +34,12 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                 .getDrawingCodeProcessById(operateHistoryDto.getDrawingCodeProcessId());
                 DrawingCodeProcess newdrawingCodeProcess = DrawingCodeProcessMapper
                                 .mapToDrawingCodeProcess(drawingCodeProcess);
-                OperatorDto operator = operatorService.getOperatorById(operateHistoryDto.getOperateHistoryId());
-                Operator newOperator = OperatorMapper.mapToOperator(operator);
+                StaffDto staff = staffService.getStaffById(operateHistoryDto.getOperateHistoryId());
+                Staff newStaff = StaffMapper.mapToStaff(staff);
 
                 OperateHistory operateHistory = OperateHistoryMapper
                                 .mapToOperateHistory(operateHistoryDto);
-                operateHistory.setOperator(newOperator);
+                operateHistory.setStaff(newStaff);
 
                 operateHistory.setDrawingCodeProcess(newdrawingCodeProcess);
 
@@ -55,10 +55,10 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                 .getDrawingCodeProcessById(operateHistoryDto.getDrawingCodeProcessId());
                 DrawingCodeProcess updateDrawingCodeProcess = DrawingCodeProcessMapper
                                 .mapToDrawingCodeProcess(drawingCodeProcess);
-                OperatorDto operator = operatorService.getOperatorById(operateHistoryDto.getOperateHistoryId());
-                Operator updateOperator = OperatorMapper.mapToOperator(operator);
+                StaffDto staff = staffService.getStaffById(operateHistoryDto.getOperateHistoryId());
+                Staff updateStaff = StaffMapper.mapToStaff(staff);
 
-                operateHistory.setOperator(updateOperator);
+                operateHistory.setStaff(updateStaff);
                 operateHistory.setManufacturingPoint(operateHistoryDto.getManufacturingPoint());
                 operateHistory.setStartTime(operateHistoryDto.getStartTime());
                 operateHistory.setStopTime(operateHistoryDto.getStopTime());
