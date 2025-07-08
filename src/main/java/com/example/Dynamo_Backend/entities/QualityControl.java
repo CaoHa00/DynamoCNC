@@ -51,6 +51,6 @@ public class QualityControl {
     private long updatedDate;
 
     @OneToMany(mappedBy = "qualityControl", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "drawing-code-process")
+    @JsonManagedReference(value = "quality-control-process")
     private List<DrawingCodeProcess> drawingCodeProcess;
 }

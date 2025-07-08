@@ -57,6 +57,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setCreatedDate(createdTimestamp);
                 drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
+                drawingCodeProcess.setProcessStatus(1);
+                drawingCodeProcess.setQcNote("null");
 
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);

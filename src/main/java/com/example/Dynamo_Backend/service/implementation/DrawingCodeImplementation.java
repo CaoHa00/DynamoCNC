@@ -22,10 +22,12 @@ public class DrawingCodeImplementation implements DrawingCodeService {
     public DrawingCodeDto addDrawingCode(DrawingCodeDto drawingCodeDto) {
         long createdTimestamp = System.currentTimeMillis();
         int status = 1;
+
         DrawingCode drawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCodeDto);
         drawingCode.setCreatedDate(createdTimestamp);
         drawingCode.setUpdatedDate(createdTimestamp);
         drawingCode.setStatus(status);
+        drawingCode.setProductStatus("status");
         DrawingCode saveDrawingCode = drawingCodeRepository.save(drawingCode);
         return DrawingCodeMapper.mapToDrawingCodeDto(saveDrawingCode);
     }
