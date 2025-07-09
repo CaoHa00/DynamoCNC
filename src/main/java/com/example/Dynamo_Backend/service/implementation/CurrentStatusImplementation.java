@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,12 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         currentStatus.setStatus(arr[3]);
         logService.addLog(currentStatus, process, operator);
         currentStatusRepository.save(currentStatus);
+    }
+
+    @Override
+    public List<CurrentStatus> all() {
+        List<CurrentStatus> all = currentStatusRepository.findAll();
+        return all;
     }
 
 }

@@ -47,6 +47,7 @@ public class DrawingCodeProcessMapper {
                                 formattedUpdatedDate,
                                 drawingCodeProcess.getStatus(),
                                 drawingCodeProcess.getQcNote(),
+                                drawingCodeProcess.getDrawingCode().getDrawingCodeName(),
                                 drawingCodeProcess.getDrawingCode() != null
                                                 ? drawingCodeProcess.getDrawingCode().getDrawingCodeId()
                                                 : null,
