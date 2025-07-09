@@ -56,10 +56,6 @@ public class DrawingCodeProcessMapper {
                                 drawingCodeProcess.getQcNote(),
                                 drawingCodeProcess.getOrderDetail() != null
                                                 ? drawingCodeProcess.getOrderDetail().getOrderDetailId()
-                                drawingCodeProcess.getDrawingCode().getDrawingCodeName(),
-                                drawingCodeProcess.getDrawingCode() != null
-                                                ? drawingCodeProcess.getDrawingCode().getDrawingCodeId()
-
                                                 : null,
                                 drawingCodeProcess.getMachine() != null ? drawingCodeProcess.getMachine().getMachineId()
                                                 : null,
