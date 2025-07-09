@@ -28,6 +28,7 @@ public class MachineKpiImplementation implements MachineKpiService {
         MachineKpi machineKpi = MachineKpiMapper.mapToMachineKpi(machineKpiDto);
         machineKpi.setMachine(machine);
         machineKpi.setCreatedDate(createdTimestamp);
+        machineKpi.setUpdatedDate(createdTimestamp);
         MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
         return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
     }

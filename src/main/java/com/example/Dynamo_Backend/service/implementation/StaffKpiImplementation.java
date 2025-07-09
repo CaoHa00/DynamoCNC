@@ -28,6 +28,7 @@ public class StaffKpiImplementation implements StaffKpiService {
         StaffKpi staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
         staffKpi.setStaff(staff);
         staffKpi.setCreatedDate(createdTimestamp);
+        staffKpi.setUpdatedDate(createdTimestamp);
         StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
         return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
     }
@@ -35,7 +36,7 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto updateStaffKpi(Integer Id, StaffKpiDto staffKpiDto) {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
+                .orElseThrow(() -> new RuntimeException("Staffkpi is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
                 .orElseThrow(() -> new RuntimeException("Staff is not found:" + staffKpiDto.getStaffId()));

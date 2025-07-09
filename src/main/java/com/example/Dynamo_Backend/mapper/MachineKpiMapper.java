@@ -38,7 +38,7 @@ public class MachineKpiMapper {
         String formattedUpdatedDate = Instant.ofEpochMilli(machineKpi.getUpdatedDate())
                 .atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
+        machineKpiDto.setId(machineKpi.getId());
         machineKpiDto.setCreatedDate(formattedCreatedDate);
         machineKpiDto.setUpdatedDate(formattedUpdatedDate);
         machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());

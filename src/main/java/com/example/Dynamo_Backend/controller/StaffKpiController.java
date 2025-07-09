@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("api/staff-kpi")
+@RequestMapping("/api/staff-kpi")
 public class StaffKpiController {
 
     public final StaffKpiService staffKpiService;
@@ -42,6 +42,7 @@ public class StaffKpiController {
     @PutMapping("/{staffKpi_id}")
     public ResponseEntity<StaffKpiDto> updateStaffKpi(@PathVariable("staffKpi_id") Integer Id,
             @RequestBody StaffKpiDto staffKpiDto) {
+
         StaffKpiDto updateStaffKpis = staffKpiService.updateStaffKpi(Id, staffKpiDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateStaffKpis);
     }
