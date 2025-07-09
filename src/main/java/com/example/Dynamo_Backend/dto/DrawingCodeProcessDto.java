@@ -29,6 +29,8 @@ public class DrawingCodeProcessDto {
     private Integer status;
     private String qcNote;
     private String orderDetailId;
+    private String drawingCodeId;
+    private String drawingCodeName;
     private Integer machineId;
     private List<OperateHistory> staffHistories;
     private List<Log> statstistics;
