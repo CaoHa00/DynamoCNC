@@ -37,26 +37,26 @@ public class MachineKpi {
     private String duration;
 
     @Column(name = "year", nullable = false)
-    private int yeat;
+    private Integer year;
 
-    @Column(name = "month", nullable = true)
-    private int month;
+    @Column(name = "month", nullable = false)
+    private Integer month;
 
     @Column(name = "week", nullable = true)
-    private int week;
+    private Integer week;
 
     @Column(name = "oee_goal", nullable = false)
-    private float oeeGoal;
+    private Float oeeGoal;
 
     @Column(name = "monthly_running_time", nullable = false)
-    private int monthlyRunningTime;
+    private Integer monthlyRunningTime;
     @Column(name = "weekly_running_time", nullable = false)
-    private int weeklyRunningTime;
+    private Integer weeklyRunningTime;
 
     @Column(name = "createdDate", nullable = false)
-    private long createdDate;
+    private Long createdDate;
     @Column(name = "updatedDate", nullable = false)
-    private long updatedDate;
+    private Long updatedDate;
 
     @ManyToOne
     @JoinColumn(name = "machine_id", nullable = false)

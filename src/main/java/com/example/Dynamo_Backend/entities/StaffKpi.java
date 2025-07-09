@@ -37,30 +37,30 @@ public class StaffKpi {
     private String duration;
 
     @Column(name = "year", nullable = false)
-    private int yeat;
+    private Integer year;
 
-    @Column(name = "month", nullable = true)
-    private int month;
+    @Column(name = "month", nullable = false)
+    private Integer month;
 
     @Column(name = "week", nullable = true)
-    private int week;
+    private Integer week;
 
     @Column(name = "pg_time_goal", nullable = false)
-    private float pgTimeGoal;
+    private Float pgTimeGoal;
 
     @Column(name = "machine_time_goal", nullable = false)
-    private float machineTimeGoal;
+    private Float machineTimeGoal;
     @Column(name = "manufacturing_point", nullable = false)
-    private float manufacturingPoint;
+    private Float manufacturingPoint;
     @Column(name = "ole_goal", nullable = false)
-    private float oleGoal;
+    private Float oleGoal;
     @Column(name = "kpi", nullable = false)
-    private float kpi;
+    private Float kpi;
 
     @Column(name = "createdDate", nullable = false)
-    private long createdDate;
+    private Long createdDate;
     @Column(name = "updatedDate", nullable = false)
-    private long updatedDate;
+    private Long updatedDate;
 
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = false)
