@@ -12,6 +12,6 @@ public class OperateHistoryDto {
     private Integer manufacturingPoint;
     private Long startTime;
     private Long stopTime;
-    private String operatorId;
+    private String staffId;
     private String drawingCodeProcessId;
 }

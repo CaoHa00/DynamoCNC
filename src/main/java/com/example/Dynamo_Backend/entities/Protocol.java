@@ -26,9 +26,9 @@ public class Protocol {
     private DrawingCodeProcess process;
 
     @ManyToOne
-    @JoinColumn(name = "operator_id", nullable = false)
-    @JsonBackReference(value = "protocol-operator")
-    private Operator operator;
+    @JoinColumn(name = "staff_id", nullable = false)
+    @JsonBackReference(value = "protocol-staff")
+    private Staff staff;
 
     @ManyToOne
     @JoinColumn(name = "machine_id", nullable = false)

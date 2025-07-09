@@ -62,7 +62,7 @@ public class LogMapper {
                 stats.getTimeStamp(),
                 status,
                 stats.getDrawingCodeProcess().getProcessId(),
-                stats.getOperator().getId());
+                stats.getStaff().getId());
     }
 
     // chuye data
@@ -73,7 +73,7 @@ public class LogMapper {
 
         stats.setStatus(statsDto.getStatus());
         // stats.setDrawingCodeProcess(drawingCodeProcess);
-        // stats.setOperator(operator);
+        // stats.setStaff(staff);
 
         return stats;
     }

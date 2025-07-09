@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.entities.Operator;
+import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.Protocol;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.ProtocolRepository;
@@ -33,8 +33,8 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus = new CurrentStatus();
         }
         Protocol operate = protocolRepository.findById(protocolId).orElse(null);
-        Operator operator = operate.getOperator();
-        currentStatus.setOperatorId(operator.getId());
+        Staff staff = operate.getStaff();
+        currentStatus.setStaffId(staff.getId());
 
         DrawingCodeProcess process = operate.getProcess();
         currentStatus.setProcessId(process.getProcessId());
@@ -42,7 +42,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         currentStatus.setMachineId(arr[0]);
         currentStatus.setTime(arr[2]);
         currentStatus.setStatus(arr[3]);
-        logService.addLog(currentStatus, process, operator);
+        logService.addLog(currentStatus, process, staff);
         currentStatusRepository.save(currentStatus);
     }
 

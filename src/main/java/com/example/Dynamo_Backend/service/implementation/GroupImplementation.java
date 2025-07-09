@@ -69,7 +69,7 @@ public class GroupImplementation implements GroupService {
     }
 
     @Override
-    public List<GroupDto> getOperatorStatusGroup() {
+    public List<GroupDto> getStaffStatusGroup() {
         List<Group> groups = groupRepository.findAll();
         groups.sort(Comparator.comparing(group -> {
             String name = group.getGroupName();

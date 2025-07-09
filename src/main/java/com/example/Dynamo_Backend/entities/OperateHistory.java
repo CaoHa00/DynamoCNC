@@ -37,9 +37,9 @@ public class OperateHistory {
     private Long stopTime;
 
     @ManyToOne
-    @JoinColumn(name = "operator_id", nullable = false)
-    @JsonBackReference(value = "history-operator")
-    private Operator operator;
+    @JoinColumn(name = "staff_id", nullable = false)
+    @JsonBackReference(value = "history-staff")
+    private Staff staff;
 
     @ManyToOne
     @JoinColumn(name = "process_id", nullable = false)

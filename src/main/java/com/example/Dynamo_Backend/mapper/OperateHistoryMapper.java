@@ -10,7 +10,7 @@ public class OperateHistoryMapper {
                 operateHistory.getManufacturingPoint(),
                 operateHistory.getStartTime(),
                 operateHistory.getStopTime(),
-                operateHistory.getOperator() != null ? operateHistory.getOperator().getId()
+                operateHistory.getStaff() != null ? operateHistory.getStaff().getId()
                         : null,
                 operateHistory.getDrawingCodeProcess() != null ? operateHistory.getDrawingCodeProcess().getProcessId()
                         : null);

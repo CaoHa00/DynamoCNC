@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OperatorGroupDto {
-    private String operatorGroupId;
+public class StaffGroupDto {
+    private String staffGroupId;
     private String groupId;
-    private String operatorId;
-    private String operatorName;
+    private String staffId;
+    private String staffName;
     private int status;
     private String createdDate;
     private String updatedDate;

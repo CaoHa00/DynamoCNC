@@ -39,8 +39,17 @@ public class DrawingCodeProcess {
     @Column(name = "manufacturing_point", nullable = false)
     private Integer manufacturingPoint;
 
-    @Column(name = "pg_time", nullable = false)
-    private Long pgTime;
+    @Column(name = "total_running_time", nullable = false)
+    private Long totalRunningTime;
+
+    @Column(name = "total_stop_time", nullable = false)
+    private Long totalStopTime;
+
+    @Column(name = "pg_run_time", nullable = false)
+    private Long pgRunTime;
+
+    @Column(name = "offset_run_time", nullable = false)
+    private Long offsetRunTime;
 
     @Column(name = "start_time", nullable = true)
     private Long startTime;
@@ -67,19 +76,14 @@ public class DrawingCodeProcess {
     private String qcNote;
 
     @ManyToOne
-    @JoinColumn(name = "drawing_code_id", nullable = false)
-    @JsonBackReference(value = "drawing-code-process")
-    private DrawingCode drawingCode;
+    @JoinColumn(name = "order_detail_id", nullable = false)
+    @JsonBackReference
+    private OrderDetail orderDetail;
 
     @ManyToOne
     @JoinColumn(name = "machine_id", nullable = true)
     @JsonBackReference(value = "machine-process")
     private Machine machine;
-
-    @ManyToOne
-    @JoinColumn(name = "quality_control_id", nullable = true)
-    @JsonBackReference(value = "quality-control-process")
-    private QualityControl qualityControl;
 
     @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "history-process")

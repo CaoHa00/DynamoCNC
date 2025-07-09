@@ -56,4 +56,8 @@ public class Machine {
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "machine-process")
     private List<DrawingCodeProcess> drawingCodeProcesses;
+
+    @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<MachineKpi> machineKpis;
 }

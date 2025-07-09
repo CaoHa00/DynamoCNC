@@ -18,17 +18,20 @@ public class DrawingCodeProcessDto {
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Long pgTime;
+    private Long totalRunningTime;
+    private Long totalStopTime;
+    private Long offsetRunTime;
+    private Long pgRunTime;
     private Long startTime;
     private Long endTime;
     private String createdDate;
     private String updatedDate;
     private Integer status;
     private String qcNote;
+    private String orderDetailId;
     private String drawingCodeId;
     private String drawingCodeName;
     private Integer machineId;
-    private String qualityControlId;
-    private List<OperateHistory> operatorHistories;
+    private List<OperateHistory> staffHistories;
     private List<Log> statstistics;
 }

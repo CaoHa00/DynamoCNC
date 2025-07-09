@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OperatorDto {
+public class StaffDto {
     private String Id;
-    private Integer operatorId;
-    private String operatorName;
-    private String operatorOffice;
-    private String operatorSection;
-    private String operatorStep;
+    private Integer staffId;
+    private String staffName;
+    private String staffOffice;
+    private String staffSection;
+    private String staffStep;
     private Double kpi;
     private Integer status;
     private String createdDate;

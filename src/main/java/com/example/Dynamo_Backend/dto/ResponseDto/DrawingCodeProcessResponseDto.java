@@ -2,6 +2,7 @@ package com.example.Dynamo_Backend.dto.ResponseDto;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.OrderDetailDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,13 +16,16 @@ public class DrawingCodeProcessResponseDto {
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Long pgTime;
+    private Long totalRunningTime;
+    private Long totalStopTime;
+    private Long offsetRunTime;
+    private Long pgRunTime;
     private Long startTime;
     private Long endTime;
     private String createdDate;
     private String updatedDate;
     private String qcNote;
     private Integer status;
-    private DrawingCodeDto drawingCodeDto;
+    private OrderDetailDto orderDetailDto;
     private MachineDto machineDto;
 }
