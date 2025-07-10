@@ -24,7 +24,7 @@ public class StaffKpiImplementation implements StaffKpiService {
     public StaffKpiDto addStaffKpi(StaffKpiDto staffKpiDto) {
         long createdTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + staffKpiDto.getStaffId()));
+                .orElseThrow(() -> new RuntimeException("StaffKpiKpi is not found:" + staffKpiDto.getStaffId()));
         StaffKpi staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
         staffKpi.setStaff(staff);
         staffKpi.setCreatedDate(createdTimestamp);
@@ -36,10 +36,10 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto updateStaffKpi(Integer Id, StaffKpiDto staffKpiDto) {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
+                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + staffKpiDto.getStaffId()));
+                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
         staffKpi.setStaff(staff);
         staffKpi.setDuration(staffKpiDto.getDuration());
         staffKpi.setYear(staffKpiDto.getYear());
@@ -58,14 +58,14 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto getStaffKpiById(Integer Id) {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
+                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
         return StaffKpiMapper.mapToStaffKpiDto(staffKpi);
     }
 
     @Override
     public void deleteStaffKpi(Integer Id) {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
+                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
         staffKpiRepository.delete(staffKpi);
     }
 

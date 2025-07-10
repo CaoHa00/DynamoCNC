@@ -45,10 +45,13 @@ public class StaffImplementation implements StaffService {
         staff.setStaffKpis(new ArrayList<StaffKpi>());
         Staff saveStaff = staffRepository.save(staff);
 
-        if (staffRequestDto.getStaffSection() == "Bộ phận sản xuất") {
+        if ("Bộ phận sản xuất".equals(staffRequestDto.getStaffSection())) {
             staffRequestDto.setId(saveStaff.getId());
             StaffKpiDto staffKpiDto = StaffKpiMapper.mapToStaffKpiDto(staffRequestDto);
             StaffKpiDto saveKpi = staffKpiService.addStaffKpi(staffKpiDto);
+            StaffKpi staffKpi = staffKpiRepository.findById(saveKpi.getId())
+                    .orElseThrow(() -> new RuntimeException("StaffKpi is not found:"));
+            saveStaff.getStaffKpis().add(staffKpi);
         }
 
         return StaffMapper.mapToStaffDto(saveStaff);
