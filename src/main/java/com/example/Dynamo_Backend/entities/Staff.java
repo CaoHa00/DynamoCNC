@@ -45,7 +45,7 @@ public class Staff {
     private String staffStep;
 
     @Column(name = "kpi", nullable = false)
-    private Double kpi;
+    private Float kpi;
 
     @Column(name = "status", nullable = false)
     private Integer status;

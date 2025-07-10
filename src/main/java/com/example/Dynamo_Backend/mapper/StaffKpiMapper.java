@@ -40,7 +40,7 @@ public class StaffKpiMapper {
         String formattedUpdatedDate = Instant.ofEpochMilli(staffKpi.getUpdatedDate())
                 .atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
+        staffKpiDto.setId(staffKpi.getId());
         staffKpiDto.setCreatedDate(formattedCreatedDate);
         staffKpiDto.setUpdatedDate(formattedUpdatedDate);
         staffKpiDto.setStaffId(staffKpi.getStaff().getId());

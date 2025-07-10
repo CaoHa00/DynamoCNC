@@ -28,6 +28,7 @@ public class StaffKpiImplementation implements StaffKpiService {
         StaffKpi staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
         staffKpi.setStaff(staff);
         staffKpi.setCreatedDate(createdTimestamp);
+        staffKpi.setUpdatedDate(createdTimestamp);
         StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
         return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
     }
