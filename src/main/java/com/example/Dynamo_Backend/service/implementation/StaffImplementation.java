@@ -10,6 +10,7 @@ import com.example.Dynamo_Backend.dto.*;
 import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
+import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
 import com.example.Dynamo_Backend.mapper.StaffMapper;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
@@ -24,6 +25,7 @@ public class StaffImplementation implements StaffService {
     @Autowired
     StaffRepository staffRepository;
 
+    StaffKpiService staffKpiService;
     StaffKpiRepository staffKpiRepository;
 
     @Override
@@ -37,28 +39,17 @@ public class StaffImplementation implements StaffService {
         staff.setStaffOffice(staffRequestDto.getStaffOffice());
         staff.setStaffSection(staffRequestDto.getStaffSection());
         staff.setStaffStep(staffRequestDto.getStaffStep());
-        staff.setKpi(staffRequestDto.getKpi());
         staff.setCreatedDate(createdTimestamp);
         staff.setUpdatedDate(createdTimestamp);
         staff.setStatus(status);
-        Staff savStaff = staffRepository.save(staff);
-        StaffKpi staffKpi = new StaffKpi();
-        staffKpi.setStaff(savStaff);
-        staffKpi.setCreatedDate(createdTimestamp);
-        staffKpi.setUpdatedDate(createdTimestamp);
-        staffKpi.setDuration(staffRequestDto.getDuration());
-        staffKpi.setYear(staffRequestDto.getYear());
-        staffKpi.setMonth(staffRequestDto.getMonth());
-        staffKpi.setWeek(staffRequestDto.getWeek());
-        staffKpi.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
-        staffKpi.setKpi(staffRequestDto.getKpi());
-        staffKpi.setOleGoal(staffRequestDto.getOleGoal());
-        staffKpi.setMachineTimeGoal(staffRequestDto.getMachineTimeGoal());
-        staffKpi.setManufacturingPoint(staffRequestDto.getManufacturingPoint());
-        staffKpiRepository.save(staffKpi);
         staff.setStaffKpis(new ArrayList<StaffKpi>());
-        staff.getStaffKpis().add(staffKpi);
-        return StaffMapper.mapToStaffDto(savStaff);
+        Staff saveStaff = staffRepository.save(staff);
+
+        staffRequestDto.setId(saveStaff.getId());
+        StaffKpiDto staffKpiDto = StaffKpiMapper.mapToStaffKpiDto(staffRequestDto);
+        staffKpiService.addStaffKpi(staffKpiDto);
+
+        return StaffMapper.mapToStaffDto(saveStaff);
     }
 
     @Override
@@ -100,7 +91,6 @@ public class StaffImplementation implements StaffService {
         staff.setStaffOffice(staffRequestDto.getStaffOffice());
         staff.setStaffSection(staffRequestDto.getStaffSection());
         staff.setStaffStep(staffRequestDto.getStaffStep());
-        staff.setKpi(staffRequestDto.getKpi());
         staff.setStatus(staffRequestDto.getStatus());
         staff.setUpdatedDate(updatedTimestamp);
 

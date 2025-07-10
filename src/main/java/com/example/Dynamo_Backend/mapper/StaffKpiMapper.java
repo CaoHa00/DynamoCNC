@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import com.example.Dynamo_Backend.dto.StaffKpiDto;
+import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.repository.StaffRepository;
@@ -30,6 +31,21 @@ public class StaffKpiMapper {
         // staffKpi.setCreatedDate((long) 0);
         // staffKpi.setUpdatedDate((long) 0);
         return staffKpi;
+    }
+
+    public static StaffKpiDto mapToStaffKpiDto(StaffRequestDto staffRequestDto) {
+        StaffKpiDto staffKpiDto = new StaffKpiDto();
+        staffKpiDto.setStaffId(staffRequestDto.getId());
+        staffKpiDto.setDuration(staffRequestDto.getDuration());
+        staffKpiDto.setYear(staffRequestDto.getYear());
+        staffKpiDto.setMonth(staffRequestDto.getMonth());
+        staffKpiDto.setWeek(staffRequestDto.getWeek());
+        staffKpiDto.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
+        staffKpiDto.setKpi(staffRequestDto.getKpi());
+        staffKpiDto.setOleGoal(staffRequestDto.getOleGoal());
+        staffKpiDto.setMachineTimeGoal(staffRequestDto.getMachineTimeGoal());
+        staffKpiDto.setManufacturingPoint(staffRequestDto.getManufacturingPoint());
+        return staffKpiDto;
     }
 
     public static StaffKpiDto mapToStaffKpiDto(StaffKpi staffKpi) {

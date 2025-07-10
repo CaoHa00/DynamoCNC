@@ -16,7 +16,6 @@ public class StaffDto {
     private String staffOffice;
     private String staffSection;
     private String staffStep;
-    private Float kpi;
     private Integer status;
     private String createdDate;
     private String updatedDate;
