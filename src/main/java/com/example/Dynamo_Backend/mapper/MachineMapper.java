@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.entities.Machine;
 
 public class MachineMapper {
@@ -19,7 +20,19 @@ public class MachineMapper {
         // machine.setCreatedDate(machineDto.getCreatedDate());
         // machine.setUpdatedDate(machineDto.getUpdatedDate());
         return machine;
+    }
 
+    public static Machine mapToMachine(MachineRequestDto machineDto) {
+        Machine machine = new Machine();
+        machine.setMachineId(machineDto.getMachineId());
+        machine.setMachineName(machineDto.getMachineName());
+        machine.setMachineType(machineDto.getMachineType());
+        machine.setMachineGroup(machineDto.getMachineGroup());
+        machine.setMachineOffice(machineDto.getMachineOffice());
+        machine.setStatus(machineDto.getStatus());
+        // machine.setCreatedDate(machineDto.getCreatedDate());
+        // machine.setUpdatedDate(machineDto.getUpdatedDate());
+        return machine;
     }
 
     public static MachineDto mapToMachineDto(Machine machine) {
@@ -38,6 +51,8 @@ public class MachineMapper {
         machineDto.setStatus(machine.getStatus());
         machineDto.setCreatedDate(formattedCreatedDate);
         machineDto.setUpdatedDate(formattedUpdatedDate);
+        machineDto.setMachineKpiDtos(
+                machine.getMachineKpis().stream().map(MachineKpiMapper::mapToMachineKpiDto).toList());
         return machineDto;
 
     }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
-
+import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.service.MachineService;
 
 import lombok.AllArgsConstructor;
@@ -33,7 +33,7 @@ public class MachineController {
     }
 
     @PostMapping
-    public ResponseEntity<MachineDto> addMachine(@RequestBody MachineDto machineDto) {
+    public ResponseEntity<MachineDto> addMachine(@RequestBody MachineRequestDto machineDto) {
         MachineDto machine = machineService.addMachine(machineDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(machine);
 
