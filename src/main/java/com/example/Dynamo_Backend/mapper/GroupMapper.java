@@ -14,6 +14,7 @@ public class GroupMapper {
                 Group group = new Group();
                 group.setGroupId(groupDto.getGroupId());
                 group.setGroupName(groupDto.getGroupName());
+                group.setGroupType(groupDto.getGroupType());
                 return group;
         }
 
@@ -27,6 +28,7 @@ public class GroupMapper {
                                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 dto.setGroupId(group.getGroupId());
                 dto.setGroupName(group.getGroupName());
+                dto.setGroupType(group.getGroupType());
                 dto.setCreatedDate(formattedCreatedDate);
                 dto.setUpdatedDate(formattedUpdatedDate);
                 dto.setStaffGroups(group.getStaffGroups() != null ? group.getStaffGroups().stream()
@@ -43,6 +45,7 @@ public class GroupMapper {
                 GroupDto dto = new GroupDto();
                 dto.setGroupId(group.getGroupId());
                 dto.setGroupName(group.getGroupName());
+                dto.setGroupType(group.getGroupType());
                 dto.setStaffGroups(group.getStaffGroups() != null ? group.getStaffGroups().stream()
                                 .map(StaffGroupMapper::mapToStaffGroupDto).collect(Collectors.toList())
                                 : new ArrayList<>());

@@ -1,7 +1,5 @@
 package com.example.Dynamo_Backend.dto;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,12 +7,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class GroupDto {
+public class GroupKpiDto {
+    private Integer Id;
+    private Integer year;
+    private Integer month;
+    private Integer week;
+    private String office;
+    private Integer workHoursAim;
+    private Integer workHoursChange;
+    private Integer realWorkHours;
     private String groupId;
-    private String groupName;
-    private String groupType;
-    private List<StaffGroupDto> staffGroups;
-    private List<MachineGroupDto> machineGroups;
     private String createdDate;
     private String updatedDate;
+
 }
