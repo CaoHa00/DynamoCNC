@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Dynamo_Backend.dto.StaffDto;
+import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
 import com.example.Dynamo_Backend.service.StaffService;
 
 import lombok.AllArgsConstructor;
@@ -31,8 +33,8 @@ public class StaffController {
     }
 
     @PostMapping
-    public ResponseEntity<StaffDto> addStaff(@RequestBody StaffDto staffDto) {
-        StaffDto staff = staffService.addStaff(staffDto);
+    public ResponseEntity<StaffDto> addStaff(@RequestBody StaffRequestDto staffRequestDto) {
+        StaffDto staff = staffService.addStaff(staffRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(staff);
 
     }
@@ -45,7 +47,7 @@ public class StaffController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteStaffs(@RequestBody List<String> staffIds) {
+    public ResponseEntity<Void> deleteStaffs(@RequestParam List<String> staffIds) {
         staffService.deleteStaff(staffIds);
         return ResponseEntity.ok().build();
     }

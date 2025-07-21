@@ -44,9 +44,6 @@ public class Staff {
     @Column(name = "staff_step", nullable = false)
     private String staffStep;
 
-    @Column(name = "kpi", nullable = false)
-    private Double kpi;
-
     @Column(name = "status", nullable = false)
     private Integer status;
 

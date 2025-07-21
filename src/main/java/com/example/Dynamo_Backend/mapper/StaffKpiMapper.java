@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import com.example.Dynamo_Backend.dto.StaffKpiDto;
+import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.repository.StaffRepository;
@@ -32,6 +33,21 @@ public class StaffKpiMapper {
         return staffKpi;
     }
 
+    public static StaffKpiDto mapToStaffKpiDto(StaffRequestDto staffRequestDto) {
+        StaffKpiDto staffKpiDto = new StaffKpiDto();
+        staffKpiDto.setStaffId(staffRequestDto.getId());
+        staffKpiDto.setDuration(staffRequestDto.getDuration());
+        staffKpiDto.setYear(staffRequestDto.getYear());
+        staffKpiDto.setMonth(staffRequestDto.getMonth());
+        staffKpiDto.setWeek(staffRequestDto.getWeek());
+        staffKpiDto.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
+        staffKpiDto.setKpi(staffRequestDto.getKpi());
+        staffKpiDto.setOleGoal(staffRequestDto.getOleGoal());
+        staffKpiDto.setMachineTimeGoal(staffRequestDto.getMachineTimeGoal());
+        staffKpiDto.setManufacturingPoint(staffRequestDto.getManufacturingPoint());
+        return staffKpiDto;
+    }
+
     public static StaffKpiDto mapToStaffKpiDto(StaffKpi staffKpi) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
         String formattedCreatedDate = Instant.ofEpochMilli(staffKpi.getCreatedDate())
@@ -40,7 +56,7 @@ public class StaffKpiMapper {
         String formattedUpdatedDate = Instant.ofEpochMilli(staffKpi.getUpdatedDate())
                 .atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
+        staffKpiDto.setId(staffKpi.getId());
         staffKpiDto.setCreatedDate(formattedCreatedDate);
         staffKpiDto.setUpdatedDate(formattedUpdatedDate);
         staffKpiDto.setStaffId(staffKpi.getStaff().getId());

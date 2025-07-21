@@ -16,7 +16,7 @@ public class StaffMapper {
                 staff.setStaffOffice(staffDto.getStaffOffice());
                 staff.setStaffSection(staffDto.getStaffSection());
                 staff.setStaffStep(staffDto.getStaffStep());
-                staff.setKpi(staffDto.getKpi());
+                staff.setStaffKpis(staffDto.getStaffKpiDtos().stream().map(StaffKpiMapper::mapToStaffKpi).toList());
                 // staff.setStatus(staffDto.getStatus());
                 // staff.setDateAdd(staffDto.getDateAdd());
                 return staff;
@@ -37,10 +37,10 @@ public class StaffMapper {
                 staffDto.setStaffOffice(staff.getStaffOffice());
                 staffDto.setStaffStep(staff.getStaffStep());
                 staffDto.setStaffSection(staff.getStaffSection());
-                staffDto.setKpi(staff.getKpi());
                 staffDto.setStatus(staff.getStatus());
                 staffDto.setCreatedDate(formattedCreatedDate);
                 staffDto.setUpdatedDate(formattedUpdatedDate);
+                staffDto.setStaffKpiDtos(staff.getStaffKpis().stream().map(StaffKpiMapper::mapToStaffKpiDto).toList());
 
                 return staffDto;
         }
