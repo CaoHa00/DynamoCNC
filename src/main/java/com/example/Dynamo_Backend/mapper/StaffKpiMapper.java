@@ -19,10 +19,8 @@ public class StaffKpiMapper {
         // .orElseThrow(() -> new RuntimeException("Staff is not found:" +
         // staffKpiDto.getStaffId()));
         // staffKpi.setStaff(staff);
-        staffKpi.setDuration(staffKpiDto.getDuration());
         staffKpi.setYear(staffKpiDto.getYear());
         staffKpi.setMonth(staffKpiDto.getMonth());
-        staffKpi.setWeek(staffKpiDto.getWeek());
         staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
         staffKpi.setKpi(staffKpiDto.getKpi());
         staffKpi.setOleGoal(staffKpiDto.getOleGoal());
@@ -36,10 +34,8 @@ public class StaffKpiMapper {
     public static StaffKpiDto mapToStaffKpiDto(StaffRequestDto staffRequestDto) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
         staffKpiDto.setStaffId(staffRequestDto.getId());
-        staffKpiDto.setDuration(staffRequestDto.getDuration());
         staffKpiDto.setYear(staffRequestDto.getYear());
         staffKpiDto.setMonth(staffRequestDto.getMonth());
-        staffKpiDto.setWeek(staffRequestDto.getWeek());
         staffKpiDto.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
         staffKpiDto.setKpi(staffRequestDto.getKpi());
         staffKpiDto.setOleGoal(staffRequestDto.getOleGoal());
@@ -60,10 +56,8 @@ public class StaffKpiMapper {
         staffKpiDto.setCreatedDate(formattedCreatedDate);
         staffKpiDto.setUpdatedDate(formattedUpdatedDate);
         staffKpiDto.setStaffId(staffKpi.getStaff().getId());
-        staffKpiDto.setDuration(staffKpi.getDuration());
         staffKpiDto.setYear(staffKpi.getYear());
         staffKpiDto.setMonth(staffKpi.getMonth());
-        staffKpiDto.setWeek(staffKpi.getWeek());
         staffKpiDto.setPgTimeGoal(staffKpi.getPgTimeGoal());
         staffKpiDto.setKpi(staffKpi.getKpi());
         staffKpiDto.setOleGoal(staffKpi.getOleGoal());

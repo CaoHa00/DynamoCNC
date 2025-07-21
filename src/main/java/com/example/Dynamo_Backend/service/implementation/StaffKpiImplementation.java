@@ -41,10 +41,8 @@ public class StaffKpiImplementation implements StaffKpiService {
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
         staffKpi.setStaff(staff);
-        staffKpi.setDuration(staffKpiDto.getDuration());
         staffKpi.setYear(staffKpiDto.getYear());
         staffKpi.setMonth(staffKpiDto.getMonth());
-        staffKpi.setWeek(staffKpiDto.getWeek());
         staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
         staffKpi.setKpi(staffKpiDto.getKpi());
         staffKpi.setOleGoal(staffKpiDto.getOleGoal());

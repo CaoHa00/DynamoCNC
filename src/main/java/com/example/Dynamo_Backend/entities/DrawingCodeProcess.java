@@ -39,17 +39,17 @@ public class DrawingCodeProcess {
     @Column(name = "manufacturing_point", nullable = false)
     private Integer manufacturingPoint;
 
-    @Column(name = "total_running_time", nullable = false)
-    private Long totalRunningTime;
+    // @Column(name = "total_running_time", nullable = false)
+    // private Long totalRunningTime;
 
-    @Column(name = "total_stop_time", nullable = false)
-    private Long totalStopTime;
+    // @Column(name = "total_stop_time", nullable = false)
+    // private Long totalStopTime;
 
-    @Column(name = "pg_run_time", nullable = false)
-    private Long pgRunTime;
+    // @Column(name = "pg_run_time", nullable = false)
+    // private Long pgRunTime;
 
-    @Column(name = "offset_run_time", nullable = false)
-    private Long offsetRunTime;
+    // @Column(name = "offset_run_time", nullable = false)
+    // private Long offsetRunTime;
 
     @Column(name = "start_time", nullable = true)
     private Long startTime;
@@ -72,8 +72,8 @@ public class DrawingCodeProcess {
     // 3: waiting for qc
     // 4:
 
-    @Column(name = "qc_note", nullable = false)
-    private String qcNote;
+    @Column(name = "id_plan", nullable = false)
+    private Integer isPlan;
 
     @ManyToOne
     @JoinColumn(name = "order_detail_id", nullable = false)
@@ -92,5 +92,9 @@ public class DrawingCodeProcess {
     @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "stats-process")
     private List<Log> logs;
+
+    @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Plan> plans;
 
 }

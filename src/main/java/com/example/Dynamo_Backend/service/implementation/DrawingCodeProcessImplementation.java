@@ -11,23 +11,19 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.config.IdGenerator;
-import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
-import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.Protocol;
-import com.example.Dynamo_Backend.mapper.DrawingCodeMapper;
 import com.example.Dynamo_Backend.mapper.DrawingCodeProcessMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
 import com.example.Dynamo_Backend.mapper.OrderDetailMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
-import com.example.Dynamo_Backend.repository.DrawingCodeRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.OrderDetailRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
@@ -62,7 +58,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
                 drawingCodeProcess.setProcessStatus(1);
-                drawingCodeProcess.setQcNote("null");
+                // check if it is added by manager or staff
+                drawingCodeProcess.setIsPlan(0);
 
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);
@@ -94,10 +91,10 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getStaffHistories());
                 drawingCodeProcess.setLogs(drawingCodeProcess.getLogs());
-                drawingCodeProcess.setPgRunTime(drawingCodeProcessDto.getPgRunTime());
-                drawingCodeProcess.setOffsetRunTime(drawingCodeProcessDto.getOffsetRunTime());
-                drawingCodeProcess.setTotalRunningTime(drawingCodeProcessDto.getTotalRunningTime());
-                drawingCodeProcess.setTotalStopTime(drawingCodeProcessDto.getTotalStopTime());
+                // drawingCodeProcess.setPgRunTime(drawingCodeProcessDto.getPgRunTime());
+                // drawingCodeProcess.setOffsetRunTime(drawingCodeProcessDto.getOffsetRunTime());
+                // drawingCodeProcess.setTotalRunningTime(drawingCodeProcessDto.getTotalRunningTime());
+                // drawingCodeProcess.setTotalStopTime(drawingCodeProcessDto.getTotalStopTime());
                 drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
                 drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getPartNumber());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());

@@ -1,10 +1,16 @@
 package com.example.Dynamo_Backend.entities;
 
+import java.util.List;
+
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,4 +37,13 @@ public class Admin {
     private Long createdDate;
     @Column(name = "updatedDate", nullable = false)
     private Long updatedDate;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Plan> plans;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Report> reports;
+
 }

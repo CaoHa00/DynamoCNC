@@ -31,13 +31,10 @@ public class OrderDetail {
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(columnDefinition = "CHAR(36)")
     private String orderDetailId;
-
-    @Column(name = "pg_time", nullable = false)
-    private Long pgTime;
     @Column(name = "order_code", nullable = false)
     private String orderCode;
-    @Column(name = "production_step", nullable = false)
-    private int productionStep;
+    @Column(name = "order_type", nullable = false)
+    private String orderType;
     @Column(name = "quantity", nullable = false)
     private int quantity;
     @Column(name = "status", nullable = false)
@@ -57,10 +54,10 @@ public class OrderDetail {
     @JsonBackReference
     private DrawingCode drawingCode;
 
-    @ManyToOne
-    @JoinColumn(name = "staff_id", nullable = false)
-    @JsonBackReference
-    private Staff staff;
+    // @ManyToOne
+    // @JoinColumn(name = "staff_id", nullable = false)
+    // @JsonBackReference
+    // private Staff staff;
 
     @OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL)
     @JsonManagedReference

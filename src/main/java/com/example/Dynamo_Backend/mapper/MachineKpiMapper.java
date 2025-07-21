@@ -19,13 +19,10 @@ public class MachineKpiMapper {
         // .orElseThrow(() -> new RuntimeException("Machine is not found:" +
         // machineKpiDto.getMachineId()));
         // machineKpi.setMachine(machine);
-        machineKpi.setDuration(machineKpiDto.getDuration());
+        machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
         machineKpi.setYear(machineKpiDto.getYear());
         machineKpi.setMonth(machineKpiDto.getMonth());
-        machineKpi.setWeek(machineKpiDto.getWeek());
-        machineKpi.setMonthlyRunningTime(machineKpiDto.getMonthlyRunningTime());
-        machineKpi.setWeeklyRunningTime(machineKpiDto.getWeeklyRunningTime());
-        machineKpi.setOeeGoal(machineKpiDto.getOeeGoal());
+        machineKpi.setOee(machineKpiDto.getOee());
         // machineKpi.setCreatedDate((long) 0);
         // machineKpi.setUpdatedDate((long) 0);
         return machineKpi;
@@ -43,13 +40,10 @@ public class MachineKpiMapper {
         machineKpiDto.setCreatedDate(formattedCreatedDate);
         machineKpiDto.setUpdatedDate(formattedUpdatedDate);
         machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());
-        machineKpiDto.setDuration(machineKpi.getDuration());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
-        machineKpiDto.setWeek(machineKpi.getWeek());
-        machineKpiDto.setMonthlyRunningTime(machineKpi.getMonthlyRunningTime());
-        machineKpiDto.setWeeklyRunningTime(machineKpi.getWeeklyRunningTime());
-        machineKpiDto.setOeeGoal(machineKpi.getOeeGoal());
+        machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
+        machineKpiDto.setOee(machineKpi.getOee());
 
         return machineKpiDto;
     }
@@ -58,13 +52,10 @@ public class MachineKpiMapper {
         MachineKpiDto machineKpiDto = new MachineKpiDto();
 
         machineKpiDto.setMachineId(machineKpi.getMachineId());
-        machineKpiDto.setDuration(machineKpi.getDuration());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
-        machineKpiDto.setWeek(machineKpi.getWeek());
-        machineKpiDto.setMonthlyRunningTime(machineKpi.getMonthlyRunningTime());
-        machineKpiDto.setWeeklyRunningTime(machineKpi.getWeeklyRunningTime());
-        machineKpiDto.setOeeGoal(machineKpi.getOeeGoal());
+        machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
+        machineKpiDto.setOee(machineKpi.getOee());
 
         return machineKpiDto;
     }

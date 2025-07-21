@@ -14,10 +14,10 @@ public class GroupKpiMapper {
         groupKpi.setWeek(groupKpiDto.getWeek());
         groupKpi.setMonth(groupKpiDto.getMonth());
         groupKpi.setYear(groupKpiDto.getYear());
-        groupKpi.setWorkHoursAim(groupKpiDto.getWorkHoursAim());
-        groupKpi.setWorkHoursChange(groupKpiDto.getWorkHoursChange());
-        groupKpi.setRealWorkHours(groupKpiDto.getRealWorkHours());
-
+        groupKpi.setWorkingHourGoal(groupKpiDto.getWorkingHourGoal());
+        groupKpi.setWorkingHourDifference(groupKpiDto.getWorkingHourDifference());
+        groupKpi.setWorkingHour(groupKpiDto.getWorkingHour());
+        groupKpi.setIsMonth(groupKpiDto.getIsMonth());
         return groupKpi;
     }
 
@@ -35,11 +35,11 @@ public class GroupKpiMapper {
         groupKpiDto.setYear(groupKpi.getYear());
         groupKpiDto.setCreatedDate(formattedCreatedDate);
         groupKpiDto.setUpdatedDate(formattedUpdatedDate);
-        groupKpiDto.setWorkHoursAim(groupKpi.getWorkHoursAim());
-        groupKpiDto.setWorkHoursChange(groupKpi.getWorkHoursChange());
-        groupKpiDto.setRealWorkHours(groupKpi.getRealWorkHours());
+        groupKpiDto.setWorkingHourGoal(groupKpi.getWorkingHourGoal());
+        groupKpiDto.setWorkingHourDifference(groupKpi.getWorkingHourDifference());
+        groupKpiDto.setWorkingHour(groupKpi.getWorkingHour());
         groupKpiDto.setGroupId(groupKpi.getGroup().getGroupId());
-
+        groupKpiDto.setIsMonth(groupKpi.getIsMonth());
         return groupKpiDto;
     }
 }

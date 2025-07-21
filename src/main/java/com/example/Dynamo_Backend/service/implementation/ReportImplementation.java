@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.ReportDto;
+import com.example.Dynamo_Backend.entities.Admin;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Report;
 import com.example.Dynamo_Backend.mapper.ReportMapper;
@@ -21,8 +22,8 @@ public class ReportImplementation implements ReportService {
     private ReportRepository reportRepository;
     @Autowired
     GroupRepository groupRepository;
-    // @Autowired
-    // AdminRepository adminRepository;
+    @Autowired
+    AdminRepository adminRepository;
 
     @Override
     public ReportDto addReport(ReportDto reportDto) {
@@ -31,6 +32,12 @@ public class ReportImplementation implements ReportService {
         Group group = groupRepository.findById(reportDto.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + reportDto.getGroupId()));
         report.setGroup(group);
+
+        Admin admin = adminRepository.findById(reportDto.getAdminId())
+                .orElseThrow(() -> new RuntimeException("Admin is not found:" +
+                        reportDto.getAdminId()));
+        report.setAdmin(admin);
+
         report.setCreatedDate(createdTimestamp);
 
         Report savedReport = reportRepository.save(report);
@@ -43,10 +50,10 @@ public class ReportImplementation implements ReportService {
                 .orElseThrow(() -> new RuntimeException("Report is not found:" + reportId));
         Group group = groupRepository.findById(reportDto.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + reportDto.getGroupId()));
-        // Admin admin = adminRepository.findById(reportDto.getAdminId())
-        // .orElseThrow(() -> new RuntimeException("Admin is not found:" +
-        // reportDto.getAdminId()));
-        // report.setAdmin(admin);
+        Admin admin = adminRepository.findById(reportDto.getAdminId())
+                .orElseThrow(() -> new RuntimeException("Admin is not found:" +
+                        reportDto.getAdminId()));
+        report.setAdmin(admin);
         report.setGroup(group);
         report.setHourDiff(reportDto.getHourDiff());
         report.setOffice(reportDto.getOffice());

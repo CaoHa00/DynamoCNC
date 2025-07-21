@@ -33,25 +33,17 @@ public class MachineKpi {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
 
-    @Column(name = "duration", nullable = false)
-    private String duration;
-
     @Column(name = "year", nullable = false)
     private Integer year;
 
     @Column(name = "month", nullable = false)
     private Integer month;
 
-    @Column(name = "week", nullable = true)
-    private Integer week;
-
     @Column(name = "oee_goal", nullable = false)
-    private Float oeeGoal;
+    private Float oee;
 
-    @Column(name = "monthly_running_time", nullable = false)
-    private Integer monthlyRunningTime;
-    @Column(name = "weekly_running_time", nullable = false)
-    private Integer weeklyRunningTime;
+    @Column(name = "machine_mining_target", nullable = false)
+    private Integer machineMiningTarget;
 
     @Column(name = "createdDate", nullable = false)
     private Long createdDate;

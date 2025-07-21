@@ -12,10 +12,11 @@ public class GroupKpiDto {
     private Integer year;
     private Integer month;
     private Integer week;
+    private Integer isMonth;
     private String office;
-    private Integer workHoursAim;
-    private Integer workHoursChange;
-    private Integer realWorkHours;
+    private Integer workingHourGoal;
+    private Integer workingHourDifference;
+    private Integer workingHour;
     private String groupId;
     private String createdDate;
     private String updatedDate;

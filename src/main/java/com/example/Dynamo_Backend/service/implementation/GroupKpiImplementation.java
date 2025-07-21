@@ -37,9 +37,9 @@ public class GroupKpiImplementation implements GroupKpiService {
         groupKpi.setWeek(groupKpiDto.getWeek());
         groupKpi.setMonth(groupKpiDto.getMonth());
         groupKpi.setYear(groupKpiDto.getYear());
-        groupKpi.setWorkHoursAim(groupKpiDto.getWorkHoursAim());
-        groupKpi.setWorkHoursChange(groupKpiDto.getWorkHoursChange());
-        groupKpi.setRealWorkHours(groupKpiDto.getRealWorkHours());
+        groupKpi.setWorkingHourGoal(groupKpiDto.getWorkingHourGoal());
+        groupKpi.setWorkingHourDifference(groupKpiDto.getWorkingHourDifference());
+        groupKpi.setWorkingHour(groupKpiDto.getWorkingHour());
 
         GroupKpi saveGroupKpi = groupKpiRepository.save(groupKpi);
         return GroupKpiMapper.mapToGroupKpiDto(saveGroupKpi);
