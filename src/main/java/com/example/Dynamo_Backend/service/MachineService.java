@@ -3,10 +3,11 @@ package com.example.Dynamo_Backend.service;
 import java.util.List;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 
 public interface MachineService {
 
-    MachineDto addMachine(MachineDto machineDto);
+    MachineDto addMachine(MachineRequestDto machineDto);
 
     MachineDto updateMachine(Integer Id, MachineDto machineDto);
 
