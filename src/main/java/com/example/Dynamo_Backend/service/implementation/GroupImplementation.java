@@ -34,9 +34,9 @@ public class GroupImplementation implements GroupService {
     public GroupDto updateGroup(String Id, GroupDto groupDto) {
         Group group = groupRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + Id));
-        long createdTimestamp = System.currentTimeMillis();
-        group.setCreatedDate(createdTimestamp);
-        group.setUpdatedDate(createdTimestamp);
+        long updatedTimestamp = System.currentTimeMillis();
+
+        group.setUpdatedDate(updatedTimestamp);
         group.setGroupId(groupDto.getGroupId());
         group.setGroupName(groupDto.getGroupName());
         Group updatedgroup = groupRepository.save(group);
