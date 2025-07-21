@@ -3,14 +3,15 @@ package com.example.Dynamo_Backend.service.implementation;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.GroupKpiDto;
-import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.mapper.GroupKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.service.GroupKpiService;
 
+@Service
 public class GroupKpiImplementation implements GroupKpiService {
     @Autowired
     GroupKpiRepository groupKpiRepository;
