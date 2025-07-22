@@ -15,7 +15,7 @@ public class StaffDto {
     private String staffName;
     private String staffOffice;
     private String staffSection;
-    private String staffStep;
+    private String shortName;
     private Integer status;
     private String createdDate;
     private String updatedDate;

@@ -44,8 +44,8 @@ public class Staff {
     @Column(name = "staff_section", nullable = false)
     private String staffSection;
 
-    @Column(name = "staff_step", nullable = false)
-    private String staffStep;
+    @Column(name = "short_name", nullable = false)
+    private String shortName;
 
     @Column(name = "status", nullable = false)
     private Integer status;

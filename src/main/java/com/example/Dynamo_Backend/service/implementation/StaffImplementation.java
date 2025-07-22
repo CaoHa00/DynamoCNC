@@ -38,7 +38,7 @@ public class StaffImplementation implements StaffService {
         staff.setStaffName(staffRequestDto.getStaffName());
         staff.setStaffOffice(staffRequestDto.getStaffOffice());
         staff.setStaffSection(staffRequestDto.getStaffSection());
-        staff.setStaffStep(staffRequestDto.getStaffStep());
+        staff.setShortName(staffRequestDto.getShortName());
         staff.setCreatedDate(createdTimestamp);
         staff.setUpdatedDate(createdTimestamp);
         staff.setStatus(status);
@@ -95,7 +95,7 @@ public class StaffImplementation implements StaffService {
         staff.setStaffId(staffRequestDto.getStaffId());
         staff.setStaffOffice(staffRequestDto.getStaffOffice());
         staff.setStaffSection(staffRequestDto.getStaffSection());
-        staff.setStaffStep(staffRequestDto.getStaffStep());
+        staff.setShortName(staffRequestDto.getShortName());
         staff.setStatus(staffRequestDto.getStatus());
         staff.setUpdatedDate(updatedTimestamp);
 

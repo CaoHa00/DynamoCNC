@@ -13,7 +13,7 @@ public class StaffRequestDto {
     private String staffName;
     private String staffOffice;
     private String staffSection;
-    private String staffStep;
+    private String shortName;
     private Float kpi;
     private Integer status;
     private String duration;
