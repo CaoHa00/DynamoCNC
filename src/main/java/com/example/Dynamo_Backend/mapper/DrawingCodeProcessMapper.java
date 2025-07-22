@@ -1,15 +1,11 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
-import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class DrawingCodeProcessMapper {
         public static DrawingCodeProcess mapToDrawingCodeProcess(DrawingCodeProcessDto drawingCodeProcessDto) {
@@ -33,12 +29,6 @@ public class DrawingCodeProcessMapper {
         }
 
         public static DrawingCodeProcessDto mapToDrawingCodeProcessDto(DrawingCodeProcess drawingCodeProcess) {
-                String formattedCreatedDate = Instant.ofEpochMilli(drawingCodeProcess.getCreatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                String formattedUpdatedDate = Instant.ofEpochMilli(drawingCodeProcess.getUpdatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 return new DrawingCodeProcessDto(
                                 drawingCodeProcess.getProcessId(),
                                 drawingCodeProcess.getPartNumber(),
@@ -50,8 +40,8 @@ public class DrawingCodeProcessMapper {
                                 // drawingCodeProcess.getPgRunTime(),
                                 drawingCodeProcess.getStartTime(),
                                 drawingCodeProcess.getEndTime(),
-                                formattedCreatedDate,
-                                formattedUpdatedDate,
+                                DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getCreatedDate()),
+                                DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getUpdatedDate()),
                                 drawingCodeProcess.getStatus(),
                                 drawingCodeProcess.getIsPlan(),
                                 drawingCodeProcess.getOrderDetail() != null
@@ -66,12 +56,6 @@ public class DrawingCodeProcessMapper {
         public static DrawingCodeProcessResponseDto toDto(OrderDetailDto orderDetailDto, MachineDto machineDto,
                         DrawingCodeProcess drawingCodeProcess) {
                 DrawingCodeProcessResponseDto dto = new DrawingCodeProcessResponseDto();
-                String formattedCreatedDate = Instant.ofEpochMilli(drawingCodeProcess.getCreatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                String formattedUpdatedDate = Instant.ofEpochMilli(drawingCodeProcess.getCreatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 dto.setProcessId(drawingCodeProcess.getProcessId());
                 dto.setPartNumber(drawingCodeProcess.getPartNumber());
                 dto.setStepNumber(drawingCodeProcess.getStepNumber());
@@ -82,8 +66,8 @@ public class DrawingCodeProcessMapper {
                 // dto.setTotalStopTime(drawingCodeProcess.getTotalStopTime());
                 dto.setStartTime(drawingCodeProcess.getStartTime());
                 dto.setEndTime(drawingCodeProcess.getEndTime());
-                dto.setCreatedDate(formattedCreatedDate);
-                dto.setUpdatedDate(formattedUpdatedDate);
+                dto.setCreatedDate((DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getCreatedDate())));
+                dto.setUpdatedDate((DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getUpdatedDate())));
                 dto.setIsPlan(drawingCodeProcess.getIsPlan());
                 dto.setStatus(drawingCodeProcess.getStatus());
                 if (machineDto != null) {

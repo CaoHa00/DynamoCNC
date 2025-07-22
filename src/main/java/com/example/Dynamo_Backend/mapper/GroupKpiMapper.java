@@ -1,11 +1,8 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.GroupKpiDto;
 import com.example.Dynamo_Backend.entities.GroupKpi;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class GroupKpiMapper {
     public static GroupKpi mapToGroupKpi(GroupKpiDto groupKpiDto) {
@@ -22,19 +19,13 @@ public class GroupKpiMapper {
     }
 
     public static GroupKpiDto mapToGroupKpiDto(GroupKpi groupKpi) {
-        String formattedCreatedDate = Instant.ofEpochMilli(groupKpi.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(groupKpi.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         GroupKpiDto groupKpiDto = new GroupKpiDto();
         groupKpiDto.setId(groupKpi.getId());
         groupKpiDto.setWeek(groupKpi.getWeek());
         groupKpiDto.setMonth(groupKpi.getMonth());
         groupKpiDto.setYear(groupKpi.getYear());
-        groupKpiDto.setCreatedDate(formattedCreatedDate);
-        groupKpiDto.setUpdatedDate(formattedUpdatedDate);
+        groupKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(groupKpi.getCreatedDate()));
+        groupKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(groupKpi.getCreatedDate()));
         groupKpiDto.setWorkingHourGoal(groupKpi.getWorkingHourGoal());
         groupKpiDto.setWorkingHourDifference(groupKpi.getWorkingHourDifference());
         groupKpiDto.setWorkingHour(groupKpi.getWorkingHour());

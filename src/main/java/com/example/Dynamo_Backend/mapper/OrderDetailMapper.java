@@ -4,25 +4,21 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import org.aspectj.weaver.ast.Or;
+
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.entities.OrderDetail;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class OrderDetailMapper {
     public static OrderDetailDto mapToOrderDetailDto(OrderDetail OrderDetail) {
         OrderDetailDto orderDetailDto = new OrderDetailDto();
 
-        String formattedCreatedDate = Instant.ofEpochMilli(OrderDetail.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(OrderDetail.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
         orderDetailDto.setOrderDetailId(OrderDetail.getOrderDetailId());
         orderDetailDto.setDrawingCodeId(OrderDetail.getDrawingCode().getDrawingCodeId());
         orderDetailDto.setOrderId(OrderDetail.getOrder().getOrderId());
-        orderDetailDto.setCreatedDate(formattedCreatedDate);
-        orderDetailDto.setUpdatedDate(formattedUpdatedDate);
+        orderDetailDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(OrderDetail.getCreatedDate()));
+        orderDetailDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(OrderDetail.getUpdatedDate()));
         orderDetailDto.setOrderCode(OrderDetail.getOrderCode());
         orderDetailDto.setOrderType(OrderDetail.getOrderType());
         orderDetailDto.setQuantity(OrderDetail.getQuantity());

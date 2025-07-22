@@ -38,7 +38,7 @@ public class Admin {
     @Column(name = "updatedDate", nullable = false)
     private Long updatedDate;
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "planner", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Plan> plans;
 

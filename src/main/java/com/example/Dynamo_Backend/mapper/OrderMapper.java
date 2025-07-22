@@ -1,12 +1,8 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.OrderDto;
 import com.example.Dynamo_Backend.entities.Order;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class OrderMapper {
     public static Order mapToOrder(OrderDto orderDto) {
@@ -43,12 +39,6 @@ public class OrderMapper {
     }
 
     public static OrderDto mapToOrderDto(Order order) {
-        String formattedCreatedDate = Instant.ofEpochMilli(order.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(order.getUpdatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         // String orderDate = Instant.ofEpochMilli(order.getOrderDate())
         // .atZone(ZoneId.systemDefault())
         // .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -71,8 +61,8 @@ public class OrderMapper {
         return new OrderDto(
                 order.getOrderId(),
                 order.getPoNumber(),
-                formattedCreatedDate,
-                formattedUpdatedDate,
+                DateTimeUtil.convertTimestampToStringDate(order.getCreatedDate()),
+                DateTimeUtil.convertTimestampToStringDate(order.getUpdatedDate()),
                 // order.getCustomerName(),
                 // order.getPhoneNumber(),
                 // order.getAddress(),

@@ -1,12 +1,9 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.RequestDto.AdminRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.AdminResponseDto;
 import com.example.Dynamo_Backend.entities.Admin;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class AdminMapper {
     public static Admin mapToAdmin(AdminRequestDto adminDto) {
@@ -16,18 +13,12 @@ public class AdminMapper {
         return admin;
     }
 
-    public static AdminResponseDto mapToaAdminResponseDto(Admin admin) {
-        String formattedCreatedDate = Instant.ofEpochMilli(admin.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(admin.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    public static AdminResponseDto mapToAdminResponseDto(Admin admin) {
         AdminResponseDto adminResponseDto = new AdminResponseDto();
         adminResponseDto.setEmail(admin.getEmail());
         adminResponseDto.setId(admin.getId());
-        adminResponseDto.setCreatedDate(formattedCreatedDate);
-        adminResponseDto.setUpdatedDate(formattedUpdatedDate);
+        adminResponseDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(admin.getCreatedDate()));
+        adminResponseDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(admin.getUpdatedDate()));
 
         return adminResponseDto;
     }

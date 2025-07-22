@@ -35,6 +35,10 @@ public class Plan {
     private Float remark;
     @Column(name = "remark_time", nullable = false)
     private Long remarkTime;
+    @Column(name = "created_date", nullable = false)
+    private Long createdDate;
+    @Column(name = "updated_date", nullable = false)
+    private Long updatedDate;
 
     @ManyToOne
     @JoinColumn(name = "drawing_code_process_id", nullable = false)

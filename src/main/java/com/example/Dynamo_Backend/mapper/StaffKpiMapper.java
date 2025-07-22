@@ -1,14 +1,10 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.StaffKpiDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
-import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.repository.StaffRepository;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class StaffKpiMapper {
     StaffRepository staffRepository;
@@ -46,15 +42,9 @@ public class StaffKpiMapper {
 
     public static StaffKpiDto mapToStaffKpiDto(StaffKpi staffKpi) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
-        String formattedCreatedDate = Instant.ofEpochMilli(staffKpi.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(staffKpi.getUpdatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         staffKpiDto.setId(staffKpi.getId());
-        staffKpiDto.setCreatedDate(formattedCreatedDate);
-        staffKpiDto.setUpdatedDate(formattedUpdatedDate);
+        staffKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getCreatedDate()));
+        staffKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getUpdatedDate()));
         staffKpiDto.setStaffId(staffKpi.getStaff().getId());
         staffKpiDto.setYear(staffKpi.getYear());
         staffKpiDto.setMonth(staffKpi.getMonth());

@@ -1,13 +1,11 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import com.example.Dynamo_Backend.dto.GroupDto;
 import com.example.Dynamo_Backend.entities.Group;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class GroupMapper {
         public static Group mapToGroup(GroupDto groupDto) {
@@ -20,17 +18,11 @@ public class GroupMapper {
 
         public static GroupDto mapToGroupDto(Group group) {
                 GroupDto dto = new GroupDto();
-                String formattedCreatedDate = Instant.ofEpochMilli(group.getCreatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                String formattedUpdatedDate = Instant.ofEpochMilli(group.getCreatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 dto.setGroupId(group.getGroupId());
                 dto.setGroupName(group.getGroupName());
                 dto.setGroupType(group.getGroupType());
-                dto.setCreatedDate(formattedCreatedDate);
-                dto.setUpdatedDate(formattedUpdatedDate);
+                dto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(group.getCreatedDate()));
+                dto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(group.getCreatedDate()));
                 dto.setStaffGroups(group.getStaffGroups() != null ? group.getStaffGroups().stream()
                                 .map(StaffGroupMapper::mapToStaffGroupDto).collect(Collectors.toList())
                                 : new ArrayList<>());

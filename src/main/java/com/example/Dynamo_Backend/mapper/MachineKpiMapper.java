@@ -9,6 +9,7 @@ import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class MachineKpiMapper {
     MachineRepository machineRepository;
@@ -30,15 +31,9 @@ public class MachineKpiMapper {
 
     public static MachineKpiDto mapToMachineKpiDto(MachineKpi machineKpi) {
         MachineKpiDto machineKpiDto = new MachineKpiDto();
-        String formattedCreatedDate = Instant.ofEpochMilli(machineKpi.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(machineKpi.getUpdatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         machineKpiDto.setId(machineKpi.getId());
-        machineKpiDto.setCreatedDate(formattedCreatedDate);
-        machineKpiDto.setUpdatedDate(formattedUpdatedDate);
+        machineKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
+        machineKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
         machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
