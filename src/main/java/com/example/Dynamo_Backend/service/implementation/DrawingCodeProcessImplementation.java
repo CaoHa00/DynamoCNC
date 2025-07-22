@@ -19,7 +19,6 @@ import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.entities.Staff;
-import com.example.Dynamo_Backend.entities.Protocol;
 import com.example.Dynamo_Backend.mapper.DrawingCodeProcessMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
 import com.example.Dynamo_Backend.mapper.OrderDetailMapper;
@@ -27,7 +26,6 @@ import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.OrderDetailRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
-import com.example.Dynamo_Backend.repository.ProtocolRepository;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 
 import lombok.AllArgsConstructor;
@@ -36,7 +34,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class DrawingCodeProcessImplementation implements DrawingCodeProcessService {
         OrderDetailRepository orderDetailRepository;
-        ProtocolRepository protocolRepository;
         MachineRepository machineRepository;
         DrawingCodeProcessRepository drawingCodeProcessRepository;
         private MessageChannel mqttOutboundChannel;
@@ -188,27 +185,13 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new RuntimeException(
                                 "Staff is not found:" + staffId));
-
-                Protocol protocol = new Protocol();
-                if (protocol.getId() == null
-                                || protocol.getId().isEmpty()) {
-                        String generatedId;
-                        do {
-                                generatedId = IdGenerator.generateRandomId();
-                        } while (protocolRepository.existsById(generatedId));
-                        protocol.setId(generatedId);
-                }
-                protocol.setProcess(process);
-                protocol.setMachine(machine);
-                protocol.setStaff(staff);
-                protocolRepository.save(protocol);
                 String sendMachine = "";
                 if (machineId < 10) {
                         sendMachine = "0" + machineId;
                 }
                 LocalDateTime now = LocalDateTime.now();
                 String formatted = now.format(DateTimeFormatter.ofPattern("MMddyyHH"));
-                String payload = sendMachine + "-" + protocol.getId() + "-" + formatted;
+                String payload = sendMachine + "-" + formatted;
                 Message<String> message = MessageBuilder
                                 .withPayload(payload)
                                 .setHeader("mqtt_topic", "myTopic")
