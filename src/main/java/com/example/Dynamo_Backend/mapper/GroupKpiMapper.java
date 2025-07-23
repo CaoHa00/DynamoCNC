@@ -8,6 +8,7 @@ public class GroupKpiMapper {
     public static GroupKpi mapToGroupKpi(GroupKpiDto groupKpiDto) {
         GroupKpi groupKpi = new GroupKpi();
         groupKpi.setId(groupKpiDto.getId());
+        groupKpi.setOffice(groupKpiDto.getOffice());
         groupKpi.setWeek(groupKpiDto.getWeek());
         groupKpi.setMonth(groupKpiDto.getMonth());
         groupKpi.setYear(groupKpiDto.getYear());
@@ -24,6 +25,7 @@ public class GroupKpiMapper {
         groupKpiDto.setWeek(groupKpi.getWeek());
         groupKpiDto.setMonth(groupKpi.getMonth());
         groupKpiDto.setYear(groupKpi.getYear());
+        groupKpiDto.setOffice(groupKpi.getOffice());
         groupKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(groupKpi.getCreatedDate()));
         groupKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(groupKpi.getCreatedDate()));
         groupKpiDto.setWorkingHourGoal(groupKpi.getWorkingHourGoal());

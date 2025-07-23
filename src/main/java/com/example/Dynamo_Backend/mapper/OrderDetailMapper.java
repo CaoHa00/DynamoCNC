@@ -1,11 +1,5 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
-import org.aspectj.weaver.ast.Or;
-
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
@@ -28,6 +22,10 @@ public class OrderDetailMapper {
     public static OrderDetail mapToOrderDetail(OrderDetailDto orderDetailDto) {
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setOrderDetailId(orderDetailDto.getOrderDetailId());
+        orderDetail.setOrderCode(orderDetailDto.getOrderCode());
+        orderDetail.setOrderType(orderDetailDto.getOrderType());
+        orderDetail.setQuantity(orderDetailDto.getQuantity());
+        // orderDetail.setStatus(orderDetailDto.getStatus());
         return orderDetail;
     }
 }

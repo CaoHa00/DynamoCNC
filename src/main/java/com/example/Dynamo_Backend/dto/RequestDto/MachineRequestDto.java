@@ -17,6 +17,7 @@ public class MachineRequestDto {
     private Integer year;
     private Integer month;
     private Float oee;
+    private String groupId;
     private Integer machineMiningTarget;
     private String createdDate;
     private String updatedDate;

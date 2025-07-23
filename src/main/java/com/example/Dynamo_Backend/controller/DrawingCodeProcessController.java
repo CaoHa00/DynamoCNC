@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
+import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 
@@ -34,7 +35,7 @@ public class DrawingCodeProcessController {
 
     @PostMapping
     public ResponseEntity<DrawingCodeProcessDto> adddrawingCodeProcess(
-            @RequestBody DrawingCodeProcessDto drawingCodeProcessDto) {
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
         DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService
                 .addDrawingCodeProcess(drawingCodeProcessDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(drawingCodeProcess);
@@ -44,7 +45,7 @@ public class DrawingCodeProcessController {
     @PostMapping("/receive")
     public ResponseEntity<Void> receiveDataFromTablet(@RequestParam("drawingCodeProcess_id") String Id,
             @RequestParam("staffId") String staffId, @RequestParam("machineId") Integer machineId) {
-        drawingCodeProcessService.recieveProcessFromTablet(Id, machineId, staffId);
+        drawingCodeProcessService.receiveProcessFromTablet(Id, machineId, staffId);
         return ResponseEntity.ok().build();
     }
 

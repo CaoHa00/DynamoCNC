@@ -37,8 +37,6 @@ public class OrderDetail {
     private String orderType;
     @Column(name = "quantity", nullable = false)
     private int quantity;
-    @Column(name = "status", nullable = false)
-    private int status;
     @Column(name = "createdDate", nullable = false)
     private long createdDate;
     @Column(name = "updatedDate", nullable = false)
@@ -53,7 +51,8 @@ public class OrderDetail {
     @JoinColumn(name = "drawing_code_id", nullable = false)
     @JsonBackReference
     private DrawingCode drawingCode;
-
+    // @Column(name = "status", nullable = false)
+    // private int status;
     // @ManyToOne
     // @JoinColumn(name = "staff_id", nullable = false)
     // @JsonBackReference

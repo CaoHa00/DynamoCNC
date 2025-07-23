@@ -20,6 +20,7 @@ public class StaffKpiMapper {
         staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
         staffKpi.setKpi(staffKpiDto.getKpi());
         staffKpi.setOleGoal(staffKpiDto.getOleGoal());
+        staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
         staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
         staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
         // staffKpi.setCreatedDate((long) 0);
@@ -35,6 +36,8 @@ public class StaffKpiMapper {
         staffKpiDto.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
         staffKpiDto.setKpi(staffRequestDto.getKpi());
         staffKpiDto.setOleGoal(staffRequestDto.getOleGoal());
+        staffKpiDto.setWorkGoal(staffRequestDto.getWorkGoal());
+        staffKpiDto.setWorkGoal(staffRequestDto.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffRequestDto.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffRequestDto.getManufacturingPoint());
         return staffKpiDto;
@@ -51,6 +54,7 @@ public class StaffKpiMapper {
         staffKpiDto.setPgTimeGoal(staffKpi.getPgTimeGoal());
         staffKpiDto.setKpi(staffKpi.getKpi());
         staffKpiDto.setOleGoal(staffKpi.getOleGoal());
+        staffKpiDto.setWorkGoal(staffKpi.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffKpi.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffKpi.getManufacturingPoint());
 

@@ -15,6 +15,7 @@ public class StaffKpiDto {
     private Float machineTimeGoal;
     private Float manufacturingPoint;
     private Float oleGoal;
+    private Float workGoal;
     private Float kpi;
     private String createdDate;
     private String updatedDate;

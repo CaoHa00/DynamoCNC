@@ -18,5 +18,6 @@ public class MachineDto {
     private int status;
     private String createdDate;
     private String updatedDate;
+    private String groupId;
     private List<MachineKpiDto> machineKpiDtos;
 }

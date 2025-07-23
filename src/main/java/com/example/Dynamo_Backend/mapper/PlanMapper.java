@@ -13,7 +13,7 @@ public class PlanMapper {
         plan.setStartTime(DateTimeUtil.convertStringToTimestamp(planDto.getStartTime()));
         plan.setEndTime(DateTimeUtil.convertStringToTimestamp(planDto.getEndTime()));
         plan.setRemark(planDto.getRemark());
-        plan.setRemarkTime(planDto.getRemarkTime());
+        plan.setRemarkTime(DateTimeUtil.convertStringToTimestamp(planDto.getRemarkTime()));
         return plan;
     }
 
@@ -25,11 +25,11 @@ public class PlanMapper {
         planDto.setStartTime(DateTimeUtil.convertTimestampToString(plan.getStartTime()));
         planDto.setEndTime(DateTimeUtil.convertTimestampToString(plan.getEndTime()));
         planDto.setRemark(plan.getRemark());
-        planDto.setRemarkTime(plan.getRemarkTime());
+        planDto.setRemarkTime(DateTimeUtil.convertTimestampToString(plan.getRemarkTime()));
         planDto.setMachineId(plan.getMachine().getMachineId());
         planDto.setPlannerId(plan.getPlanner().getId());
         planDto.setProcessId(plan.getDrawingCodeProcess().getProcessId());
-        planDto.setStaffId(plan.getStaff().getId());
+        planDto.setStaffId(plan.getStaff().getStaffId());
         planDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(plan.getCreatedDate()));
         planDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(plan.getUpdatedDate()));
 

@@ -29,6 +29,7 @@ public class StaffMapper {
                 staffDto.setShortName(staff.getShortName());
                 staffDto.setStaffSection(staff.getStaffSection());
                 staffDto.setStatus(staff.getStatus());
+                staffDto.setGroupId(staff.getGroup().getGroupId());
                 staffDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getCreatedDate()));
                 staffDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getUpdatedDate()));
                 staffDto.setStaffKpiDtos(staff.getStaffKpis().stream().map(StaffKpiMapper::mapToStaffKpiDto).toList());

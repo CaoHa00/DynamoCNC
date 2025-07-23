@@ -11,8 +11,8 @@ public class DrawingCodeMapper {
         drawingCode.setDrawingCodeName(drawingCodeDto.getDrawingCodeName());
         drawingCode.setCreatedDate(0);
         drawingCode.setUpdatedDate(0);
-        drawingCode.setStatus(drawingCodeDto.getStatus());
-        drawingCode.setProductStatus(drawingCodeDto.getProductStatus());
+        // drawingCode.setStatus(drawingCodeDto.getStatus());
+        // drawingCode.setProductStatus(drawingCodeDto.getProductStatus());
         return drawingCode;
         // return new DrawingCode(
         // drawingCodeDto.getDrawingCodeId(),
@@ -28,8 +28,8 @@ public class DrawingCodeMapper {
         drawingCodeDto.setDrawingCodeName(drawingCode.getDrawingCodeName());
         drawingCodeDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(drawingCode.getCreatedDate()));
         drawingCodeDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(drawingCode.getUpdatedDate()));
-        drawingCodeDto.setStatus(drawingCode.getStatus());
-        drawingCodeDto.setProductStatus(drawingCode.getProductStatus());
+        // drawingCodeDto.setStatus(drawingCode.getStatus());
+        // drawingCodeDto.setProductStatus(drawingCode.getProductStatus());
         return drawingCodeDto;
     }
 

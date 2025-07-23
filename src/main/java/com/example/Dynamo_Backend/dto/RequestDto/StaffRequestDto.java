@@ -16,14 +16,14 @@ public class StaffRequestDto {
     private String shortName;
     private Float kpi;
     private Integer status;
-    private String duration;
     private Integer year;
     private Integer month;
-    private Integer week;
     private Float pgTimeGoal;
+    private Float workGoal;
     private Float machineTimeGoal;
     private Float manufacturingPoint;
     private Float oleGoal;
+    private String groupId;
     private String createdDate;
     private String updatedDate;
 }

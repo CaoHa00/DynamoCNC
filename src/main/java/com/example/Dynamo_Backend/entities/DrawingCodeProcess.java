@@ -72,7 +72,7 @@ public class DrawingCodeProcess {
     // 3: waiting for qc
     // 4:
 
-    @Column(name = "id_plan", nullable = false)
+    @Column(name = "is_plan", nullable = false)
     private Integer isPlan;
 
     @ManyToOne

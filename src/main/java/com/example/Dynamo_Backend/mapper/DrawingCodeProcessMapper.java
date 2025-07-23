@@ -3,8 +3,11 @@ package com.example.Dynamo_Backend.mapper;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
+import com.example.Dynamo_Backend.dto.PlanDto;
+import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
+import com.example.Dynamo_Backend.entities.Plan;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class DrawingCodeProcessMapper {
@@ -24,6 +27,27 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.setLogs(drawingCodeProcessDto.getStatstistics());
                 drawingCodeProcess.setCreatedDate(0);
                 drawingCodeProcess.setUpdatedDate(0);
+                drawingCodeProcess.setStartTime(
+                                DateTimeUtil.convertStringToTimestamp(drawingCodeProcessDto.getStartTime()));
+                drawingCodeProcess
+                                .setEndTime(DateTimeUtil.convertStringToTimestamp(drawingCodeProcessDto.getEndTime()));
+                drawingCodeProcess.setIsPlan(drawingCodeProcessDto.getIsPlan());
+                return drawingCodeProcess;
+        }
+
+        public static DrawingCodeProcess mapToDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+                DrawingCodeProcess drawingCodeProcess = new DrawingCodeProcess();
+
+                drawingCodeProcess.setProcessId(drawingCodeProcessDto.getProcessId());
+                drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
+                drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getStepNumber());
+                drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
+                drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
+                drawingCodeProcess.setProcessStatus(drawingCodeProcessDto.getInProgress());
+                drawingCodeProcess.setStartTime(
+                                DateTimeUtil.convertStringToTimestamp(drawingCodeProcessDto.getStartTime()));
+                drawingCodeProcess
+                                .setEndTime(DateTimeUtil.convertStringToTimestamp(drawingCodeProcessDto.getEndTime()));
                 drawingCodeProcess.setIsPlan(drawingCodeProcessDto.getIsPlan());
                 return drawingCodeProcess;
         }
@@ -38,8 +62,8 @@ public class DrawingCodeProcessMapper {
                                 // drawingCodeProcess.getTotalStopTime(),
                                 // drawingCodeProcess.getOffsetRunTime(),
                                 // drawingCodeProcess.getPgRunTime(),
-                                drawingCodeProcess.getStartTime(),
-                                drawingCodeProcess.getEndTime(),
+                                DateTimeUtil.convertTimestampToString(drawingCodeProcess.getStartTime()),
+                                DateTimeUtil.convertTimestampToString(drawingCodeProcess.getStartTime()),
                                 DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getCreatedDate()),
                                 DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getUpdatedDate()),
                                 drawingCodeProcess.getStatus(),
@@ -50,7 +74,8 @@ public class DrawingCodeProcessMapper {
                                 drawingCodeProcess.getMachine() != null ? drawingCodeProcess.getMachine().getMachineId()
                                                 : null,
                                 drawingCodeProcess.getOperateHistories(),
-                                drawingCodeProcess.getLogs());
+                                drawingCodeProcess.getLogs(),
+                                drawingCodeProcess.getPlans());
         }
 
         public static DrawingCodeProcessResponseDto toDto(OrderDetailDto orderDetailDto, MachineDto machineDto,
@@ -64,10 +89,10 @@ public class DrawingCodeProcessMapper {
                 // dto.setOffsetRunTime(drawingCodeProcess.getOffsetRunTime());
                 // dto.setTotalRunningTime(drawingCodeProcess.getTotalRunningTime());
                 // dto.setTotalStopTime(drawingCodeProcess.getTotalStopTime());
-                dto.setStartTime(drawingCodeProcess.getStartTime());
-                dto.setEndTime(drawingCodeProcess.getEndTime());
-                dto.setCreatedDate((DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getCreatedDate())));
-                dto.setUpdatedDate((DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getUpdatedDate())));
+                dto.setStartTime(DateTimeUtil.convertTimestampToString(drawingCodeProcess.getStartTime()));
+                dto.setEndTime(DateTimeUtil.convertTimestampToString(drawingCodeProcess.getEndTime()));
+                dto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getCreatedDate()));
+                dto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getUpdatedDate()));
                 dto.setIsPlan(drawingCodeProcess.getIsPlan());
                 dto.setStatus(drawingCodeProcess.getStatus());
                 if (machineDto != null) {
@@ -78,22 +103,18 @@ public class DrawingCodeProcessMapper {
 
         }
 
-        // public static DrawingCodeProcessResquestDto toEnity(DrawingCodeProcessDto
-        // drawingCodeProcessDto) {
-        // DrawingCodeProcessResquestDto entity = new DrawingCodeProcessResquestDto();
-        // entity.setProcessId(drawingCodeProcessDto.getProcessId());
-        // entity.setDrawingCodeId(drawingCodeProcessDto.getDrawingCodeId());
-        // entity.setPartNumber(drawingCodeProcessDto.getPartNumber());
-        // entity.setStepNumber(drawingCodeProcessDto.getStepNumber());
-        // entity.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
-        // entity.setPgTime(drawingCodeProcessDto.getPgTime());
-        // entity.setStartTime(drawingCodeProcessDto.getStartTime());
-        // entity.setEndTime(drawingCodeProcessDto.getEndTime());
-        // entity.setAddDate(drawingCodeProcessDto.getAddDate());
-        // entity.setStatus(drawingCodeProcessDto.getStatus());
-        // entity.setDrawingCodeId(drawingCodeProcessDto.getDrawingCodeId());
-        // entity.setMachineId(drawingCodeProcessDto.getMachineId());
-        // return entity;
+        public static PlanDto mapToPlanDto(DrawingCodeProcessResquestDto drawingCodeProcessResquestDto) {
+                PlanDto plan = new PlanDto();
+                plan.setInProgress(drawingCodeProcessResquestDto.getInProgress());
+                plan.setStartTime(drawingCodeProcessResquestDto.getStartTime());
+                plan.setEndTime(drawingCodeProcessResquestDto.getEndTime());
+                plan.setStatus(drawingCodeProcessResquestDto.getStatus());
+                plan.setRemark(drawingCodeProcessResquestDto.getRemark());
+                plan.setRemarkTime(drawingCodeProcessResquestDto.getRemarkTime());
+                plan.setStaffId(drawingCodeProcessResquestDto.getStaffId());
+                plan.setMachineId(drawingCodeProcessResquestDto.getMachineId());
+                plan.setPlannerId(drawingCodeProcessResquestDto.getPlannerId());
 
-        // }
+                return plan;
+        }
 }

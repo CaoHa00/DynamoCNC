@@ -1,6 +1,5 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
-import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 
@@ -20,8 +19,8 @@ public class DrawingCodeProcessResponseDto {
     // private Long totalStopTime;
     // private Long offsetRunTime;
     // private Long pgRunTime;
-    private Long startTime;
-    private Long endTime;
+    private String startTime;
+    private String endTime;
     private String createdDate;
     private String updatedDate;
     private Integer isPlan;

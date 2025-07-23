@@ -40,6 +40,7 @@ public class MachineMapper {
         machineDto.setMachineGroup(machine.getMachineGroup());
         machineDto.setMachineOffice(machine.getMachineOffice());
         machineDto.setStatus(machine.getStatus());
+        machineDto.setGroupId(machine.getGroup().getGroupId());
         machineDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));
         machineDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));
         machineDto.setMachineKpiDtos(

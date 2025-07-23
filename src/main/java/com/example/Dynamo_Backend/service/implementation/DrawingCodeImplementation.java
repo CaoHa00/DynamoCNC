@@ -1,6 +1,5 @@
 package com.example.Dynamo_Backend.service.implementation;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -26,8 +25,8 @@ public class DrawingCodeImplementation implements DrawingCodeService {
         DrawingCode drawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCodeDto);
         drawingCode.setCreatedDate(createdTimestamp);
         drawingCode.setUpdatedDate(createdTimestamp);
-        drawingCode.setStatus(status);
-        drawingCode.setProductStatus("status");
+        // drawingCode.setStatus(status);
+        // drawingCode.setProductStatus("status");
         DrawingCode saveDrawingCode = drawingCodeRepository.save(drawingCode);
         return DrawingCodeMapper.mapToDrawingCodeDto(saveDrawingCode);
     }
@@ -38,7 +37,7 @@ public class DrawingCodeImplementation implements DrawingCodeService {
                 .orElseThrow(() -> new RuntimeException("DrawingCode is not found:" + drawingCodeId));
         long updatedTimestamp = System.currentTimeMillis();
         drawingCode.setDrawingCodeName(drawingCodeDto.getDrawingCodeName());
-        drawingCode.setStatus(drawingCodeDto.getStatus());
+        // drawingCode.setStatus(drawingCodeDto.getStatus());
         drawingCode.setUpdatedDate(updatedTimestamp);
         // drawingCode.setOrders(drawingCode.getOrders());
         // drawingCode.setDrawingCodeProcesses(drawingCodeDto.getDrawingCodeProcesses());

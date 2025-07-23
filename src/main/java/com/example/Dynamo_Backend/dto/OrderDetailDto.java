@@ -16,6 +16,6 @@ public class OrderDetailDto {
     private String orderType;
     private String createdDate;
     private String updatedDate;
-    private int status;
+    // private int status;
 
 }

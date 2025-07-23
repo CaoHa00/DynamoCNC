@@ -46,6 +46,7 @@ public class StaffKpiImplementation implements StaffKpiService {
         staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
         staffKpi.setKpi(staffKpiDto.getKpi());
         staffKpi.setOleGoal(staffKpiDto.getOleGoal());
+        staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
         staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
         staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
         staffKpi.setUpdatedDate(updatedTimestamp);

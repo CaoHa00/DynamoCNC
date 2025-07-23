@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "process_time")
+@Table(name = "tbl-plan")
 public class Plan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

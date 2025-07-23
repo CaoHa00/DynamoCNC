@@ -48,6 +48,8 @@ public class StaffKpi {
     private Float manufacturingPoint;
     @Column(name = "ole_goal", nullable = false)
     private Float oleGoal;
+    @Column(name = "work_goal", nullable = false)
+    private Float workGoal;
     @Column(name = "kpi", nullable = false)
     private Float kpi;
 

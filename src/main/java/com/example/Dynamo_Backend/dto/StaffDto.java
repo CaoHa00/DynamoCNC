@@ -19,5 +19,6 @@ public class StaffDto {
     private Integer status;
     private String createdDate;
     private String updatedDate;
+    private String groupId;
     private List<StaffKpiDto> staffKpiDtos;
 }

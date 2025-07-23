@@ -14,9 +14,9 @@ public class PlanDto {
     private Integer status;
     private Integer inProgress;
     private Float remark;
-    private Long remarkTime;
+    private String remarkTime;
     private String processId;
-    private String staffId;
+    private Integer staffId;
     private Integer machineId;
     private String plannerId;
     private String createdDate;

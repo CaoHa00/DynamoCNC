@@ -8,19 +8,6 @@ public class OrderMapper {
     public static Order mapToOrder(OrderDto orderDto) {
         Order order = new Order();
 
-        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
-        // HH:mm:ss");
-        // LocalDateTime localDateTime = LocalDateTime.parse(orderDto.getOrderDate(),
-        // formatter);
-        // long orderDate =
-        // localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        // localDateTime = LocalDateTime.parse(orderDto.getDeliveryDate(), formatter);
-        // long deliveryDate =
-        // localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        // localDateTime = LocalDateTime.parse(orderDto.getCompletionDate(), formatter);
-        // long completeDate =
-        // localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
         order.setOrderId(orderDto.getOrderId());
         order.setPoNumber(orderDto.getPoNumber());
         // order.setAddress(orderDto.getAddress());
@@ -29,10 +16,10 @@ public class OrderMapper {
         // order.setDeliveryDate(deliveryDate);
         // order.setOrderDate(orderDate);
         // order.setOrderName(orderDto.getOrderName());
-        order.setOrderstatus(orderDto.getOrderstatus());
-        order.setStatus(orderDto.getStatus());
+        // order.setOrderstatus(orderDto.getOrderstatus());
+        // order.setStatus(orderDto.getStatus());
         // order.setShippingMethod(orderDto.getShippingMethod());
-        order.setRemark(orderDto.getRemark());
+        // order.setRemark(orderDto.getRemark());
         // order.setCreatedDate(orderDto.getCreatedDate());
         // order.setUpdatedDate(orderDto.getUpdatedDate());
         return order;
@@ -62,17 +49,18 @@ public class OrderMapper {
                 order.getOrderId(),
                 order.getPoNumber(),
                 DateTimeUtil.convertTimestampToStringDate(order.getCreatedDate()),
-                DateTimeUtil.convertTimestampToStringDate(order.getUpdatedDate()),
-                // order.getCustomerName(),
-                // order.getPhoneNumber(),
-                // order.getAddress(),
-                // orderDate,
-                // deliveryDate,
-                // completionDate,
-                // order.getShippingMethod(),
-                order.getRemark(),
-                order.getStatus(),
-                order.getOrderstatus());
+                DateTimeUtil.convertTimestampToStringDate(order.getUpdatedDate())
+        // order.getCustomerName(),
+        // order.getPhoneNumber(),
+        // order.getAddress(),
+        // orderDate,
+        // deliveryDate,
+        // completionDate,
+        // order.getShippingMethod(),
+        // order.getRemark(),
+        // order.getStatus(),
+        // order.getOrderstatus()
+        );
 
     }
 
