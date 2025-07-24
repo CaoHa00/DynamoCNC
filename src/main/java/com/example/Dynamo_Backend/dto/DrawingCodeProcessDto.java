@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.dto;
 import java.util.List;
 
 import com.example.Dynamo_Backend.entities.OperateHistory;
+import com.example.Dynamo_Backend.entities.Plan;
 import com.example.Dynamo_Backend.entities.Log;
 
 import lombok.AllArgsConstructor;
@@ -18,18 +19,19 @@ public class DrawingCodeProcessDto {
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Long totalRunningTime;
-    private Long totalStopTime;
-    private Long offsetRunTime;
-    private Long pgRunTime;
-    private Long startTime;
-    private Long endTime;
+    // private Long totalRunningTime;
+    // private Long totalStopTime;
+    // private Long offsetRunTime;
+    // private Long pgRunTime;
+    private String startTime;
+    private String endTime;
     private String createdDate;
     private String updatedDate;
     private Integer status;
-    private String qcNote;
+    private Integer isPlan;
     private String orderDetailId;
     private Integer machineId;
     private List<OperateHistory> staffHistories;
     private List<Log> statstistics;
+    private List<Plan> plans;
 }

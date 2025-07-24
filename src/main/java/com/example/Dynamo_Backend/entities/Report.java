@@ -39,8 +39,8 @@ public class Report {
     @JoinColumn(name = "group_id", nullable = false)
     @JsonBackReference
     private Group group;
-    // @ManyToOne
-    // @JoinColumn(name = "admin_id", nullable = false)
-    // @JsonBackReference
-    // private Admin admin;
+    @ManyToOne
+    @JoinColumn(name = "admin_id", nullable = false)
+    @JsonBackReference
+    private Admin admin;
 }

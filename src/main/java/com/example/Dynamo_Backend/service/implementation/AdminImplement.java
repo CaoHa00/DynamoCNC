@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.service.implementation;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.RequestDto.AdminRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.AdminResponseDto;
@@ -11,11 +12,12 @@ import com.example.Dynamo_Backend.mapper.AdminMapper;
 import com.example.Dynamo_Backend.repository.AdminRepository;
 import com.example.Dynamo_Backend.service.AdminService;
 
+@Service
 public class AdminImplement implements AdminService {
     @Autowired
     private AdminRepository adminRepository;
 
-    @Autowired
+    // @Autowired
     // private PasswordEncoder passwordEncoder;
     @Override
     public AdminResponseDto register(AdminRequestDto adminRequestDto) {
@@ -31,7 +33,7 @@ public class AdminImplement implements AdminService {
         // admin.setPassword(passwordEncoder.encode(adminRequestDto.getPassword()));
         admin.setPassword(adminRequestDto.getPassword());
         Admin savedAdmin = adminRepository.save(admin);
-        return AdminMapper.mapToaAdminResponseDto(savedAdmin);
+        return AdminMapper.mapToAdminResponseDto(savedAdmin);
     }
 
     @Override
@@ -44,7 +46,7 @@ public class AdminImplement implements AdminService {
     public AdminResponseDto getAdminById(String Id) {
         Admin admin = adminRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
-        return AdminMapper.mapToaAdminResponseDto(admin);
+        return AdminMapper.mapToAdminResponseDto(admin);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class AdminImplement implements AdminService {
 
         Admin savedAdmin = adminRepository.save(admin);
 
-        return AdminMapper.mapToaAdminResponseDto(savedAdmin);
+        return AdminMapper.mapToAdminResponseDto(savedAdmin);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class AdminImplement implements AdminService {
     @Override
     public List<AdminResponseDto> getAllAdmins() {
         List<Admin> admins = adminRepository.findAll();
-        return admins.stream().map(AdminMapper::mapToaAdminResponseDto).toList();
+        return admins.stream().map(AdminMapper::mapToAdminResponseDto).toList();
     }
 
 }

@@ -27,14 +27,16 @@ public class GroupKpi {
     private Integer month;
     @Column(name = "week", nullable = true)
     private Integer week;
+    @Column(name = "isMonth", nullable = false)
+    private Integer isMonth;
     @Column(name = "office", nullable = false)
     private String office;
-    @Column(name = "work_hours_aim", nullable = false)
-    private Integer workHoursAim;
-    @Column(name = "work_hours_change", nullable = false)
-    private Integer workHoursChange;
-    @Column(name = "real_work_hours", nullable = false)
-    private Integer realWorkHours;
+    @Column(name = "working_hour_goal", nullable = false)
+    private Integer workingHourGoal;
+    @Column(name = "working_hour_difference", nullable = false)
+    private Integer workingHourDifference;
+    @Column(name = "working_hour", nullable = false)
+    private Integer workingHour;
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
     @JsonBackReference

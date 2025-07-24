@@ -1,24 +1,18 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import com.example.Dynamo_Backend.dto.ReportDto;
 import com.example.Dynamo_Backend.entities.Report;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class ReportMapper {
     public static ReportDto maptoReportDto(Report report) {
         ReportDto reportDto = new ReportDto();
-        String formattedCreatedDate = Instant.ofEpochMilli(report.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String date = Instant.ofEpochMilli(report.getDateTime())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        reportDto.setDateTime(date);
-        reportDto.setCreatedDate(formattedCreatedDate);
+        reportDto.setDateTime(DateTimeUtil.convertTimestampToStringDate(report.getDateTime()));
+        reportDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(report.getCreatedDate()));
         reportDto.setId(report.getId());
         reportDto.setGroupId(report.getGroup().getGroupId());
         // reportDto.setAdminId(report.getAdmin().getId());

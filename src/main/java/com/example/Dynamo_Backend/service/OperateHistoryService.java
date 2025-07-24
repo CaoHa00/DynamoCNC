@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.Dynamo_Backend.dto.OperateHistoryDto;
 
 public interface OperateHistoryService {
+    OperateHistoryDto addOperateHistory(String payload);
 
     OperateHistoryDto addOperateHistory(OperateHistoryDto operateHistoryDto);
 

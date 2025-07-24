@@ -9,6 +9,7 @@ import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class MachineKpiMapper {
     MachineRepository machineRepository;
@@ -19,13 +20,10 @@ public class MachineKpiMapper {
         // .orElseThrow(() -> new RuntimeException("Machine is not found:" +
         // machineKpiDto.getMachineId()));
         // machineKpi.setMachine(machine);
-        machineKpi.setDuration(machineKpiDto.getDuration());
+        machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
         machineKpi.setYear(machineKpiDto.getYear());
         machineKpi.setMonth(machineKpiDto.getMonth());
-        machineKpi.setWeek(machineKpiDto.getWeek());
-        machineKpi.setMonthlyRunningTime(machineKpiDto.getMonthlyRunningTime());
-        machineKpi.setWeeklyRunningTime(machineKpiDto.getWeeklyRunningTime());
-        machineKpi.setOeeGoal(machineKpiDto.getOeeGoal());
+        machineKpi.setOee(machineKpiDto.getOee());
         // machineKpi.setCreatedDate((long) 0);
         // machineKpi.setUpdatedDate((long) 0);
         return machineKpi;
@@ -33,23 +31,14 @@ public class MachineKpiMapper {
 
     public static MachineKpiDto mapToMachineKpiDto(MachineKpi machineKpi) {
         MachineKpiDto machineKpiDto = new MachineKpiDto();
-        String formattedCreatedDate = Instant.ofEpochMilli(machineKpi.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(machineKpi.getUpdatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         machineKpiDto.setId(machineKpi.getId());
-        machineKpiDto.setCreatedDate(formattedCreatedDate);
-        machineKpiDto.setUpdatedDate(formattedUpdatedDate);
+        machineKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
+        machineKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
         machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());
-        machineKpiDto.setDuration(machineKpi.getDuration());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
-        machineKpiDto.setWeek(machineKpi.getWeek());
-        machineKpiDto.setMonthlyRunningTime(machineKpi.getMonthlyRunningTime());
-        machineKpiDto.setWeeklyRunningTime(machineKpi.getWeeklyRunningTime());
-        machineKpiDto.setOeeGoal(machineKpi.getOeeGoal());
+        machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
+        machineKpiDto.setOee(machineKpi.getOee());
 
         return machineKpiDto;
     }
@@ -58,13 +47,10 @@ public class MachineKpiMapper {
         MachineKpiDto machineKpiDto = new MachineKpiDto();
 
         machineKpiDto.setMachineId(machineKpi.getMachineId());
-        machineKpiDto.setDuration(machineKpi.getDuration());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
-        machineKpiDto.setWeek(machineKpi.getWeek());
-        machineKpiDto.setMonthlyRunningTime(machineKpi.getMonthlyRunningTime());
-        machineKpiDto.setWeeklyRunningTime(machineKpi.getWeeklyRunningTime());
-        machineKpiDto.setOeeGoal(machineKpi.getOeeGoal());
+        machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
+        machineKpiDto.setOee(machineKpi.getOee());
 
         return machineKpiDto;
     }

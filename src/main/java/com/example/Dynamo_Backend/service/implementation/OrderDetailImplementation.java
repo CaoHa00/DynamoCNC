@@ -58,6 +58,9 @@ public class OrderDetailImplementation implements OrderDetailService {
         orderDetail.setOrder(updateOrder);
         orderDetail.setDrawingCode(updateDrawingCode);
         orderDetail.setUpdatedDate(updatedTimestamp);
+        orderDetail.setQuantity(orderDetailDto.getQuantity());
+        orderDetail.setOrderCode(orderDetailDto.getOrderCode());
+        orderDetail.setOrderType(orderDetailDto.getOrderType());
         OrderDetail updatedOrderDetail = orderDetailRepository.save(orderDetail);
         return OrderDetailMapper.mapToOrderDetailDto(updatedOrderDetail);
     }

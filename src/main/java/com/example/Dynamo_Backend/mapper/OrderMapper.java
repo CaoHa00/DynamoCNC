@@ -1,29 +1,12 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.OrderDto;
 import com.example.Dynamo_Backend.entities.Order;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class OrderMapper {
     public static Order mapToOrder(OrderDto orderDto) {
         Order order = new Order();
-
-        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
-        // HH:mm:ss");
-        // LocalDateTime localDateTime = LocalDateTime.parse(orderDto.getOrderDate(),
-        // formatter);
-        // long orderDate =
-        // localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        // localDateTime = LocalDateTime.parse(orderDto.getDeliveryDate(), formatter);
-        // long deliveryDate =
-        // localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        // localDateTime = LocalDateTime.parse(orderDto.getCompletionDate(), formatter);
-        // long completeDate =
-        // localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
         order.setOrderId(orderDto.getOrderId());
         order.setPoNumber(orderDto.getPoNumber());
@@ -33,22 +16,16 @@ public class OrderMapper {
         // order.setDeliveryDate(deliveryDate);
         // order.setOrderDate(orderDate);
         // order.setOrderName(orderDto.getOrderName());
-        order.setOrderstatus(orderDto.getOrderstatus());
-        order.setStatus(orderDto.getStatus());
+        // order.setOrderstatus(orderDto.getOrderstatus());
+        // order.setStatus(orderDto.getStatus());
         // order.setShippingMethod(orderDto.getShippingMethod());
-        order.setRemark(orderDto.getRemark());
+        // order.setRemark(orderDto.getRemark());
         // order.setCreatedDate(orderDto.getCreatedDate());
         // order.setUpdatedDate(orderDto.getUpdatedDate());
         return order;
     }
 
     public static OrderDto mapToOrderDto(Order order) {
-        String formattedCreatedDate = Instant.ofEpochMilli(order.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(order.getUpdatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         // String orderDate = Instant.ofEpochMilli(order.getOrderDate())
         // .atZone(ZoneId.systemDefault())
         // .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -71,18 +48,19 @@ public class OrderMapper {
         return new OrderDto(
                 order.getOrderId(),
                 order.getPoNumber(),
-                formattedCreatedDate,
-                formattedUpdatedDate,
-                // order.getCustomerName(),
-                // order.getPhoneNumber(),
-                // order.getAddress(),
-                // orderDate,
-                // deliveryDate,
-                // completionDate,
-                // order.getShippingMethod(),
-                order.getRemark(),
-                order.getStatus(),
-                order.getOrderstatus());
+                DateTimeUtil.convertTimestampToStringDate(order.getCreatedDate()),
+                DateTimeUtil.convertTimestampToStringDate(order.getUpdatedDate())
+        // order.getCustomerName(),
+        // order.getPhoneNumber(),
+        // order.getAddress(),
+        // orderDate,
+        // deliveryDate,
+        // completionDate,
+        // order.getShippingMethod(),
+        // order.getRemark(),
+        // order.getStatus(),
+        // order.getOrderstatus()
+        );
 
     }
 

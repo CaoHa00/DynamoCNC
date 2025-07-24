@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.*;
 import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
+import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
 import com.example.Dynamo_Backend.mapper.StaffMapper;
+import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.service.StaffKpiService;
@@ -24,6 +26,8 @@ import lombok.AllArgsConstructor;
 public class StaffImplementation implements StaffService {
     @Autowired
     StaffRepository staffRepository;
+    @Autowired
+    GroupRepository groupRepository;
 
     StaffKpiService staffKpiService;
     StaffKpiRepository staffKpiRepository;
@@ -33,12 +37,16 @@ public class StaffImplementation implements StaffService {
         Staff staff = new Staff();
         long createdTimestamp = System.currentTimeMillis();
         int status = 1;
+        Group group = groupRepository.findById(staffRequestDto.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group is not found:" + staffRequestDto.getGroupId()));
+
+        staff.setGroup(group);
         staff.setId(staffRequestDto.getId());
         staff.setStaffId(staffRequestDto.getStaffId());
         staff.setStaffName(staffRequestDto.getStaffName());
         staff.setStaffOffice(staffRequestDto.getStaffOffice());
         staff.setStaffSection(staffRequestDto.getStaffSection());
-        staff.setStaffStep(staffRequestDto.getStaffStep());
+        staff.setShortName(staffRequestDto.getShortName());
         staff.setCreatedDate(createdTimestamp);
         staff.setUpdatedDate(createdTimestamp);
         staff.setStatus(status);
@@ -86,18 +94,21 @@ public class StaffImplementation implements StaffService {
     }
 
     @Override
-    public StaffDto updateStaff(String Id, StaffDto staffRequestDto) {
+    public StaffDto updateStaff(String Id, StaffDto staffDto) {
         Staff staff = staffRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
 
         long updatedTimestamp = System.currentTimeMillis();
-        staff.setStaffName(staffRequestDto.getStaffName());
-        staff.setStaffId(staffRequestDto.getStaffId());
-        staff.setStaffOffice(staffRequestDto.getStaffOffice());
-        staff.setStaffSection(staffRequestDto.getStaffSection());
-        staff.setStaffStep(staffRequestDto.getStaffStep());
-        staff.setStatus(staffRequestDto.getStatus());
+        staff.setStaffName(staffDto.getStaffName());
+        staff.setStaffId(staffDto.getStaffId());
+        staff.setStaffOffice(staffDto.getStaffOffice());
+        staff.setStaffSection(staffDto.getStaffSection());
+        staff.setShortName(staffDto.getShortName());
+        staff.setStatus(staffDto.getStatus());
         staff.setUpdatedDate(updatedTimestamp);
+        Group group = groupRepository.findById(staffDto.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group is not found:" + staffDto.getGroupId()));
+        staff.setGroup(group);
 
         Staff updatedStaff = staffRepository.save(staff);
         return StaffMapper.mapToStaffDto(updatedStaff);

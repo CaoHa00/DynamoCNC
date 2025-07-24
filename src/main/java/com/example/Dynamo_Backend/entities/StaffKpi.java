@@ -33,17 +33,11 @@ public class StaffKpi {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
 
-    @Column(name = "duration", nullable = false)
-    private String duration;
-
     @Column(name = "year", nullable = false)
     private Integer year;
 
     @Column(name = "month", nullable = false)
     private Integer month;
-
-    @Column(name = "week", nullable = true)
-    private Integer week;
 
     @Column(name = "pg_time_goal", nullable = false)
     private Float pgTimeGoal;
@@ -54,6 +48,8 @@ public class StaffKpi {
     private Float manufacturingPoint;
     @Column(name = "ole_goal", nullable = false)
     private Float oleGoal;
+    @Column(name = "work_goal", nullable = false)
+    private Float workGoal;
     @Column(name = "kpi", nullable = false)
     private Float kpi;
 

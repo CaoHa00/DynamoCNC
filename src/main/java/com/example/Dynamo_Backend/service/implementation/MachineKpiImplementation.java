@@ -41,13 +41,10 @@ public class MachineKpiImplementation implements MachineKpiService {
         Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + machineKpiDto.getMachineId()));
         machineKpi.setMachine(machine);
-        machineKpi.setDuration(machineKpiDto.getDuration());
         machineKpi.setYear(machineKpiDto.getYear());
         machineKpi.setMonth(machineKpiDto.getMonth());
-        machineKpi.setWeek(machineKpiDto.getWeek());
-        machineKpi.setMonthlyRunningTime(machineKpiDto.getMonthlyRunningTime());
-        machineKpi.setWeeklyRunningTime(machineKpiDto.getWeeklyRunningTime());
-        machineKpi.setOeeGoal(machineKpiDto.getOeeGoal());
+        machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
+        machineKpi.setOee(machineKpiDto.getOee());
         machineKpi.setUpdatedDate(updatedTimestamp);
         MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
         return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);

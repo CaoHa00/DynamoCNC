@@ -19,7 +19,7 @@ public class OrderDto {
     // private String deliveryDate;
     // private String completionDate;
     // private String shippingMethod;
-    private String remark;
-    private int status;
-    private int orderstatus;
+    // private String remark;
+    // private int status;
+    // private int orderstatus;
 }

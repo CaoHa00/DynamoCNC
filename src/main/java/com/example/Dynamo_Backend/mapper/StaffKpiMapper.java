@@ -1,14 +1,10 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.StaffKpiDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
-import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.repository.StaffRepository;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class StaffKpiMapper {
     StaffRepository staffRepository;
@@ -19,13 +15,12 @@ public class StaffKpiMapper {
         // .orElseThrow(() -> new RuntimeException("Staff is not found:" +
         // staffKpiDto.getStaffId()));
         // staffKpi.setStaff(staff);
-        staffKpi.setDuration(staffKpiDto.getDuration());
         staffKpi.setYear(staffKpiDto.getYear());
         staffKpi.setMonth(staffKpiDto.getMonth());
-        staffKpi.setWeek(staffKpiDto.getWeek());
         staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
         staffKpi.setKpi(staffKpiDto.getKpi());
         staffKpi.setOleGoal(staffKpiDto.getOleGoal());
+        staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
         staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
         staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
         // staffKpi.setCreatedDate((long) 0);
@@ -36,13 +31,13 @@ public class StaffKpiMapper {
     public static StaffKpiDto mapToStaffKpiDto(StaffRequestDto staffRequestDto) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
         staffKpiDto.setStaffId(staffRequestDto.getId());
-        staffKpiDto.setDuration(staffRequestDto.getDuration());
         staffKpiDto.setYear(staffRequestDto.getYear());
         staffKpiDto.setMonth(staffRequestDto.getMonth());
-        staffKpiDto.setWeek(staffRequestDto.getWeek());
         staffKpiDto.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
         staffKpiDto.setKpi(staffRequestDto.getKpi());
         staffKpiDto.setOleGoal(staffRequestDto.getOleGoal());
+        staffKpiDto.setWorkGoal(staffRequestDto.getWorkGoal());
+        staffKpiDto.setWorkGoal(staffRequestDto.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffRequestDto.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffRequestDto.getManufacturingPoint());
         return staffKpiDto;
@@ -50,23 +45,16 @@ public class StaffKpiMapper {
 
     public static StaffKpiDto mapToStaffKpiDto(StaffKpi staffKpi) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
-        String formattedCreatedDate = Instant.ofEpochMilli(staffKpi.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(staffKpi.getUpdatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         staffKpiDto.setId(staffKpi.getId());
-        staffKpiDto.setCreatedDate(formattedCreatedDate);
-        staffKpiDto.setUpdatedDate(formattedUpdatedDate);
+        staffKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getCreatedDate()));
+        staffKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getUpdatedDate()));
         staffKpiDto.setStaffId(staffKpi.getStaff().getId());
-        staffKpiDto.setDuration(staffKpi.getDuration());
         staffKpiDto.setYear(staffKpi.getYear());
         staffKpiDto.setMonth(staffKpi.getMonth());
-        staffKpiDto.setWeek(staffKpi.getWeek());
         staffKpiDto.setPgTimeGoal(staffKpi.getPgTimeGoal());
         staffKpiDto.setKpi(staffKpi.getKpi());
         staffKpiDto.setOleGoal(staffKpi.getOleGoal());
+        staffKpiDto.setWorkGoal(staffKpi.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffKpi.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffKpi.getManufacturingPoint());
 

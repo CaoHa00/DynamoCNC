@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
 import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
+import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
+import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.MachineKpiService;
@@ -26,6 +28,8 @@ import lombok.AllArgsConstructor;
 public class MachineImplementation implements MachineService {
     @Autowired
     MachineRepository machineRepository;
+    @Autowired
+    GroupRepository groupRepository;
 
     MachineKpiRepository machineKpiRepository;
     MachineKpiService machineKpiService;
@@ -39,6 +43,10 @@ public class MachineImplementation implements MachineService {
         machine.setCreatedDate(createdTimestamp);
         machine.setUpdatedDate(createdTimestamp);
         machine.setMachineKpis(new ArrayList<MachineKpi>());
+        Group group = groupRepository.findById(machineDto.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group is not found:" + machineDto.getGroupId()));
+
+        machine.setGroup(group);
         Machine saveMachine = machineRepository.save(machine);
 
         machineDto.setMachineId(saveMachine.getMachineId());
@@ -65,6 +73,9 @@ public class MachineImplementation implements MachineService {
         machine.setMachineType(machineDto.getMachineType());
         machine.setStatus(machineDto.getStatus());
         machine.setUpdatedDate(updatedTimestamp);
+        Group group = groupRepository.findById(machineDto.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group is not found:" + machineDto.getGroupId()));
+        machine.setGroup(group);
         Machine updatedMachine = machineRepository.save(machine);
         return MachineMapper.mapToMachineDto(updatedMachine);
     }

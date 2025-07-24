@@ -11,13 +11,11 @@ public class OrderDetailDto {
     private String orderDetailId;
     private String drawingCodeId;
     private String orderId;
-    private String staffId;
-    private Long pgTime;
     private String orderCode;
-    private int productionStep;
     private int quantity;
+    private String orderType;
     private String createdDate;
     private String updatedDate;
-    private int status;
+    // private int status;
 
 }

@@ -1,11 +1,8 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.StaffGroupDto;
 import com.example.Dynamo_Backend.entities.StaffGroup;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class StaffGroupMapper {
         public static StaffGroup mapToStaffGroup(StaffGroupDto staffGroupDto) {
@@ -20,12 +17,6 @@ public class StaffGroupMapper {
 
         public static StaffGroupDto mapToStaffGroupDto(StaffGroup staffGroup) {
                 StaffGroupDto staffGroupDto = new StaffGroupDto();
-                String formattedCreatedDate = Instant.ofEpochMilli(staffGroup.getCreatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                String formattedUpdatedDate = Instant.ofEpochMilli(staffGroup.getCreatedDate())
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 staffGroupDto.setStaffGroupId(staffGroup.getStaffGroupId());
                 staffGroupDto.setGroupId(
                                 staffGroup.getGroup() != null ? staffGroup.getGroup().getGroupId() : null);
@@ -33,8 +24,8 @@ public class StaffGroupMapper {
                                 .setStaffId(staffGroup.getStaff() != null ? staffGroup.getStaff().getId() : null);
                 staffGroupDto.setStaffName(
                                 staffGroup.getStaff() != null ? staffGroup.getStaff().getStaffName() : null);
-                staffGroupDto.setCreatedDate(formattedCreatedDate);
-                staffGroupDto.setUpdatedDate(formattedUpdatedDate);
+                staffGroupDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staffGroup.getCreatedDate()));
+                staffGroupDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staffGroup.getUpdatedDate()));
                 return staffGroupDto;
         }
 

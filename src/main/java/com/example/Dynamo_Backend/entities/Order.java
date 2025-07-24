@@ -48,12 +48,12 @@ public class Order {
     // private Long completionDate;
     // @Column(name = "shippingMethod", nullable = false)
     // private String shippingMethod;
-    @Column(name = "remark", nullable = false)
-    private String remark;
-    @Column(name = "status", nullable = false)
-    private int status;
-    @Column(name = "order_status", nullable = false)
-    private int orderstatus;
+    // @Column(name = "remark", nullable = false)
+    // private String remark;
+    // @Column(name = "status", nullable = false)
+    // private int status;
+    // @Column(name = "order_status", nullable = false)
+    // private int orderstatus;
 
     @Column(name = "created_date", nullable = false)
     private Long createdDate;

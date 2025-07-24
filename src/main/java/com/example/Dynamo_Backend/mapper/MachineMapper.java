@@ -1,12 +1,9 @@
 package com.example.Dynamo_Backend.mapper;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class MachineMapper {
     public static Machine mapToMachine(MachineDto machineDto) {
@@ -37,20 +34,15 @@ public class MachineMapper {
 
     public static MachineDto mapToMachineDto(Machine machine) {
         MachineDto machineDto = new MachineDto();
-        String formattedCreatedDate = Instant.ofEpochMilli(machine.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String formattedUpdatedDate = Instant.ofEpochMilli(machine.getCreatedDate())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         machineDto.setMachineId(machine.getMachineId());
         machineDto.setMachineName(machine.getMachineName());
         machineDto.setMachineType(machine.getMachineType());
         machineDto.setMachineGroup(machine.getMachineGroup());
         machineDto.setMachineOffice(machine.getMachineOffice());
         machineDto.setStatus(machine.getStatus());
-        machineDto.setCreatedDate(formattedCreatedDate);
-        machineDto.setUpdatedDate(formattedUpdatedDate);
+        machineDto.setGroupId(machine.getGroup().getGroupId());
+        machineDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));
+        machineDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));
         machineDto.setMachineKpiDtos(
                 machine.getMachineKpis().stream().map(MachineKpiMapper::mapToMachineKpiDto).toList());
         return machineDto;

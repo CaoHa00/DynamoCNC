@@ -36,6 +36,9 @@ public class OperateHistory {
     @Column(name = "stop_time", nullable = false)
     private Long stopTime;
 
+    @Column(name = "in_progress", nullable = false)
+    private Integer inProgress;
+
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = false)
     @JsonBackReference(value = "history-staff")
