@@ -198,6 +198,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 process.setProcessStatus(2);
                 process.setStartTime(timestampNow);
 
+                drawingCodeProcessRepository.save(process);
+
                 Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new RuntimeException(
                                 "Staff is not found:" + staffId));
                 OperateHistory history = new OperateHistory();
