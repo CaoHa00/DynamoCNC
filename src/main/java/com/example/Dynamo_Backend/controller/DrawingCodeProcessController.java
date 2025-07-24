@@ -39,7 +39,12 @@ public class DrawingCodeProcessController {
         DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService
                 .addDrawingCodeProcess(drawingCodeProcessDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(drawingCodeProcess);
+    }
 
+    @PostMapping("/done-process/{process_id}")
+    public ResponseEntity<Void> doneProcess(@PathVariable("process_id") String processId) {
+        drawingCodeProcessService.doneProcess(processId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/receive")

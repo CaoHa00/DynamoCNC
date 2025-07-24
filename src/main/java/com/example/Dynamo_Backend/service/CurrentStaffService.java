@@ -5,6 +5,8 @@ import java.util.List;
 import com.example.Dynamo_Backend.dto.CurrentStaffDto;
 
 public interface CurrentStaffService {
+    CurrentStaffDto addCurrentStaff(String payload);
+
     CurrentStaffDto addCurrentStaff(CurrentStaffDto currentStaffRequestDto);
 
     CurrentStaffDto updateCurrentStaff(Integer Id, CurrentStaffDto currentStaffDto);
@@ -14,4 +16,5 @@ public interface CurrentStaffService {
     List<CurrentStaffDto> getAllCurrentStaffs();
 
     CurrentStaffDto getCurrentStaffById(Integer Id);
+
 }

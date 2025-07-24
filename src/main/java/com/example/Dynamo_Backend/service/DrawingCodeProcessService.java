@@ -24,4 +24,6 @@ public interface DrawingCodeProcessService {
 
     void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
 
+    void doneProcess(String processId);
+
 }

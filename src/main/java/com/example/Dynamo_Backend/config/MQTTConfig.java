@@ -19,6 +19,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import com.example.Dynamo_Backend.service.OperateHistoryService;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 
 import lombok.AllArgsConstructor;
@@ -27,13 +28,14 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class MQTTConfig {
     final CurrentStatusService currentStatusService;
+    final OperateHistoryService operateHistoryService;
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
 
-        options.setServerURIs(new String[] { "tcp://10.60.2.96:1883" });
+        options.setServerURIs(new String[] { "tcp://127.0.0.1:1883" });
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);
         factory.setConnectionOptions(options);
@@ -68,12 +70,13 @@ public class MQTTConfig {
                 String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
                 if (topic.equals("myTopic")) {
                     System.out.println(message.getPayload().toString());
-                    currentStatusService.addCurrentStatus(message.getPayload().toString());
-                    try {
-                        MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    // currentStatusService.addCurrentStatus(message.getPayload().toString());
+                    operateHistoryService.addOperateHistory(message.getPayload().toString());
+                    // try {
+                    // MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
+                    // } catch (IOException e) {
+                    // e.printStackTrace();
+                    // }
                 }
 
                 // String[] arr = message.getPayload().toString().split(",");

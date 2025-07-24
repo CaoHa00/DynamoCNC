@@ -10,28 +10,14 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 
-import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
-import com.example.Dynamo_Backend.dto.MachineDto;
-import com.example.Dynamo_Backend.dto.OrderDetailDto;
-import com.example.Dynamo_Backend.dto.PlanDto;
+import com.example.Dynamo_Backend.dto.*;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
-import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.entities.Machine;
-import com.example.Dynamo_Backend.entities.OperateHistory;
-import com.example.Dynamo_Backend.entities.OrderDetail;
-import com.example.Dynamo_Backend.entities.Staff;
-import com.example.Dynamo_Backend.mapper.DrawingCodeProcessMapper;
-import com.example.Dynamo_Backend.mapper.MachineMapper;
-import com.example.Dynamo_Backend.mapper.OrderDetailMapper;
-import com.example.Dynamo_Backend.mapper.PlanMapper;
-import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
-import com.example.Dynamo_Backend.repository.MachineRepository;
-import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
-import com.example.Dynamo_Backend.repository.OrderDetailRepository;
-import com.example.Dynamo_Backend.repository.StaffRepository;
-import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
-import com.example.Dynamo_Backend.service.PlanService;
+import com.example.Dynamo_Backend.entities.*;
+import com.example.Dynamo_Backend.mapper.*;
+import com.example.Dynamo_Backend.repository.*;
+import com.example.Dynamo_Backend.service.*;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -41,10 +27,11 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         OrderDetailRepository orderDetailRepository;
         MachineRepository machineRepository;
         DrawingCodeProcessRepository drawingCodeProcessRepository;
-        private MessageChannel mqttOutboundChannel;
+        // private MessageChannel mqttOutboundChannel;
         StaffRepository staffRepository;
         PlanService planService;
         OperateHistoryRepository operateHistoryRepository;
+        CurrentStaffService currentStaffService;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -55,10 +42,13 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .orElseThrow(() -> new RuntimeException(
                                                 "DrawingCode is not found:"
                                                                 + drawingCodeProcessDto.getOrderDetailId()));
-
+                Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId())
+                                .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+                                                drawingCodeProcessDto.getMachineId()));
                 DrawingCodeProcess drawingCodeProcess = DrawingCodeProcessMapper
                                 .mapToDrawingCodeProcess(drawingCodeProcessDto);
                 drawingCodeProcess.setOrderDetail(orderDetail);
+                drawingCodeProcess.setMachine(machine);
                 drawingCodeProcess.setCreatedDate(createdTimestamp);
                 drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
@@ -197,19 +187,16 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 process.setMachine(machine);
                 process.setProcessStatus(2);
                 process.setStartTime(timestampNow);
+                process.setEndTime((long) 0);
 
                 drawingCodeProcessRepository.save(process);
 
                 Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new RuntimeException(
                                 "Staff is not found:" + staffId));
-                OperateHistory history = new OperateHistory();
-                history.setStaff(staff);
-                history.setStartTime(timestampNow);
-                history.setStopTime((long) 0);
-                history.setDrawingCodeProcess(process);
-                history.setManufacturingPoint(process.getManufacturingPoint());
-
-                operateHistoryRepository.save(history);
+                // cập nhật staff đang làm
+                CurrentStaffDto currentStaffDto = new CurrentStaffDto(null, staff.getId(), machine.getMachineId(),
+                                DateTimeUtil.convertTimestampToStringDate(timestampNow));
+                currentStaffService.addCurrentStaff(currentStaffDto);
 
                 // String sendMachine = "";
                 // if (machineId < 10) {
@@ -228,6 +215,29 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 // } else {
                 // System.err.println("Failed to send message: " + payload);
                 // }
+        }
+
+        @Override
+        public void doneProcess(String processId) {
+                DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+                                .findById(processId)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "DrawingCode is not found:" + processId));
+                Long doneTime = System.currentTimeMillis();
+                OperateHistory operateHistory = operateHistoryRepository
+                                .findByDrawingCodeProcess_processId(drawingCodeProcess.getProcessId())
+                                .stream()
+                                .filter(operate -> operate.getInProgress() == 1)
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No in-progress operate history found for process ID: "
+                                                                + drawingCodeProcess.getProcessId()));
+
+                drawingCodeProcess.setEndTime(doneTime);
+                drawingCodeProcess.setUpdatedDate(doneTime);
+                operateHistory.setStopTime(doneTime);
+                drawingCodeProcessRepository.save(drawingCodeProcess);
+                operateHistoryRepository.save(operateHistory);
         }
 
 }

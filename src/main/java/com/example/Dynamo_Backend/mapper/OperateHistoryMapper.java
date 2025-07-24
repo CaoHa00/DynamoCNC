@@ -10,6 +10,7 @@ public class OperateHistoryMapper {
                 operateHistory.getManufacturingPoint(),
                 operateHistory.getStartTime(),
                 operateHistory.getStopTime(),
+                operateHistory.getInProgress(),
                 operateHistory.getStaff() != null ? operateHistory.getStaff().getId()
                         : null,
                 operateHistory.getDrawingCodeProcess() != null ? operateHistory.getDrawingCodeProcess().getProcessId()
@@ -22,6 +23,7 @@ public class OperateHistoryMapper {
         operateHistory.setManufacturingPoint(operateHistoryDto.getManufacturingPoint());
         operateHistory.setStartTime(operateHistoryDto.getStartTime());
         operateHistory.setStopTime(operateHistoryDto.getStopTime());
+        operateHistory.setInProgress(operateHistoryDto.getInProgress());
         return operateHistory;
     }
 }
