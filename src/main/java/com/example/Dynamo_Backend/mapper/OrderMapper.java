@@ -10,6 +10,7 @@ public class OrderMapper {
 
         order.setOrderId(orderDto.getOrderId());
         order.setPoNumber(orderDto.getPoNumber());
+        order.setStatus(orderDto.getStatus());
         // order.setAddress(orderDto.getAddress());
         // order.setCompletionDate(completeDate);
         // order.setCustomerName(orderDto.getCustomerName());
@@ -49,7 +50,8 @@ public class OrderMapper {
                 order.getOrderId(),
                 order.getPoNumber(),
                 DateTimeUtil.convertTimestampToStringDate(order.getCreatedDate()),
-                DateTimeUtil.convertTimestampToStringDate(order.getUpdatedDate())
+                DateTimeUtil.convertTimestampToStringDate(order.getUpdatedDate()),
+                order.getStatus()
         // order.getCustomerName(),
         // order.getPhoneNumber(),
         // order.getAddress(),

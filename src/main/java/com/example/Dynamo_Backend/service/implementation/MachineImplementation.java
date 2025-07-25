@@ -1,6 +1,5 @@
 package com.example.Dynamo_Backend.service.implementation;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,10 +51,10 @@ public class MachineImplementation implements MachineService {
         machineDto.setMachineId(saveMachine.getMachineId());
         MachineKpiDto machineKpiDto = MachineKpiMapper.mapToMachineKpiDto(machineDto);
         MachineKpiDto saveMachineKpiDto = machineKpiService.addMachineKpi(machineKpiDto);
+        saveMachine.setMachineKpis(new ArrayList<>());
+        saveMachine.getMachineKpis().add(MachineKpiMapper.mapToMachineKpi(saveMachineKpiDto));
 
         MachineDto result = MachineMapper.mapToMachineDto(saveMachine);
-        result.setMachineKpiDtos(new ArrayList<MachineKpiDto>());
-        result.getMachineKpiDtos().add(saveMachineKpiDto);
 
         // return MachineMapper.mapToMachineDto(saveMachine);
         return result;

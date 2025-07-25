@@ -30,7 +30,7 @@ public class StaffKpiMapper {
 
     public static StaffKpiDto mapToStaffKpiDto(StaffRequestDto staffRequestDto) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
-        staffKpiDto.setStaffId(staffRequestDto.getId());
+        staffKpiDto.setStaffId(staffRequestDto.getStaffId());
         staffKpiDto.setYear(staffRequestDto.getYear());
         staffKpiDto.setMonth(staffRequestDto.getMonth());
         staffKpiDto.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
@@ -48,7 +48,7 @@ public class StaffKpiMapper {
         staffKpiDto.setId(staffKpi.getId());
         staffKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getCreatedDate()));
         staffKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getUpdatedDate()));
-        staffKpiDto.setStaffId(staffKpi.getStaff().getId());
+        staffKpiDto.setStaffId(staffKpi.getStaff().getStaffId());
         staffKpiDto.setYear(staffKpi.getYear());
         staffKpiDto.setMonth(staffKpi.getMonth());
         staffKpiDto.setPgTimeGoal(staffKpi.getPgTimeGoal());

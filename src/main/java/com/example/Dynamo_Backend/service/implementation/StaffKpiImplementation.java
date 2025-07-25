@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -23,7 +25,7 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto addStaffKpi(StaffKpiDto staffKpiDto) {
         long createdTimestamp = System.currentTimeMillis();
-        Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
+        Staff staff = staffRepository.findByStaffId(staffKpiDto.getStaffId())
                 .orElseThrow(() -> new RuntimeException("StaffKpiKpi is not found:" + staffKpiDto.getStaffId()));
         StaffKpi staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
         staffKpi.setStaff(staff);
@@ -38,7 +40,33 @@ public class StaffKpiImplementation implements StaffKpiService {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
-        Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
+        Staff staff = staffRepository.findByStaffId(staffKpiDto.getStaffId())
+                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
+        staffKpi.setStaff(staff);
+        staffKpi.setYear(staffKpiDto.getYear());
+        staffKpi.setMonth(staffKpiDto.getMonth());
+        staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
+        staffKpi.setKpi(staffKpiDto.getKpi());
+        staffKpi.setOleGoal(staffKpiDto.getOleGoal());
+        staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
+        staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
+        staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
+        staffKpi.setUpdatedDate(updatedTimestamp);
+        StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
+        return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
+    }
+
+    @Override
+    public StaffKpiDto updateStaffKpiByStaffId(Integer staffId, StaffKpiDto staffKpiDto) {
+        long updatedTimestamp = System.currentTimeMillis();
+        String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
+        StaffKpi staffKpi = staffKpiRepository.findByStaff_staffId(staffId).stream()
+                .filter(kpi -> currentMonth.equals(String.format("%02d", kpi.getMonth())))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                        "No staffKpi found for staff ID: " + staffId));
+
+        Staff staff = staffRepository.findByStaffId(staffId)
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
         staffKpi.setStaff(staff);
         staffKpi.setYear(staffKpiDto.getYear());

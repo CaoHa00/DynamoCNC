@@ -39,10 +39,10 @@ public class StaffKpiController {
 
     }
 
-    @PutMapping("/{staffKpi_id}")
-    public ResponseEntity<StaffKpiDto> updateStaffKpi(@PathVariable("staffKpi_id") Integer Id,
+    @PutMapping("/{staff_id}")
+    public ResponseEntity<StaffKpiDto> updateStaffKpi(@PathVariable("staff_id") Integer staffId,
             @RequestBody StaffKpiDto staffKpiDto) {
-        StaffKpiDto updateStaffKpis = staffKpiService.updateStaffKpi(Id, staffKpiDto);
+        StaffKpiDto updateStaffKpis = staffKpiService.updateStaffKpiByStaffId(staffId, staffKpiDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateStaffKpis);
     }
 

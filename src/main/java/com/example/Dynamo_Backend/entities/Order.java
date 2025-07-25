@@ -33,6 +33,8 @@ public class Order {
     private String orderId;
     @Column(name = "PO_number", nullable = false)
     private String poNumber;
+    @Column(name = "status", nullable = false)
+    private int status;
     // @Column(name = "customer_name", nullable = false)
     // private String customerName;
     // @Column(name = "phone_number", nullable = false)
@@ -50,8 +52,7 @@ public class Order {
     // private String shippingMethod;
     // @Column(name = "remark", nullable = false)
     // private String remark;
-    // @Column(name = "status", nullable = false)
-    // private int status;
+
     // @Column(name = "order_status", nullable = false)
     // private int orderstatus;
 

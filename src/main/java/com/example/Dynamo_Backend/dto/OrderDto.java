@@ -12,6 +12,7 @@ public class OrderDto {
     private String poNumber;
     private String createdDate;
     private String updatedDate;
+    private int status;
     // private String customerName;
     // private String phoneNumber;
     // private String address;
@@ -20,6 +21,5 @@ public class OrderDto {
     // private String completionDate;
     // private String shippingMethod;
     // private String remark;
-    // private int status;
     // private int orderstatus;
 }

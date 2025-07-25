@@ -19,5 +19,5 @@ public class MachineDto {
     private String createdDate;
     private String updatedDate;
     private String groupId;
-    private List<MachineKpiDto> machineKpiDtos;
+    private MachineKpiDto machineKpiDtos;
 }
