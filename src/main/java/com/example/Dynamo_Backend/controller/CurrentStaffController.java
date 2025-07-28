@@ -31,20 +31,20 @@ public class CurrentStaffController {
     }
 
     @PutMapping("/{currentStaff_id}")
-    public ResponseEntity<CurrentStaffDto> updateCurrentStaff(@PathVariable("currentStaff_id") Integer Id,
+    public ResponseEntity<CurrentStaffDto> updateCurrentStaff(@PathVariable("currentStaff_id") Long Id,
             @RequestBody CurrentStaffDto currentStaffDto) {
         CurrentStaffDto updatedCurrentStaff = currentStaffService.updateCurrentStaff(Id, currentStaffDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedCurrentStaff);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteCurrentStaffs(@PathVariable("staff_machine_id") Integer currentStaffId) {
+    public ResponseEntity<Void> deleteCurrentStaffs(@PathVariable("staff_machine_id") Long currentStaffId) {
         currentStaffService.deleteCurrentStaff(currentStaffId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{currentStaff_id}")
-    public ResponseEntity<CurrentStaffDto> getCurrentStaffById(@PathVariable("currentStaff_id") Integer Id) {
+    public ResponseEntity<CurrentStaffDto> getCurrentStaffById(@PathVariable("currentStaff_id") Long Id) {
         CurrentStaffDto currentStaff = currentStaffService.getCurrentStaffById(Id);
         return ResponseEntity.ok(currentStaff);
     }

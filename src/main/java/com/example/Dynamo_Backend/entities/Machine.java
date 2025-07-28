@@ -45,6 +45,9 @@ public class Machine {
 
     @Column(name = "status", nullable = true)
     private int status;
+    // 0:empty
+    // 1:running
+    // 2:stop
     @Column(name = "createdDate", nullable = false)
     private long createdDate;
     @Column(name = "updatedDate", nullable = false)

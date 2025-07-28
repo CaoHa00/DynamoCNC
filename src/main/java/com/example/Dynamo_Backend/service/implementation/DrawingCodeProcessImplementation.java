@@ -27,7 +27,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         OrderDetailRepository orderDetailRepository;
         MachineRepository machineRepository;
         DrawingCodeProcessRepository drawingCodeProcessRepository;
-        // private MessageChannel mqttOutboundChannel;
+        private MessageChannel mqttOutboundChannel;
         StaffRepository staffRepository;
         PlanService planService;
         OperateHistoryRepository operateHistoryRepository;
@@ -42,13 +42,14 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .orElseThrow(() -> new RuntimeException(
                                                 "OrderDetail is not found:"
                                                                 + drawingCodeProcessDto.getOrderCode()));
-                Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId())
-                                .orElseThrow(() -> new RuntimeException("Machine is not found:" +
-                                                drawingCodeProcessDto.getMachineId()));
+                // Machine machine =
+                // machineRepository.findById(drawingCodeProcessDto.getMachineId())
+                // .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+                // drawingCodeProcessDto.getMachineId()));
                 DrawingCodeProcess drawingCodeProcess = DrawingCodeProcessMapper
                                 .mapToDrawingCodeProcess(drawingCodeProcessDto);
                 drawingCodeProcess.setOrderDetail(orderDetail);
-                drawingCodeProcess.setMachine(machine);
+                // drawingCodeProcess.setMachine(machine);
                 drawingCodeProcess.setCreatedDate(createdTimestamp);
                 drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
@@ -177,7 +178,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 long timestampNow = System.currentTimeMillis();
                 DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId)
                                 .orElseThrow(() -> new RuntimeException(
-                                                "DrawingCode is not found:" + drawingCodeProcessId));
+                                                "DrawingCodeProcess is not found:" + drawingCodeProcessId));
                 // Xử lý: chuyển trạng thái các process khác dùng máy thànhh off
                 List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_MachineId(machineId);
                 for (DrawingCodeProcess process2 : processes) {
@@ -187,6 +188,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
                 Machine machine = machineRepository.findById(machineId).orElseThrow(() -> new RuntimeException(
                                 "Machine is not found:" + machineId));
+                machine.setStatus(1);
+                machineRepository.save(machine);
                 process.setMachine(machine);
                 process.setProcessStatus(2);
                 process.setStartTime(timestampNow);
@@ -201,23 +204,44 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 DateTimeUtil.convertTimestampToStringDate(timestampNow));
                 currentStaffService.addCurrentStaff(currentStaffDto);
 
-                // String sendMachine = "";
-                // if (machineId < 10) {
-                // sendMachine = "0" + machineId;
-                // }
-                // LocalDateTime now = LocalDateTime.now();
-                // String formatted = now.format(DateTimeFormatter.ofPattern("MMddyyHH"));
-                // String payload = sendMachine + "-" + formatted;
-                // Message<String> message = MessageBuilder
-                // .withPayload(payload)
-                // .setHeader("mqtt_topic", "myTopic")
-                // .build();
-                // boolean sent = mqttOutboundChannel.send(message);
-                // if (sent) {
-                // System.out.println("Message sent successfully: " + payload);
-                // } else {
-                // System.err.println("Failed to send message: " + payload);
-                // }
+                String sendMachine = "";
+                if (machineId < 10) {
+                        sendMachine = "0" + machineId;
+                }
+                LocalDateTime now = LocalDateTime.now();
+                Integer productStatus;
+                switch (process.getProcessType()) {
+                        case "Main":
+                                productStatus = 1;
+                                break;
+                        case "NG":
+                                productStatus = 2;
+                                break;
+                        case "LK":
+                                productStatus = 3;
+                                break;
+                        case "Electric":
+                                productStatus = 4;
+                                break;
+                        default:
+                                productStatus = 1;
+                                break;
+                }
+                String formatted = now.format(DateTimeFormatter.ofPattern("MMddyyHH"));
+                String payload = sendMachine + "*" + staff.getStaffId() + "*" + productStatus + "*"
+                                + process.getOrderDetail().getOrderCode() + "*" + process.getPartNumber() + "*"
+                                + process.getStepNumber() + "*" + process.getManufacturingPoint() + "*"
+                                + process.getPgTime();
+                Message<String> message = MessageBuilder
+                                .withPayload(payload)
+                                .setHeader("mqtt_topic", "myTopic")
+                                .build();
+                boolean sent = mqttOutboundChannel.send(message);
+                if (sent) {
+                        System.out.println("Message sent successfully: " + payload);
+                } else {
+                        System.err.println("Failed to send message: " + payload);
+                }
         }
 
         @Override
@@ -255,6 +279,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 DateTimeUtil.convertTimestampToStringDate(createdTimestamp));
                 currentStaffService.addCurrentStaff(currentStaffDto);
 
+                machine.setStatus(1);
+                machineRepository.save(machine);
+
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);
         }
 
@@ -263,7 +290,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
                                 .findById(processId)
                                 .orElseThrow(() -> new RuntimeException(
-                                                "DrawingCode is not found:" + processId));
+                                                "DrawingCodeProcess is not found:" + processId));
                 Long doneTime = System.currentTimeMillis();
                 OperateHistory operateHistory = operateHistoryRepository
                                 .findByDrawingCodeProcess_processId(drawingCodeProcess.getProcessId())
@@ -276,9 +303,19 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setProcessStatus(3);
                 drawingCodeProcess.setEndTime(doneTime);
                 drawingCodeProcess.setUpdatedDate(doneTime);
-                operateHistory.setStopTime(doneTime);
                 drawingCodeProcessRepository.save(drawingCodeProcess);
-                operateHistoryRepository.save(operateHistory);
-        }
 
+                operateHistory.setStopTime(doneTime);
+                operateHistoryRepository.save(operateHistory);
+
+                Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
+                                .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+                                                drawingCodeProcess.getMachine().getMachineId()));
+                machine.setStatus(0);
+                machineRepository.save(machine);
+
+                CurrentStaffDto currentStaffDto = currentStaffService
+                                .getCurrentStaffByMachineId(machine.getMachineId());
+                currentStaffService.deleteCurrentStaff(currentStaffDto.getId());
+        }
 }

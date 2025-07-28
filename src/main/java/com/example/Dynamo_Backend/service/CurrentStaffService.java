@@ -8,12 +8,14 @@ public interface CurrentStaffService {
 
     CurrentStaffDto addCurrentStaff(CurrentStaffDto currentStaffRequestDto);
 
-    CurrentStaffDto updateCurrentStaff(Integer Id, CurrentStaffDto currentStaffDto);
+    CurrentStaffDto updateCurrentStaff(Long Id, CurrentStaffDto currentStaffDto);
 
-    void deleteCurrentStaff(Integer Id);
+    void deleteCurrentStaff(Long Id);
 
     List<CurrentStaffDto> getAllCurrentStaffs();
 
-    CurrentStaffDto getCurrentStaffById(Integer Id);
+    CurrentStaffDto getCurrentStaffById(Long Id);
+
+    CurrentStaffDto getCurrentStaffByMachineId(Integer machineId);
 
 }

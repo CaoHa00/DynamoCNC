@@ -45,7 +45,7 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     }
 
     @Override
-    public CurrentStaffDto updateCurrentStaff(Integer Id, CurrentStaffDto currentStaffDto) {
+    public CurrentStaffDto updateCurrentStaff(Long Id, CurrentStaffDto currentStaffDto) {
         CurrentStaff currentStaff = currentStaffRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("CurrentStaff is not found:" + Id));
         Staff staff = staffRepository.findById(currentStaffDto.getStaffId())
@@ -60,7 +60,7 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     }
 
     @Override
-    public void deleteCurrentStaff(Integer Id) {
+    public void deleteCurrentStaff(Long Id) {
         CurrentStaff currentStaff = currentStaffRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("CurrentStaff is not found:" + Id));
         currentStaffRepository.delete(currentStaff);
@@ -74,10 +74,16 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     }
 
     @Override
-    public CurrentStaffDto getCurrentStaffById(Integer Id) {
+    public CurrentStaffDto getCurrentStaffById(Long Id) {
         CurrentStaff currentStaff = currentStaffRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("CurrentStaff is not found:" + Id));
 
+        return CurrentStaffMapper.mapToCurrentStaffDto(currentStaff);
+    }
+
+    @Override
+    public CurrentStaffDto getCurrentStaffByMachineId(Integer machineId) {
+        CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineId);
         return CurrentStaffMapper.mapToCurrentStaffDto(currentStaff);
     }
 
