@@ -9,15 +9,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DrawingCodeProcessResquestDto {
     private String processId;
-    private String orderType;
+    private String processType;
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Integer pgTime;
+    private Long pgTime;
     private String startTime;
     private String endTime;
     private Integer status;
-    private String orderDetailId;
+    private String orderCode;
     private Integer machineId;
     private Integer staffId;
     private String plannerId;

@@ -20,5 +20,5 @@ public class StaffDto {
     private String createdDate;
     private String updatedDate;
     private String groupId;
-    private List<StaffKpiDto> staffKpiDtos;
+    private StaffKpiDto staffKpiDtos;
 }

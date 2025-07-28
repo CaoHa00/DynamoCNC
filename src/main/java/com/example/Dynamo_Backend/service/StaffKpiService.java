@@ -9,7 +9,9 @@ public interface StaffKpiService {
 
     StaffKpiDto updateStaffKpi(Integer Id, StaffKpiDto staffKpiDto);
 
-    StaffKpiDto getStaffKpiById(Integer Id);
+    StaffKpiDto updateStaffKpiByStaffId(Integer staffId, StaffKpiDto staffKpiDto);
+
+    StaffKpiDto getStaffKpiById(Integer staffId);
 
     void deleteStaffKpi(Integer Id);
 

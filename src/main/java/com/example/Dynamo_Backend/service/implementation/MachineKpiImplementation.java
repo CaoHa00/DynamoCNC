@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -68,6 +70,28 @@ public class MachineKpiImplementation implements MachineKpiService {
     public List<MachineKpiDto> getMachineKpis() {
         List<MachineKpi> machineKpis = machineKpiRepository.findAll();
         return machineKpis.stream().map(MachineKpiMapper::mapToMachineKpiDto).toList();
+    }
+
+    @Override
+    public MachineKpiDto updateMachineKpiByMachineId(Integer machineId, MachineKpiDto machineKpiDto) {
+        long updatedTimestamp = System.currentTimeMillis();
+        String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
+        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineId(machineId).stream()
+                .filter(kpi -> currentMonth.equals(String.format("%02d", kpi.getMonth())))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                        "No machineKpi found for machine ID: " + machineId));
+
+        Machine machine = machineRepository.findById(machineId)
+                .orElseThrow(() -> new RuntimeException("MachineKpi is not found:" + machineKpiDto.getMachineId()));
+        machineKpi.setMachine(machine);
+        machineKpi.setYear(machineKpiDto.getYear());
+        machineKpi.setMonth(machineKpiDto.getMonth());
+        machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
+        machineKpi.setOee(machineKpiDto.getOee());
+        machineKpi.setUpdatedDate(updatedTimestamp);
+        MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
+        return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
     }
 
 }

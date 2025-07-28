@@ -9,6 +9,8 @@ public interface MachineKpiService {
 
     MachineKpiDto updateMachineKpi(Integer Id, MachineKpiDto machineKpiDto);
 
+    MachineKpiDto updateMachineKpiByMachineId(Integer machineId, MachineKpiDto machineKpiDto);
+
     MachineKpiDto getMachineKpiById(Integer Id);
 
     void deleteMachineKpi(Integer Id);

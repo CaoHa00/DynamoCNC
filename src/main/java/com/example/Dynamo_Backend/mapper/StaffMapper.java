@@ -1,6 +1,10 @@
 package com.example.Dynamo_Backend.mapper;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import com.example.Dynamo_Backend.dto.StaffDto;
+import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 
@@ -13,7 +17,6 @@ public class StaffMapper {
                 staff.setStaffOffice(staffDto.getStaffOffice());
                 staff.setStaffSection(staffDto.getStaffSection());
                 staff.setShortName(staffDto.getShortName());
-                staff.setStaffKpis(staffDto.getStaffKpiDtos().stream().map(StaffKpiMapper::mapToStaffKpi).toList());
                 // staff.setStatus(staffDto.getStatus());
                 // staff.setDateAdd(staffDto.getDateAdd());
                 return staff;
@@ -32,8 +35,16 @@ public class StaffMapper {
                 staffDto.setGroupId(staff.getGroup().getGroupId());
                 staffDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getCreatedDate()));
                 staffDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getUpdatedDate()));
-                staffDto.setStaffKpiDtos(staff.getStaffKpis().stream().map(StaffKpiMapper::mapToStaffKpiDto).toList());
-
+                String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
+                StaffKpi staffKpi = null;
+                for (StaffKpi mk : staff.getStaffKpis()) {
+                        if (currentMonth.equals(String.format("%02d", mk.getMonth()))) {
+                                staffKpi = mk;
+                        }
+                }
+                if (staffKpi != null) {
+                        staffDto.setStaffKpiDtos(StaffKpiMapper.mapToStaffKpiDto(staffKpi));
+                }
                 return staffDto;
         }
 }

@@ -7,7 +7,6 @@ import com.example.Dynamo_Backend.dto.PlanDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.entities.Plan;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class DrawingCodeProcessMapper {
@@ -18,6 +17,9 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
                 drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getStepNumber());
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
+                drawingCodeProcess.setProcessType(drawingCodeProcessDto.getProcessType());
+                drawingCodeProcess.setProcessStatus(drawingCodeProcessDto.getProcessStatus());
+                drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 // drawingCodeProcess.setPgRunTime(drawingCodeProcessDto.getPgRunTime());
                 // drawingCodeProcess.setOffsetRunTime(drawingCodeProcessDto.getOffsetRunTime());
                 // drawingCodeProcess.setTotalRunningTime(drawingCodeProcessDto.getTotalRunningTime());
@@ -44,6 +46,7 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
                 drawingCodeProcess.setProcessStatus(drawingCodeProcessDto.getInProgress());
+                drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 drawingCodeProcess.setStartTime(
                                 DateTimeUtil.convertStringToTimestamp(drawingCodeProcessDto.getStartTime()));
                 drawingCodeProcess
@@ -58,12 +61,15 @@ public class DrawingCodeProcessMapper {
                                 drawingCodeProcess.getPartNumber(),
                                 drawingCodeProcess.getStepNumber(),
                                 drawingCodeProcess.getManufacturingPoint(),
+                                drawingCodeProcess.getProcessType(),
+                                drawingCodeProcess.getProcessStatus(),
+                                drawingCodeProcess.getPgTime(),
                                 // drawingCodeProcess.getOffsetRunTime(),
                                 // drawingCodeProcess.getTotalStopTime(),
                                 // drawingCodeProcess.getOffsetRunTime(),
                                 // drawingCodeProcess.getPgRunTime(),
                                 DateTimeUtil.convertTimestampToString(drawingCodeProcess.getStartTime()),
-                                DateTimeUtil.convertTimestampToString(drawingCodeProcess.getStartTime()),
+                                DateTimeUtil.convertTimestampToString(drawingCodeProcess.getEndTime()),
                                 DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getCreatedDate()),
                                 DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getUpdatedDate()),
                                 drawingCodeProcess.getStatus(),
@@ -85,6 +91,9 @@ public class DrawingCodeProcessMapper {
                 dto.setPartNumber(drawingCodeProcess.getPartNumber());
                 dto.setStepNumber(drawingCodeProcess.getStepNumber());
                 dto.setManufacturingPoint(drawingCodeProcess.getManufacturingPoint());
+                dto.setProcessType(drawingCodeProcess.getProcessType());
+                dto.setProcessStatus(drawingCodeProcess.getProcessStatus());
+                dto.setPgTime(drawingCodeProcess.getPgTime());
                 // dto.setPgRunTime(drawingCodeProcess.getPgRunTime());
                 // dto.setOffsetRunTime(drawingCodeProcess.getOffsetRunTime());
                 // dto.setTotalRunningTime(drawingCodeProcess.getTotalRunningTime());

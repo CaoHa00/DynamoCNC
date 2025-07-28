@@ -19,5 +19,5 @@ public class StaffKpiDto {
     private Float kpi;
     private String createdDate;
     private String updatedDate;
-    private String staffId;
+    private Integer staffId;
 }
