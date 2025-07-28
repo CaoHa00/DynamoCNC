@@ -24,6 +24,8 @@ public interface DrawingCodeProcessService {
 
     void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
 
+    DrawingCodeProcessDto addProcessByOperator(DrawingCodeProcessResquestDto drawingCodeProcessDto);
+
     void doneProcess(String processId);
 
 }

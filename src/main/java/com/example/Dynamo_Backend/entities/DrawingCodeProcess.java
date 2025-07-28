@@ -30,6 +30,9 @@ public class DrawingCodeProcess {
     @Column(columnDefinition = "CHAR(36)")
     private String processId;
 
+    @Column(name = "process_type", nullable = false)
+    private String processType;
+
     @Column(name = "part_number", nullable = false)
     private Integer partNumber;
 
@@ -69,7 +72,7 @@ public class DrawingCodeProcess {
     private Integer processStatus;
     // 1: to do
     // 2: in progress
-    // 3: waiting for qc
+    // 3: done
     // 4:
 
     @Column(name = "is_plan", nullable = false)
