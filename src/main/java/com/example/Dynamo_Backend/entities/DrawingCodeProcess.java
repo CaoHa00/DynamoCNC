@@ -48,8 +48,8 @@ public class DrawingCodeProcess {
     // @Column(name = "total_stop_time", nullable = false)
     // private Long totalStopTime;
 
-    // @Column(name = "pg_run_time", nullable = false)
-    // private Long pgRunTime;
+    @Column(name = "pg_time", nullable = false)
+    private Long pgTime;
 
     // @Column(name = "offset_run_time", nullable = false)
     // private Long offsetRunTime;

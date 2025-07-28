@@ -19,6 +19,7 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setProcessType(drawingCodeProcessDto.getProcessType());
                 drawingCodeProcess.setProcessStatus(drawingCodeProcessDto.getProcessStatus());
+                drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 // drawingCodeProcess.setPgRunTime(drawingCodeProcessDto.getPgRunTime());
                 // drawingCodeProcess.setOffsetRunTime(drawingCodeProcessDto.getOffsetRunTime());
                 // drawingCodeProcess.setTotalRunningTime(drawingCodeProcessDto.getTotalRunningTime());
@@ -45,6 +46,7 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
                 drawingCodeProcess.setProcessStatus(drawingCodeProcessDto.getInProgress());
+                drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 drawingCodeProcess.setStartTime(
                                 DateTimeUtil.convertStringToTimestamp(drawingCodeProcessDto.getStartTime()));
                 drawingCodeProcess
@@ -61,6 +63,7 @@ public class DrawingCodeProcessMapper {
                                 drawingCodeProcess.getManufacturingPoint(),
                                 drawingCodeProcess.getProcessType(),
                                 drawingCodeProcess.getProcessStatus(),
+                                drawingCodeProcess.getPgTime(),
                                 // drawingCodeProcess.getOffsetRunTime(),
                                 // drawingCodeProcess.getTotalStopTime(),
                                 // drawingCodeProcess.getOffsetRunTime(),
@@ -90,6 +93,7 @@ public class DrawingCodeProcessMapper {
                 dto.setManufacturingPoint(drawingCodeProcess.getManufacturingPoint());
                 dto.setProcessType(drawingCodeProcess.getProcessType());
                 dto.setProcessStatus(drawingCodeProcess.getProcessStatus());
+                dto.setPgTime(drawingCodeProcess.getPgTime());
                 // dto.setPgRunTime(drawingCodeProcess.getPgRunTime());
                 // dto.setOffsetRunTime(drawingCodeProcess.getOffsetRunTime());
                 // dto.setTotalRunningTime(drawingCodeProcess.getTotalRunningTime());

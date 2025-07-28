@@ -231,8 +231,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId())
                                 .orElseThrow(() -> new RuntimeException("Machine is not found:" +
                                                 drawingCodeProcessDto.getMachineId()));
-                DrawingCodeProcess drawingCodeProcess = DrawingCodeProcessMapper
-                                .mapToDrawingCodeProcess(drawingCodeProcessDto);
+                DrawingCodeProcess drawingCodeProcess = new DrawingCodeProcess();
                 drawingCodeProcess.setOrderDetail(orderDetail);
                 drawingCodeProcess.setMachine(machine);
                 drawingCodeProcess.setCreatedDate(createdTimestamp);
@@ -241,7 +240,12 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setEndTime((long) 0);
                 drawingCodeProcess.setStatus(status);
                 drawingCodeProcess.setProcessStatus(2);
+                drawingCodeProcess.setProcessType(drawingCodeProcessDto.getProcessType());
                 drawingCodeProcess.setIsPlan(0);
+                drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
+                drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getStepNumber());
+                drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
+                drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
                 Staff staff = staffRepository.findByStaffId(drawingCodeProcessDto.getStaffId())
                                 .orElseThrow(() -> new RuntimeException(

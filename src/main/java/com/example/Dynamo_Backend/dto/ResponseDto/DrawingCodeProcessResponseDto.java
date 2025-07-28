@@ -17,6 +17,7 @@ public class DrawingCodeProcessResponseDto {
     private Integer manufacturingPoint;
     private String processType;
     private Integer processStatus;
+    private Long pgTime;
     // private Long totalRunningTime;
     // private Long totalStopTime;
     // private Long offsetRunTime;

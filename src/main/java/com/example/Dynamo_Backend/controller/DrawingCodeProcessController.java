@@ -41,6 +41,14 @@ public class DrawingCodeProcessController {
         return ResponseEntity.status(HttpStatus.CREATED).body(drawingCodeProcess);
     }
 
+    @PostMapping("/by-operator")
+    public ResponseEntity<DrawingCodeProcessDto> addProcessByOperator(
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService
+                .addProcessByOperator(drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(drawingCodeProcess);
+    }
+
     @PostMapping("/done-process/{process_id}")
     public ResponseEntity<Void> doneProcess(@PathVariable("process_id") String processId) {
         drawingCodeProcessService.doneProcess(processId);
@@ -70,7 +78,7 @@ public class DrawingCodeProcessController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{drawingCodeProcess_id}")
+    @GetMapping("/id/{drawingCodeProcess_id}")
     public ResponseEntity<DrawingCodeProcessDto> getDrawingCodeProcessById(
             @PathVariable("drawingCodeProcess_id") String Id) {
         DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService.getDrawingCodeProcessById(Id);
