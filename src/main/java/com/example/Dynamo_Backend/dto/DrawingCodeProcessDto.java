@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class DrawingCodeProcessDto {
-
     private String processId;
     private Integer partNumber;
     private Integer stepNumber;
