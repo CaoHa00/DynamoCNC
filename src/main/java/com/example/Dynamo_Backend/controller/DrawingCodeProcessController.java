@@ -65,7 +65,7 @@ public class DrawingCodeProcessController {
     @PutMapping("/{drawingCodeProcess_id}")
     public ResponseEntity<DrawingCodeProcessResponseDto> updateDrawingCodeProcess(
             @PathVariable("drawingCodeProcess_id") String Id,
-            @RequestBody DrawingCodeProcessDto drawingCodeProcessDto) {
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
         DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateDrawingCodeProcess(
                 Id,
                 drawingCodeProcessDto);

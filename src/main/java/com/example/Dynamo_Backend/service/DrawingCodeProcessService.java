@@ -10,7 +10,7 @@ public interface DrawingCodeProcessService {
     DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
     DrawingCodeProcessResponseDto updateDrawingCodeProcess(String drawingCodeProcessId,
-            DrawingCodeProcessDto drawingCodeProcessDto);
+            DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
     DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
 

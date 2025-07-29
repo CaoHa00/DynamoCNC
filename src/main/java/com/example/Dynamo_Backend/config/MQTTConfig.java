@@ -74,11 +74,11 @@ public class MQTTConfig {
                     System.out.println(message.getPayload().toString());
                     // currentStatusService.addCurrentStatus(message.getPayload().toString());
                     eventPublisher.publishEvent(new OperateHistoryMessageEvent(message.getPayload().toString()));
-                    // try {
-                    // MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
-                    // } catch (IOException e) {
-                    // e.printStackTrace();
-                    // }
+                    try {
+                        MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 // String[] arr = message.getPayload().toString().split(",");

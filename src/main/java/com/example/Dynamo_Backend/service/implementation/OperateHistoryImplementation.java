@@ -20,6 +20,7 @@ import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 import com.example.Dynamo_Backend.service.OperateHistoryService;
 import com.example.Dynamo_Backend.service.StaffService;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -118,8 +119,8 @@ public class OperateHistoryImplementation implements OperateHistoryService {
 
                 operateHistory.setStaff(updateStaff);
                 operateHistory.setManufacturingPoint(operateHistoryDto.getManufacturingPoint());
-                operateHistory.setStartTime(operateHistoryDto.getStartTime());
-                operateHistory.setStopTime(operateHistoryDto.getStopTime());
+                operateHistory.setStartTime(DateTimeUtil.convertStringToTimestamp(operateHistoryDto.getStartTime()));
+                operateHistory.setStopTime(DateTimeUtil.convertStringToTimestamp(operateHistoryDto.getStopTime()));
                 operateHistory.setDrawingCodeProcess(updateDrawingCodeProcess);
 
                 OperateHistory updateOperateHistory = operateHistoryRepository.save(operateHistory);

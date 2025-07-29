@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/staff_machine")
+@RequestMapping("/api/current-staff")
 public class CurrentStaffController {
     public final CurrentStaffService currentStaffService;
 
@@ -37,8 +37,8 @@ public class CurrentStaffController {
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedCurrentStaff);
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deleteCurrentStaffs(@PathVariable("staff_machine_id") Long currentStaffId) {
+    @DeleteMapping("/{currentStaff_id}")
+    public ResponseEntity<Void> deleteCurrentStaffs(@PathVariable("currentStaff_id") Long currentStaffId) {
         currentStaffService.deleteCurrentStaff(currentStaffId);
         return ResponseEntity.ok().build();
     }
