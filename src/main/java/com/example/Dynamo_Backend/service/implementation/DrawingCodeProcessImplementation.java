@@ -332,6 +332,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);
         }
 
+        // reset lai currentStatus -- chua lam
         @Override
         public void doneProcess(String processId) {
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
@@ -350,21 +351,21 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setProcessStatus(3);
                 drawingCodeProcess.setEndTime(doneTime);
                 drawingCodeProcess.setUpdatedDate(doneTime);
-                drawingCodeProcessRepository.save(drawingCodeProcess);
 
                 operateHistory.setStopTime(doneTime);
                 operateHistory.setInProgress(0);
-                operateHistoryRepository.save(operateHistory);
 
                 Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
                                 .orElseThrow(() -> new RuntimeException("Machine is not found:" +
                                                 drawingCodeProcess.getMachine().getMachineId()));
                 machine.setStatus(0);
-                machineRepository.save(machine);
 
                 CurrentStaffDto currentStaffDto = currentStaffService
                                 .getCurrentStaffByMachineId(machine.getMachineId());
                 currentStaffService.deleteCurrentStaff(currentStaffDto.getId());
+                drawingCodeProcessRepository.save(drawingCodeProcess);
+                operateHistoryRepository.save(operateHistory);
+                machineRepository.save(machine);
         }
 
         @Override

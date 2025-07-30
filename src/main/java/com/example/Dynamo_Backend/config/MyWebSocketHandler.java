@@ -8,6 +8,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.example.Dynamo_Backend.dto.CurrentStatusDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class MyWebSocketHandler extends TextWebSocketHandler {
 
     private static final List<WebSocketSession> sessions = new ArrayList<>();
@@ -33,6 +36,17 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
                 session.sendMessage(new TextMessage(message));
+            }
+        }
+    }
+
+    public static void sendMachineStatusToClients(List<CurrentStatusDto> currentStatusDtos) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonMessage = objectMapper.writeValueAsString(currentStatusDtos);
+
+        for (WebSocketSession session : sessions) {
+            if (session.isOpen()) {
+                session.sendMessage(new TextMessage(jsonMessage));
             }
         }
     }

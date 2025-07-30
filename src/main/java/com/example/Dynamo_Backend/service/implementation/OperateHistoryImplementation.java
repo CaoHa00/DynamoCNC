@@ -75,6 +75,8 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                         operateHistory.setStopTime(currentTimestamp);
                                         operateHistory.setInProgress(0);
                                         operateHistoryRepository.save(operateHistory);
+                                        operateHistory.setManufacturingPoint(
+                                                        drawingCodeProcessDto.getManufacturingPoint());
                                         operateHistory = new OperateHistory();
                                         operateHistory.setDrawingCodeProcess(DrawingCodeProcessMapper
                                                         .mapToDrawingCodeProcess(drawingCodeProcessDto));
