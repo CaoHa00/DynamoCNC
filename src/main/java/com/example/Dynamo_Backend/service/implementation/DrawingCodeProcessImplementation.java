@@ -152,7 +152,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         }
 
         @Override
-        public DrawingCodeProcessDto getDrawingCodeProcessByMachineId(Integer machineId) {
+        public DrawingCodeProcessResponseDto getDrawingCodeProcessByMachineId(Integer machineId) {
                 DrawingCodeProcess drawingCodeProcess = new DrawingCodeProcess();
                 List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_MachineId(machineId);
                 List<DrawingCodeProcess> currentProcess = new ArrayList<>();
@@ -166,10 +166,15 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 } else if (currentProcess.size() == 1) {
                         drawingCodeProcess = currentProcess.get(0);
                 } else {
-                        return new DrawingCodeProcessDto();
+                        return new DrawingCodeProcessResponseDto();
                 }
-
-                return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(drawingCodeProcess);
+                OrderDetailDto orderDetailDto = OrderDetailMapper
+                                .mapToOrderDetailDto(drawingCodeProcess.getOrderDetail());
+                Machine machine = drawingCodeProcess.getMachine();
+                MachineDto machineDto = (machine != null)
+                                ? MachineMapper.mapToMachineDto(machine)
+                                : null;
+                return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, drawingCodeProcess);
         }
 
         @Override
@@ -360,5 +365,25 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 CurrentStaffDto currentStaffDto = currentStaffService
                                 .getCurrentStaffByMachineId(machine.getMachineId());
                 currentStaffService.deleteCurrentStaff(currentStaffDto.getId());
+        }
+
+        @Override
+        public DrawingCodeProcessDto getDrawingCodeProcessDtoByMachineId(Integer machineId) {
+                DrawingCodeProcess drawingCodeProcess = new DrawingCodeProcess();
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_MachineId(machineId);
+                List<DrawingCodeProcess> currentProcess = new ArrayList<>();
+                for (DrawingCodeProcess process : processes) {
+                        if (process.getProcessStatus() == 2) {
+                                currentProcess.add(process);
+                        }
+                }
+                if (currentProcess.size() > 1) {
+                        new RuntimeException("Have more than 1 processes in progess!");
+                } else if (currentProcess.size() == 1) {
+                        drawingCodeProcess = currentProcess.get(0);
+                } else {
+                        return new DrawingCodeProcessDto();
+                }
+                return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(drawingCodeProcess);
         }
 }
