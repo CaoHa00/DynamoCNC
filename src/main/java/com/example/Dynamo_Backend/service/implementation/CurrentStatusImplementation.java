@@ -68,6 +68,11 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus.setTime(arr[2]);
         }
         currentStatus.setTime(arr[2]);
+        DrawingCodeProcess process = drawingCodeProcessRepository
+                .findById(currentStatus.getProcessId())
+                .orElseThrow(() -> new RuntimeException("Process is not found when find process for currentStatus"));
+
+        logService.addLog(currentStatus, process, currentStaff.getStaff());
         currentStatusRepository.save(currentStatus);
 
         List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();

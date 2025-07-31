@@ -32,6 +32,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         PlanService planService;
         OperateHistoryRepository operateHistoryRepository;
         CurrentStaffService currentStaffService;
+        ProcessTimeRepository processTimeRepository;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -360,12 +361,77 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 drawingCodeProcess.getMachine().getMachineId()));
                 machine.setStatus(0);
 
+                List<Log> logs = drawingCodeProcess.getLogs();
+                ProcessTime processTime = new ProcessTime();
+                logs.sort((log1, log2) -> Long.compare(log1.getTimeStamp(), log2.getTimeStamp()));
+                if (logs.isEmpty())
+                        return;
+                long spanTime = 0L;
+                long runTime = 0L;
+                long pgTime = 0L;
+                long stopTime = 0L;
+                long offsetTime = 0L;
+
+                Long lastStart = null;
+                String lastStatus = null;
+
+                for (int i = 0; i < logs.size(); i++) {
+                        Log log = logs.get(i);
+                        String status = log.getStatus();
+                        Long time = log.getTimeStamp();
+
+                        if ("R1".equals(status) || "R2".equals(status)) {
+                                lastStart = time;
+                                lastStatus = status;
+                        } else if (("S1".equals(status) || "S2".equals(status)) && lastStart != null) {
+                                long duration = time - lastStart;
+                                runTime += duration;
+                                if ("R1".equals(lastStatus))
+                                        pgTime += duration;
+                                if ("R2".equals(lastStatus))
+                                        offsetTime += duration;
+                                lastStart = null;
+                                lastStatus = null;
+                        }
+                        if (("S1".equals(status) || "S2".equals(status)) && i + 1 < logs.size()) {
+                                Log nextLog = logs.get(i + 1);
+                                if ("R1".equals(nextLog.getStatus()) || "R2".equals(nextLog.getStatus())) {
+                                        stopTime += nextLog.getTimeStamp() - time;
+                                }
+                        }
+                }
+                int lastIndex = logs.size() - 1;
+                if (("S1".equals(logs.get(lastIndex)) || "S2".equals(lastIndex))) {
+                        // phòng trường hợp log đầu không phải R
+                        for (int i = 0; i < logs.size() - 1; i++) {
+                                Log log = logs.get(i);
+                                if ("R1".equals(log.getStatus()) || "R2".equals(log.getStatus())) {
+                                        spanTime = logs.get(logs.size() - 1).getTimeStamp()
+                                                        - logs.get(i).getTimeStamp();
+                                        break;
+                                }
+                        }
+
+                } else {
+                        spanTime = doneTime - logs.get(0).getTimeStamp();
+                        runTime += doneTime - logs.get(lastIndex).getTimeStamp();
+                }
+
+                processTime.setSpanTime(spanTime / 1000f); // convert ms to seconds
+                processTime.setRunTime(runTime / 1000f);
+                processTime.setPgTime(pgTime / 1000f);
+                processTime.setStopTime(stopTime / 1000f);
+                processTime.setOffsetTime(offsetTime / 1000f);
+                processTime.setDrawingCodeProcess(drawingCodeProcess);
+
                 CurrentStaffDto currentStaffDto = currentStaffService
                                 .getCurrentStaffByMachineId(machine.getMachineId());
+
                 currentStaffService.deleteCurrentStaff(currentStaffDto.getId());
                 drawingCodeProcessRepository.save(drawingCodeProcess);
                 operateHistoryRepository.save(operateHistory);
                 machineRepository.save(machine);
+                processTimeRepository.save(processTime);
         }
 
         @Override
