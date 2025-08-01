@@ -69,8 +69,9 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                 operateHistory.setStartTime(currentTimestamp);
                                 operateHistory.setStopTime((long) 0);
                                 operateHistory.setInProgress(1);
+                                OperateHistory saveOperateHistory = operateHistoryRepository.save(operateHistory);
+                                return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
                         } else {
-
                                 if (operateHistory.getStaff().getId() != currentStaff.getStaff().getId()) {
                                         operateHistory.setStopTime(currentTimestamp);
                                         operateHistory.setInProgress(0);
@@ -85,10 +86,11 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                         operateHistory.setStopTime((long) 0);
                                         operateHistory.setInProgress(0);
                                 }
+                                OperateHistory saveOperateHistory = operateHistoryRepository.save(operateHistory);
+                                return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
                         }
                 }
-                OperateHistory saveOperateHistory = operateHistoryRepository.save(operateHistory);
-                return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
+                return OperateHistoryMapper.mapToOperateHistoryDto(new OperateHistory());
         }
 
         @Override

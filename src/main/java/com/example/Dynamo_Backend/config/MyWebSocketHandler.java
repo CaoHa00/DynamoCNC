@@ -33,17 +33,30 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
     }
 
     public static void sendMessageToClients(String message) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonMessage = objectMapper.writeValueAsString(
+                new java.util.HashMap<String, Object>() {
+                    {
+                        put("type", "mqtt");
+                        put("message", message);
+                    }
+                });
         for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
-                session.sendMessage(new TextMessage(message));
+                session.sendMessage(new TextMessage(jsonMessage));
             }
         }
     }
 
     public static void sendMachineStatusToClients(List<CurrentStatusDto> currentStatusDtos) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonMessage = objectMapper.writeValueAsString(currentStatusDtos);
-
+        String jsonMessage = objectMapper.writeValueAsString(
+                new java.util.HashMap<String, Object>() {
+                    {
+                        put("type", "status");
+                        put("data", currentStatusDtos);
+                    }
+                });
         for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
                 session.sendMessage(new TextMessage(jsonMessage));

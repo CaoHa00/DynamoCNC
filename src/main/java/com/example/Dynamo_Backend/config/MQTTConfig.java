@@ -72,7 +72,7 @@ public class MQTTConfig {
                 String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
                 if (topic.equals("myTopic")) {
                     System.out.println(message.getPayload().toString());
-                    // currentStatusService.addCurrentStatus(message.getPayload().toString());
+                    currentStatusService.addCurrentStatus(message.getPayload().toString());
                     eventPublisher.publishEvent(new OperateHistoryMessageEvent(message.getPayload().toString()));
                     try {
                         MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());

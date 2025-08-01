@@ -52,7 +52,6 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                     break;
                 }
             }
-            currentStatus.setProcessId(machineId);
         } else {
             currentStatus.setProcessId(null);
         }
@@ -67,7 +66,6 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setTime(arr[2]);
         }
-        currentStatus.setTime(arr[2]);
         DrawingCodeProcess process = drawingCodeProcessRepository
                 .findById(currentStatus.getProcessId())
                 .orElseThrow(() -> new RuntimeException("Process is not found when find process for currentStatus"));

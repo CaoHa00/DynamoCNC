@@ -32,12 +32,12 @@ public class Log {
     private String status;
 
     @ManyToOne
-    @JoinColumn(name = "process_id", nullable = false)
+    @JoinColumn(name = "process_id", nullable = true)
     @JsonBackReference(value = "stats-process")
     private DrawingCodeProcess drawingCodeProcess;
 
     @ManyToOne
-    @JoinColumn(name = "staff_id", nullable = false)
+    @JoinColumn(name = "staff_id", nullable = true)
     @JsonBackReference(value = "stats-staff")
     private Staff staff;
 
