@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class DrawingCodeDto {
     private String drawingCodeId;
     private String drawingCodeName;
-    // private int status;
+    private int status;
     private String createdDate;
     private String updatedDate;
     // private String productStatus;
