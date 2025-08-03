@@ -45,6 +45,7 @@ public class MachineMapper {
         machineDto.setMachineOffice(machine.getMachineOffice());
         machineDto.setStatus(machine.getStatus());
         machineDto.setGroupId(machine.getGroup().getGroupId());
+        machineDto.setGroupName(machine.getGroup().getGroupName());
         machineDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));
         machineDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));

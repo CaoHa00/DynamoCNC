@@ -19,5 +19,6 @@ public class MachineDto {
     private String createdDate;
     private String updatedDate;
     private String groupId;
+    private String groupName;
     private MachineKpiDto machineKpiDtos;
 }

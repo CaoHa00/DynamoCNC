@@ -33,7 +33,7 @@ public class StaffController {
 
     @PutMapping("/{staff_id}")
     public ResponseEntity<StaffDto> updateStaff(@PathVariable("staff_id") String Id,
-            @RequestBody StaffDto staffDto) {
+            @RequestBody StaffRequestDto staffDto) {
         StaffDto updatedStaff = staffService.updateStaff(Id, staffDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updatedStaff);
     }

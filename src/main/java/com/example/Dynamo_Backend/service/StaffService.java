@@ -8,7 +8,7 @@ import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
 public interface StaffService {
     StaffDto addStaff(StaffRequestDto staffRequestDto);
 
-    StaffDto updateStaff(String Id, StaffDto staffDto);
+    StaffDto updateStaff(String Id, StaffRequestDto staffDto);
 
     void deleteStaff(List<String> ids);
 

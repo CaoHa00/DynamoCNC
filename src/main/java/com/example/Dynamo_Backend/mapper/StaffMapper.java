@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import com.example.Dynamo_Backend.dto.StaffDto;
+import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
@@ -17,8 +18,20 @@ public class StaffMapper {
                 staff.setStaffOffice(staffDto.getStaffOffice());
                 staff.setStaffSection(staffDto.getStaffSection());
                 staff.setShortName(staffDto.getShortName());
-                // staff.setStatus(staffDto.getStatus());
-                // staff.setDateAdd(staffDto.getDateAdd());
+                staff.setStatus(staffDto.getStatus());
+                return staff;
+
+        }
+
+        public static Staff mapToEntity(StaffRequestDto staffDto) {
+                Staff staff = new Staff();
+                staff.setId(staffDto.getId());
+                staff.setStaffId(staffDto.getStaffId());
+                staff.setStaffName(staffDto.getStaffName());
+                staff.setStaffOffice(staffDto.getStaffOffice());
+                staff.setStaffSection(staffDto.getStaffSection());
+                staff.setShortName(staffDto.getShortName());
+                staff.setStatus(staffDto.getStatus());
                 return staff;
 
         }
@@ -33,6 +46,7 @@ public class StaffMapper {
                 staffDto.setStaffSection(staff.getStaffSection());
                 staffDto.setStatus(staff.getStatus());
                 staffDto.setGroupId(staff.getGroup().getGroupId());
+                staffDto.setGroupName(staff.getGroup().getGroupName());
                 staffDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getCreatedDate()));
                 staffDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getUpdatedDate()));
                 String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));

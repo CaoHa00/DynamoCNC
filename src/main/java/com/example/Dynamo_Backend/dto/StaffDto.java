@@ -20,5 +20,6 @@ public class StaffDto {
     private String createdDate;
     private String updatedDate;
     private String groupId;
+    private String groupName;
     private StaffKpiDto staffKpiDtos;
 }

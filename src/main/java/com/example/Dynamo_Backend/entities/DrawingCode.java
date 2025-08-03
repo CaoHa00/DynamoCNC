@@ -37,8 +37,8 @@ public class DrawingCode {
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
 
-    // @Column(name = "status", nullable = false)
-    // private int status;
+    @Column(name = "status", nullable = false)
+    private int status;
 
     // @Column(name = "product_status", nullable = false)
     // private String productStatus;
