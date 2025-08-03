@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.config;
 import java.io.IOException;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -19,7 +20,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import com.example.Dynamo_Backend.service.OperateHistoryService;
+import com.example.Dynamo_Backend.event.OperateHistoryMessageEvent;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 
 import lombok.AllArgsConstructor;
@@ -28,7 +29,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class MQTTConfig {
     final CurrentStatusService currentStatusService;
-    final OperateHistoryService operateHistoryService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
@@ -63,6 +64,7 @@ public class MQTTConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
+
         return new MessageHandler() {
 
             @Override
@@ -71,12 +73,12 @@ public class MQTTConfig {
                 if (topic.equals("myTopic")) {
                     System.out.println(message.getPayload().toString());
                     // currentStatusService.addCurrentStatus(message.getPayload().toString());
-                    operateHistoryService.addOperateHistory(message.getPayload().toString());
-                    // try {
-                    // MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
-                    // } catch (IOException e) {
-                    // e.printStackTrace();
-                    // }
+                    eventPublisher.publishEvent(new OperateHistoryMessageEvent(message.getPayload().toString()));
+                    try {
+                        MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 // String[] arr = message.getPayload().toString().split(",");

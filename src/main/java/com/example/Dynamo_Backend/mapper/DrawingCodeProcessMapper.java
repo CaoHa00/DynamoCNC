@@ -46,6 +46,7 @@ public class DrawingCodeProcessMapper {
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
                 drawingCodeProcess.setProcessStatus(drawingCodeProcessDto.getInProgress());
+                drawingCodeProcess.setProcessType(drawingCodeProcessDto.getProcessType());
                 drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 drawingCodeProcess.setStartTime(
                                 DateTimeUtil.convertStringToTimestamp(drawingCodeProcessDto.getStartTime()));
