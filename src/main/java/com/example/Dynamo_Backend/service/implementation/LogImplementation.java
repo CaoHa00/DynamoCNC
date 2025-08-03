@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service;
 import com.example.Dynamo_Backend.dto.LogDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.entities.Operator;
+import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.mapper.LogMapper;
 import com.example.Dynamo_Backend.repository.LogRepository;
-import com.example.Dynamo_Backend.service.OperatorService;
+import com.example.Dynamo_Backend.service.StaffService;
 import com.example.Dynamo_Backend.service.LogService;
 
 import lombok.AllArgsConstructor;
@@ -17,14 +17,14 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class LogImplementation implements LogService {
-        OperatorService operatorService;
+        StaffService staffService;
         LogRepository logRepository;
 
         @Override
-        public void addLog(CurrentStatus currentStatus, DrawingCodeProcess process, Operator operator) {
+        public void addLog(CurrentStatus currentStatus, DrawingCodeProcess process, Staff staff) {
                 Log log = new Log();
                 log.setDrawingCodeProcess(process);
-                log.setOperator(operator);
+                log.setStaff(staff);
                 log.setStatus(currentStatus.getStatus());
                 log.setTimeStamp(System.currentTimeMillis());
                 logRepository.save(log);

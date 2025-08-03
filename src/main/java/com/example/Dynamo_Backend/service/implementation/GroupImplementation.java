@@ -23,6 +23,9 @@ public class GroupImplementation implements GroupService {
     @Override
     public GroupDto addGroup(GroupDto groupDto) {
         Group group = GroupMapper.mapToGroup(groupDto);
+        long createdTimestamp = System.currentTimeMillis();
+        group.setCreatedDate(createdTimestamp);
+        group.setUpdatedDate(createdTimestamp);
         Group saveGroup = groupRepository.save(group);
         return GroupMapper.mapToGroupDto(saveGroup);
     }
@@ -31,6 +34,9 @@ public class GroupImplementation implements GroupService {
     public GroupDto updateGroup(String Id, GroupDto groupDto) {
         Group group = groupRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + Id));
+        long updatedTimestamp = System.currentTimeMillis();
+
+        group.setUpdatedDate(updatedTimestamp);
         group.setGroupId(groupDto.getGroupId());
         group.setGroupName(groupDto.getGroupName());
         Group updatedgroup = groupRepository.save(group);
@@ -63,7 +69,7 @@ public class GroupImplementation implements GroupService {
     }
 
     @Override
-    public List<GroupDto> getOperatorStatusGroup() {
+    public List<GroupDto> getStaffStatusGroup() {
         List<Group> groups = groupRepository.findAll();
         groups.sort(Comparator.comparing(group -> {
             String name = group.getGroupName();

@@ -37,8 +37,8 @@ public class Log {
     private DrawingCodeProcess drawingCodeProcess;
 
     @ManyToOne
-    @JoinColumn(name = "operator_id", nullable = false)
-    @JsonBackReference(value = "stats-operator")
-    private Operator operator;
+    @JoinColumn(name = "staff_id", nullable = false)
+    @JsonBackReference(value = "stats-staff")
+    private Staff staff;
 
 }

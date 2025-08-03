@@ -35,12 +35,36 @@ public class Group {
     @Column(name = "group_name")
     private String groupName;
 
+    @Column(name = "group_type")
+    private String groupType;
+
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "group-operator")
-    private List<OperatorGroup> operatorGroups;
+    @JsonManagedReference
+    private List<Staff> staffs;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Machine> machines;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "group-staff")
+    private List<StaffGroup> staffGroups;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "group-machine")
     private List<MachineGroup> machineGroups;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<GroupKpi> groupKpis;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Report> reports;
+
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
 }

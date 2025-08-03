@@ -3,15 +3,18 @@ package com.example.Dynamo_Backend.service;
 import java.util.List;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
+import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 
 public interface DrawingCodeProcessService {
-    DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessDto drawingCodeProcessDto);
+    DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
     DrawingCodeProcessResponseDto updateDrawingCodeProcess(String drawingCodeProcessId,
             DrawingCodeProcessDto drawingCodeProcessDto);
 
     DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
+
+    DrawingCodeProcessDto getDrawingCodeProcessByMachineId(Integer machineId);
 
     void deleteDrawingCodeProcess(String drawingCodeProcessId);
 
@@ -19,6 +22,10 @@ public interface DrawingCodeProcessService {
 
     List<DrawingCodeProcessResponseDto> getAll();
 
-    void recieveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String operatorId);
+    void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
+
+    DrawingCodeProcessDto addProcessByOperator(DrawingCodeProcessResquestDto drawingCodeProcessDto);
+
+    void doneProcess(String processId);
 
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
+import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 
@@ -34,17 +35,30 @@ public class DrawingCodeProcessController {
 
     @PostMapping
     public ResponseEntity<DrawingCodeProcessDto> adddrawingCodeProcess(
-            @RequestBody DrawingCodeProcessDto drawingCodeProcessDto) {
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
         DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService
                 .addDrawingCodeProcess(drawingCodeProcessDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(drawingCodeProcess);
+    }
 
+    @PostMapping("/by-operator")
+    public ResponseEntity<DrawingCodeProcessDto> addProcessByOperator(
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService
+                .addProcessByOperator(drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(drawingCodeProcess);
+    }
+
+    @PostMapping("/done-process/{process_id}")
+    public ResponseEntity<Void> doneProcess(@PathVariable("process_id") String processId) {
+        drawingCodeProcessService.doneProcess(processId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/receive")
     public ResponseEntity<Void> receiveDataFromTablet(@RequestParam("drawingCodeProcess_id") String Id,
-            @RequestParam("operatorId") String operatorId, @RequestParam("machineId") Integer machineId) {
-        drawingCodeProcessService.recieveProcessFromTablet(Id, machineId, operatorId);
+            @RequestParam("staffId") String staffId, @RequestParam("machineId") Integer machineId) {
+        drawingCodeProcessService.receiveProcessFromTablet(Id, machineId, staffId);
         return ResponseEntity.ok().build();
     }
 
@@ -64,10 +78,17 @@ public class DrawingCodeProcessController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{drawingCodeProcess_id}")
+    @GetMapping("/id/{drawingCodeProcess_id}")
     public ResponseEntity<DrawingCodeProcessDto> getDrawingCodeProcessById(
             @PathVariable("drawingCodeProcess_id") String Id) {
         DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService.getDrawingCodeProcessById(Id);
+        return ResponseEntity.ok(drawingCodeProcess);
+    }
+
+    @GetMapping("machine/{machineId}")
+    public ResponseEntity<DrawingCodeProcessDto> getDrawingCodeProcessByMachineId(
+            @PathVariable("machineId") Integer Id) {
+        DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService.getDrawingCodeProcessByMachineId(Id);
         return ResponseEntity.ok(drawingCodeProcess);
     }
 

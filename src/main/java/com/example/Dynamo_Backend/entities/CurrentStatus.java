@@ -23,7 +23,7 @@ public class CurrentStatus {
     @Column(columnDefinition = "CHAR(36)")
     private String Id;
     private String machineId;
-    private String operatorId;
+    private String staffId;
     private String processId;
     private String time;
     private String status;

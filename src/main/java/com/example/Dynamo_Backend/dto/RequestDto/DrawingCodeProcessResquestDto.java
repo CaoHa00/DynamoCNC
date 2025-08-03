@@ -9,14 +9,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DrawingCodeProcessResquestDto {
     private String processId;
+    private String processType;
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Integer pgTime;
+    private Long pgTime;
     private String startTime;
     private String endTime;
-    private String addDate;
     private Integer status;
-    private String drawingCodeId;
+    private String orderCode;
     private Integer machineId;
+    private Integer staffId;
+    private String plannerId;
+    private Integer inProgress;
+    private Float remark;
+    private String remarkTime;
+    private Integer isPlan;
 }

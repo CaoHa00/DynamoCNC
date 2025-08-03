@@ -31,15 +31,18 @@ public class OperateHistory {
     private Integer manufacturingPoint;
 
     @Column(name = "start_time", nullable = false)
-    private String startTime;
+    private Long startTime;
 
     @Column(name = "stop_time", nullable = false)
-    private String stopTime;
+    private Long stopTime;
+
+    @Column(name = "in_progress", nullable = false)
+    private Integer inProgress;
 
     @ManyToOne
-    @JoinColumn(name = "operator_id", nullable = false)
-    @JsonBackReference(value = "history-operator")
-    private Operator operator;
+    @JoinColumn(name = "staff_id", nullable = false)
+    @JsonBackReference(value = "history-staff")
+    private Staff staff;
 
     @ManyToOne
     @JoinColumn(name = "process_id", nullable = false)

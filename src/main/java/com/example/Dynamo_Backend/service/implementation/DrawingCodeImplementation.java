@@ -1,6 +1,5 @@
 package com.example.Dynamo_Backend.service.implementation;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -20,11 +19,14 @@ public class DrawingCodeImplementation implements DrawingCodeService {
 
     @Override
     public DrawingCodeDto addDrawingCode(DrawingCodeDto drawingCodeDto) {
-        String addDate = LocalDate.now().toString();
+        long createdTimestamp = System.currentTimeMillis();
         int status = 1;
+
         DrawingCode drawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCodeDto);
-        drawingCode.setAddDate(addDate);
+        drawingCode.setCreatedDate(createdTimestamp);
+        drawingCode.setUpdatedDate(createdTimestamp);
         drawingCode.setStatus(status);
+        // drawingCode.setProductStatus("status");
         DrawingCode saveDrawingCode = drawingCodeRepository.save(drawingCode);
         return DrawingCodeMapper.mapToDrawingCodeDto(saveDrawingCode);
     }
@@ -33,8 +35,10 @@ public class DrawingCodeImplementation implements DrawingCodeService {
     public DrawingCodeDto updateDrawingCode(String drawingCodeId, DrawingCodeDto drawingCodeDto) {
         DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeId)
                 .orElseThrow(() -> new RuntimeException("DrawingCode is not found:" + drawingCodeId));
+        long updatedTimestamp = System.currentTimeMillis();
         drawingCode.setDrawingCodeName(drawingCodeDto.getDrawingCodeName());
         drawingCode.setStatus(drawingCodeDto.getStatus());
+        drawingCode.setUpdatedDate(updatedTimestamp);
         // drawingCode.setOrders(drawingCode.getOrders());
         // drawingCode.setDrawingCodeProcesses(drawingCodeDto.getDrawingCodeProcesses());
         DrawingCode updatedDrawingCode = drawingCodeRepository.save(drawingCode);

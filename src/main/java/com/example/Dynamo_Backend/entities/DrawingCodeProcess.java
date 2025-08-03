@@ -30,6 +30,9 @@ public class DrawingCodeProcess {
     @Column(columnDefinition = "CHAR(36)")
     private String processId;
 
+    @Column(name = "process_type", nullable = false)
+    private String processType;
+
     @Column(name = "part_number", nullable = false)
     private Integer partNumber;
 
@@ -39,25 +42,46 @@ public class DrawingCodeProcess {
     @Column(name = "manufacturing_point", nullable = false)
     private Integer manufacturingPoint;
 
+    // @Column(name = "total_running_time", nullable = false)
+    // private Long totalRunningTime;
+
+    // @Column(name = "total_stop_time", nullable = false)
+    // private Long totalStopTime;
+
     @Column(name = "pg_time", nullable = false)
-    private Integer pgTime;
+    private Long pgTime;
+
+    // @Column(name = "offset_run_time", nullable = false)
+    // private Long offsetRunTime;
 
     @Column(name = "start_time", nullable = true)
-    private String startTime;
+    private Long startTime;
 
     @Column(name = "end_time", nullable = true)
-    private String endTime;
+    private Long endTime;
 
-    @Column(name = "addDate", nullable = false)
-    private String addDate;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @Column(name = "status", nullable = false)
     private Integer status;
 
+    @Column(name = "process_status", nullable = false)
+    private Integer processStatus;
+    // 1: to do
+    // 2: in progress
+    // 3: done
+    // 4:
+
+    @Column(name = "is_plan", nullable = false)
+    private Integer isPlan;
+
     @ManyToOne
-    @JoinColumn(name = "drawing_code_id", nullable = false)
-    @JsonBackReference(value = "drawing-code-process")
-    private DrawingCode drawingCode;
+    @JoinColumn(name = "order_detail_id", nullable = false)
+    @JsonBackReference
+    private OrderDetail orderDetail;
 
     @ManyToOne
     @JoinColumn(name = "machine_id", nullable = true)
@@ -71,5 +95,9 @@ public class DrawingCodeProcess {
     @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "stats-process")
     private List<Log> logs;
+
+    @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Plan> plans;
 
 }

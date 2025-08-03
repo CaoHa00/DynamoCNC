@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,5 +16,9 @@ public class MachineDto {
     private String machineGroup;
     private String machineOffice;
     private int status;
-    private String addDate;
+    private String createdDate;
+    private String updatedDate;
+    private String groupId;
+    private String groupName;
+    private MachineKpiDto machineKpiDtos;
 }

@@ -1,15 +1,23 @@
 package com.example.Dynamo_Backend.service.implementation;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.MachineKpiDto;
+import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
+import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.MachineKpi;
+import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
+import com.example.Dynamo_Backend.repository.GroupRepository;
+import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.service.MachineKpiService;
 import com.example.Dynamo_Backend.service.MachineService;
 
 import lombok.AllArgsConstructor;
@@ -19,16 +27,37 @@ import lombok.AllArgsConstructor;
 public class MachineImplementation implements MachineService {
     @Autowired
     MachineRepository machineRepository;
+    @Autowired
+    GroupRepository groupRepository;
+
+    MachineKpiRepository machineKpiRepository;
+    MachineKpiService machineKpiService;
 
     @Override
-    public MachineDto addMachine(MachineDto machineDto) {
+    public MachineDto addMachine(MachineRequestDto machineDto) {
         int status = 1;
-        String date = LocalDate.now().toString();
+        long createdTimestamp = System.currentTimeMillis();
         Machine machine = MachineMapper.mapToMachine(machineDto);
         machine.setStatus(status);
-        machine.setAddDate(date);
+        machine.setCreatedDate(createdTimestamp);
+        machine.setUpdatedDate(createdTimestamp);
+        machine.setMachineKpis(new ArrayList<MachineKpi>());
+        Group group = groupRepository.findById(machineDto.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group is not found:" + machineDto.getGroupId()));
+
+        machine.setGroup(group);
         Machine saveMachine = machineRepository.save(machine);
-        return MachineMapper.mapToMachineDto(saveMachine);
+
+        machineDto.setMachineId(saveMachine.getMachineId());
+        MachineKpiDto machineKpiDto = MachineKpiMapper.mapToMachineKpiDto(machineDto);
+        MachineKpiDto saveMachineKpiDto = machineKpiService.addMachineKpi(machineKpiDto);
+        saveMachine.setMachineKpis(new ArrayList<>());
+        saveMachine.getMachineKpis().add(MachineKpiMapper.mapToMachineKpi(saveMachineKpiDto));
+
+        MachineDto result = MachineMapper.mapToMachineDto(saveMachine);
+
+        // return MachineMapper.mapToMachineDto(saveMachine);
+        return result;
 
     }
 
@@ -36,11 +65,16 @@ public class MachineImplementation implements MachineService {
     public MachineDto updateMachine(Integer Id, MachineDto machineDto) {
         Machine machine = machineRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+        long updatedTimestamp = System.currentTimeMillis();
         machine.setMachineGroup(machineDto.getMachineGroup());
         machine.setMachineName(machineDto.getMachineName());
         machine.setMachineOffice(machineDto.getMachineOffice());
         machine.setMachineType(machineDto.getMachineType());
         machine.setStatus(machineDto.getStatus());
+        machine.setUpdatedDate(updatedTimestamp);
+        Group group = groupRepository.findById(machineDto.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group is not found:" + machineDto.getGroupId()));
+        machine.setGroup(group);
         Machine updatedMachine = machineRepository.save(machine);
         return MachineMapper.mapToMachineDto(updatedMachine);
     }
@@ -57,6 +91,10 @@ public class MachineImplementation implements MachineService {
         Machine machine = machineRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
         machineRepository.delete(machine);
+        List<MachineKpi> machineKpis = machineKpiRepository.findByMachine_machineId(Id);
+        for (MachineKpi machineKpi : machineKpis) {
+            machineKpiRepository.delete(machineKpi);
+        }
     }
 
     @Override

@@ -32,18 +32,19 @@ public class DrawingCode {
     @Column(name = "drawing_code_name", nullable = false)
     private String drawingCodeName;
 
-    @Column(name = "add_date", nullable = false)
-    private String addDate;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @Column(name = "status", nullable = false)
     private int status;
 
-    @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "drawing-code-order")
-    private List<Order> orders;
+    // @Column(name = "product_status", nullable = false)
+    // private String productStatus;
 
     @OneToMany(mappedBy = "drawingCode", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "drawing-code-process")
-    private List<DrawingCodeProcess> drawingCodeProcesses;
+    @JsonManagedReference
+    private List<OrderDetail> orderDetails;
 
 }

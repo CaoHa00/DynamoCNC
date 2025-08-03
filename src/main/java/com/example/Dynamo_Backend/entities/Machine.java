@@ -2,8 +2,7 @@ package com.example.Dynamo_Backend.entities;
 
 import java.util.List;
 
-import org.hibernate.annotations.GenericGenerator;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -12,6 +11,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -44,14 +45,29 @@ public class Machine {
 
     @Column(name = "status", nullable = true)
     private int status;
-    @Column(name = "add_date", nullable = true)
-    private String addDate;
+    @Column(name = "createdDate", nullable = false)
+    private long createdDate;
+    @Column(name = "updatedDate", nullable = false)
+    private long updatedDate;
 
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "machine-group")
     private List<MachineGroup> machineGroups;
 
+    @ManyToOne
+    @JoinColumn(name = "group_id", nullable = false)
+    @JsonBackReference
+    private Group group;
+
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "machine-process")
     private List<DrawingCodeProcess> drawingCodeProcesses;
+
+    @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<MachineKpi> machineKpis;
+
+    @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Plan> plans;
 }

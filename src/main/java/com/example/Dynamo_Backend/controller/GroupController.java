@@ -58,7 +58,7 @@ public class GroupController {
 
     @GetMapping("/status")
     public ResponseEntity<List<GroupDto>> getAllGroupStatus() {
-        List<GroupDto> groups = groupService.getOperatorStatusGroup();
+        List<GroupDto> groups = groupService.getStaffStatusGroup();
         return ResponseEntity.status(HttpStatus.OK).body(groups);
     }
 
