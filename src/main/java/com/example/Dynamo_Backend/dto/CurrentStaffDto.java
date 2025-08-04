@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class CurrentStaffDto {
     private Long Id;
     private String staffId;
+    private Integer staffIdNumber;
     private Integer machineId;
     private String assignedAt;
 }
