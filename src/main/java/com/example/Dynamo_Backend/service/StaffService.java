@@ -2,8 +2,12 @@ package com.example.Dynamo_Backend.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
+
+import jakarta.mail.Multipart;
 
 public interface StaffService {
     StaffDto addStaff(StaffRequestDto staffRequestDto);
@@ -15,5 +19,7 @@ public interface StaffService {
     List<StaffDto> getAllStaffs();
 
     StaffDto getStaffById(String Id);
+
+    void importStaffFromExcel(MultipartFile file);
 
 }

@@ -1,5 +1,6 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,11 @@ import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.service.StaffKpiService;
 import com.example.Dynamo_Backend.service.StaffService;
 
+import jakarta.mail.Multipart;
 import lombok.AllArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @AllArgsConstructor
@@ -102,4 +107,41 @@ public class StaffImplementation implements StaffService {
         Staff updatedStaff = staffRepository.save(staff);
         return StaffMapper.mapToStaffDto(updatedStaff);
     }
+
+    @Override
+    public void importStaffFromExcel(MultipartFile file) {
+        try {
+            InputStream inputStream = ((MultipartFile) file).getInputStream();
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+            List<Staff> staffList = new ArrayList<>();
+
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0)
+                    continue;
+                Staff staffDto = new Staff();
+                staffDto.setStaffName(row.getCell(0).getStringCellValue());
+                staffDto.setStaffId(Integer.parseInt(row.getCell(1).getStringCellValue()));
+                staffDto.setStaffOffice(row.getCell(2).getStringCellValue());
+                staffDto.setStaffSection(row.getCell(3).getStringCellValue());
+                staffDto.setShortName(row.getCell(4).getStringCellValue());
+                staffDto.setStatus(1);
+                Group group = groupRepository.findById(row.getCell(5).getStringCellValue())
+                        .orElseThrow(() -> new RuntimeException(
+                                "Group is not found when add staff by excel:" + row.getCell(5).getStringCellValue()));
+                staffDto.setGroup(group);
+
+                staffList.add(staffDto);
+            }
+
+            for (Staff staff : staffList) {
+                staffRepository.save(staff);
+            }
+            workbook.close();
+            inputStream.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage());
+        }
+    }
+
 }
