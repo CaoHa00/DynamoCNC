@@ -52,9 +52,9 @@ public class StaffController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadStaffExcel(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Void> uploadStaffExcel(@RequestParam("file") MultipartFile file) {
         staffService.importStaffFromExcel(file);
-        return ResponseEntity.ok("Staff data imported successfully.");
+        return ResponseEntity.ok().build();
     }
 
 }

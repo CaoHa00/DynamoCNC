@@ -23,12 +23,12 @@ public class CurrentStatus {
     @Column(columnDefinition = "CHAR(36)")
     private String Id;
     @Column(name = "machineId", nullable = false)
-    private String machineId;
+    private Integer machineId;
     @Column(name = "staffId", nullable = true)
     private String staffId;
     @Column(name = "processId", nullable = true)
     private String processId;
-    @Column(name = "time", nullable = false)
+    @Column(name = "time", nullable = true)
     private String time;
     @Column(name = "status", nullable = false)
     private String status;
