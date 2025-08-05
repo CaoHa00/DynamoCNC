@@ -20,7 +20,6 @@ import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.service.StaffKpiService;
 import com.example.Dynamo_Backend.service.StaffService;
 
-import jakarta.mail.Multipart;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -120,16 +119,21 @@ public class StaffImplementation implements StaffService {
                 if (row.getRowNum() == 0)
                     continue;
                 Staff staffDto = new Staff();
-                staffDto.setStaffName(row.getCell(0).getStringCellValue());
-                staffDto.setStaffId(Integer.parseInt(row.getCell(1).getStringCellValue()));
-                staffDto.setStaffOffice(row.getCell(2).getStringCellValue());
-                staffDto.setStaffSection(row.getCell(3).getStringCellValue());
-                staffDto.setShortName(row.getCell(4).getStringCellValue());
-                staffDto.setStatus(1);
-                Group group = groupRepository.findById(row.getCell(5).getStringCellValue())
+                Cell staffIdCell = row.getCell(0);
+                if (staffIdCell.getCellType() == CellType.NUMERIC) {
+                    staffDto.setStaffId((int) staffIdCell.getNumericCellValue());
+                } else {
+                    staffDto.setStaffId(Integer.parseInt(staffIdCell.getStringCellValue()));
+                }
+                staffDto.setStaffName(row.getCell(1).getStringCellValue());
+                staffDto.setShortName(row.getCell(2).getStringCellValue());
+                staffDto.setStaffOffice(row.getCell(3).getStringCellValue());
+                Group group = groupRepository.findByGroupName(row.getCell(4).getStringCellValue())
                         .orElseThrow(() -> new RuntimeException(
                                 "Group is not found when add staff by excel:" + row.getCell(5).getStringCellValue()));
                 staffDto.setGroup(group);
+                staffDto.setStaffSection(row.getCell(5).getStringCellValue());
+                staffDto.setStatus(1);
 
                 staffList.add(staffDto);
             }
@@ -143,5 +147,4 @@ public class StaffImplementation implements StaffService {
             throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage());
         }
     }
-
 }

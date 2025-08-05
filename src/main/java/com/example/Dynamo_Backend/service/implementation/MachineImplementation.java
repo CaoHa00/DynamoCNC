@@ -1,10 +1,12 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
@@ -21,6 +23,8 @@ import com.example.Dynamo_Backend.service.MachineKpiService;
 import com.example.Dynamo_Backend.service.MachineService;
 
 import lombok.AllArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @Service
 @AllArgsConstructor
@@ -102,6 +106,39 @@ public class MachineImplementation implements MachineService {
         List<Machine> machines = machineRepository.findAll();
         return machines.stream().map(MachineMapper::mapToMachineDto).toList();
 
+    }
+
+    @Override
+    public void importMachineFromExcel(MultipartFile file) {
+        try {
+            InputStream inputStream = file.getInputStream();
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+            List<Machine> machineList = new ArrayList<>();
+
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0)
+                    continue;
+                Machine machineDto = new Machine();
+                machineDto.setMachineId((int) row.getCell(0).getNumericCellValue());
+                machineDto.setMachineName(row.getCell(1).getStringCellValue());
+                machineDto.setMachineGroup(row.getCell(2).getStringCellValue());
+                machineDto.setMachineOffice(row.getCell(3).getStringCellValue());
+                machineDto.setMachineType(row.getCell(4).getStringCellValue());
+                machineDto.setStatus(1);
+                Group group = groupRepository.findByGroupName(row.getCell(5).getStringCellValue())
+                        .orElseThrow(() -> new RuntimeException(
+                                "Group is not found when add machine by excel:" + row.getCell(5).getStringCellValue()));
+                machineDto.setGroup(group);
+
+                machineList.add(machineDto);
+            }
+            machineRepository.saveAll(machineList);
+            workbook.close();
+            inputStream.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to import machines from Excel file: " + e.getMessage());
+        }
     }
 
 }
