@@ -8,7 +8,9 @@ import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.mapper.DrawingCodeMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeRepository;
+import com.example.Dynamo_Backend.repository.OrderDetailRepository;
 import com.example.Dynamo_Backend.service.DrawingCodeService;
+import com.example.Dynamo_Backend.service.OrderDetailService;
 
 import lombok.AllArgsConstructor;
 
@@ -42,6 +44,7 @@ public class DrawingCodeImplementation implements DrawingCodeService {
         // drawingCode.setOrders(drawingCode.getOrders());
         // drawingCode.setDrawingCodeProcesses(drawingCodeDto.getDrawingCodeProcesses());
         DrawingCode updatedDrawingCode = drawingCodeRepository.save(drawingCode);
+        // orderDetailService.updateOrderCode(drawingCodeId, "");
         return DrawingCodeMapper.mapToDrawingCodeDto(updatedDrawingCode);
     }
 

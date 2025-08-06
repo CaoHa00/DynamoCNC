@@ -12,8 +12,9 @@ public class MachineKpiDto {
     private Integer year;
     private Integer month;
     private Float oee;
-    private Integer machineMiningTarget;
+    private Float machineMiningTarget;
     private String createdDate;
     private String updatedDate;
     private Integer machineId;
+    private String machineName;
 }

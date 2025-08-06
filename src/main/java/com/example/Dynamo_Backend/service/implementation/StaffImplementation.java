@@ -48,7 +48,7 @@ public class StaffImplementation implements StaffService {
         staffRequestDto.setId(saveStaff.getId());
         StaffKpiDto staffKpiDto = StaffKpiMapper.mapToStaffKpiDto(staffRequestDto);
         StaffKpiDto saveKpi = staffKpiService.addStaffKpi(staffKpiDto);
-        StaffKpi staffKpi = staffKpiRepository.findById(saveKpi.getId())
+        StaffKpi staffKpi = staffKpiRepository.findById(saveKpi.getKpiId())
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:"));
         saveStaff.getStaffKpis().add(staffKpi);
 
@@ -89,6 +89,7 @@ public class StaffImplementation implements StaffService {
                 .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
 
         long updatedTimestamp = System.currentTimeMillis();
+        staff.setCreatedDate(staff.getCreatedDate());
         staff.setStaffName(staffDto.getStaffName());
         staff.setStaffId(staffDto.getStaffId());
         staff.setStaffOffice(staffDto.getStaffOffice());
@@ -99,6 +100,9 @@ public class StaffImplementation implements StaffService {
         Group group = groupRepository.findById(staffDto.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + staffDto.getGroupId()));
         staff.setGroup(group);
+
+        StaffKpiDto staffKpiDto = StaffKpiMapper.mapToStaffKpiDto(staffDto);
+        staffKpiService.updateStaffKpiByStaffId(staff.getId(), staffKpiDto);
         Staff updatedStaff = staffRepository.save(staff);
         return StaffMapper.mapToStaffDto(updatedStaff);
     }

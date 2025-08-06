@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 public class OrderDetailDto {
     private String orderDetailId;
     private String drawingCodeId;
+    private String drawingCodeName;
     private String orderId;
+    private String poNumber;
     private String orderCode;
     private int quantity;
     private String orderType;

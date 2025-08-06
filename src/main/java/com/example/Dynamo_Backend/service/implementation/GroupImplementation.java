@@ -82,4 +82,10 @@ public class GroupImplementation implements GroupService {
                 .toList();
     }
 
+    @Override
+    public List<GroupDto> getGroupByGroupType(String groupType) {
+        List<Group> groups = groupRepository.findByGroupType(groupType);
+        return groups.stream().map(GroupMapper::mapToGroupDto).toList();
+    }
+
 }

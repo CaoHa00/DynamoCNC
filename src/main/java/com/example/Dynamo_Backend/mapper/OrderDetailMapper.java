@@ -5,17 +5,19 @@ import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class OrderDetailMapper {
-    public static OrderDetailDto mapToOrderDetailDto(OrderDetail OrderDetail) {
+    public static OrderDetailDto mapToOrderDetailDto(OrderDetail orderDetail) {
         OrderDetailDto orderDetailDto = new OrderDetailDto();
 
-        orderDetailDto.setOrderDetailId(OrderDetail.getOrderDetailId());
-        orderDetailDto.setDrawingCodeId(OrderDetail.getDrawingCode().getDrawingCodeId());
-        orderDetailDto.setOrderId(OrderDetail.getOrder().getOrderId());
-        orderDetailDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(OrderDetail.getCreatedDate()));
-        orderDetailDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(OrderDetail.getUpdatedDate()));
-        orderDetailDto.setOrderCode(OrderDetail.getOrderCode());
-        orderDetailDto.setOrderType(OrderDetail.getOrderType());
-        orderDetailDto.setQuantity(OrderDetail.getQuantity());
+        orderDetailDto.setOrderDetailId(orderDetail.getOrderDetailId());
+        orderDetailDto.setDrawingCodeId(orderDetail.getDrawingCode().getDrawingCodeId());
+        orderDetailDto.setDrawingCodeName(orderDetail.getDrawingCode().getDrawingCodeName());
+        orderDetailDto.setPoNumber(orderDetail.getOrder().getPoNumber());
+        orderDetailDto.setOrderId(orderDetail.getOrder().getOrderId());
+        orderDetailDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getCreatedDate()));
+        orderDetailDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getUpdatedDate()));
+        orderDetailDto.setOrderCode(orderDetail.getOrderCode());
+        orderDetailDto.setOrderType(orderDetail.getOrderType());
+        orderDetailDto.setQuantity(orderDetail.getQuantity());
         return orderDetailDto;
     }
 

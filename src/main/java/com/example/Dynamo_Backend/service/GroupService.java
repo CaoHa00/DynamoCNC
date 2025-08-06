@@ -16,4 +16,7 @@ public interface GroupService {
     List<GroupDto> getGroups();
 
     List<GroupDto> getStaffStatusGroup();
+
+    List<GroupDto> getGroupByGroupType(String groupType);
+
 }

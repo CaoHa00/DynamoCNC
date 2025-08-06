@@ -9,7 +9,7 @@ public interface StaffKpiService {
 
     StaffKpiDto updateStaffKpi(Integer Id, StaffKpiDto staffKpiDto);
 
-    StaffKpiDto updateStaffKpiByStaffId(Integer staffId, StaffKpiDto staffKpiDto);
+    StaffKpiDto updateStaffKpiByStaffId(String Id, StaffKpiDto staffKpiDto);
 
     StaffKpiDto getStaffKpiById(Integer staffId);
 

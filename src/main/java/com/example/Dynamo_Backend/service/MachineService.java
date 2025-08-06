@@ -9,7 +9,7 @@ public interface MachineService {
 
     MachineDto addMachine(MachineRequestDto machineDto);
 
-    MachineDto updateMachine(Integer Id, MachineDto machineDto);
+    MachineDto updateMachine(Integer Id, MachineRequestDto machineDto);
 
     MachineDto getMachineById(Integer Id);
 

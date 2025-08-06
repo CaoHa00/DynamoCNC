@@ -25,7 +25,7 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto addStaffKpi(StaffKpiDto staffKpiDto) {
         long createdTimestamp = System.currentTimeMillis();
-        Staff staff = staffRepository.findByStaffId(staffKpiDto.getStaffId())
+        Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
                 .orElseThrow(() -> new RuntimeException("StaffKpiKpi is not found:" + staffKpiDto.getStaffId()));
         StaffKpi staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
         staffKpi.setStaff(staff);
@@ -40,7 +40,8 @@ public class StaffKpiImplementation implements StaffKpiService {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
-        Staff staff = staffRepository.findByStaffId(staffKpiDto.getStaffId())
+        String a = staffKpiDto.getStaffId();
+        Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
         staffKpi.setStaff(staff);
         staffKpi.setYear(staffKpiDto.getYear());
@@ -57,16 +58,18 @@ public class StaffKpiImplementation implements StaffKpiService {
     }
 
     @Override
-    public StaffKpiDto updateStaffKpiByStaffId(Integer staffId, StaffKpiDto staffKpiDto) {
+    public StaffKpiDto updateStaffKpiByStaffId(String staffId, StaffKpiDto staffKpiDto) {
         long updatedTimestamp = System.currentTimeMillis();
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
-        StaffKpi staffKpi = staffKpiRepository.findByStaff_staffId(staffId).stream()
-                .filter(kpi -> currentMonth.equals(String.format("%02d", kpi.getMonth())))
+        String currentYear = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
+        StaffKpi staffKpi = staffKpiRepository.findByStaff_Id(staffId).stream()
+                .filter(kpi -> currentMonth.equals(String.format("%02d", kpi.getMonth()))
+                        && currentYear.equals(String.format("%02d", kpi.getYear())))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException(
                         "No staffKpi found for staff ID: " + staffId));
 
-        Staff staff = staffRepository.findByStaffId(staffId)
+        Staff staff = staffRepository.findById(staffId)
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
         staffKpi.setStaff(staff);
         staffKpi.setYear(staffKpiDto.getYear());
@@ -77,6 +80,9 @@ public class StaffKpiImplementation implements StaffKpiService {
         staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
         staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
         staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
+        if (staffKpiDto.getCreatedDate() == null) {
+            staffKpi.setCreatedDate(staffKpi.getCreatedDate());
+        }
         staffKpi.setUpdatedDate(updatedTimestamp);
         StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
         return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);

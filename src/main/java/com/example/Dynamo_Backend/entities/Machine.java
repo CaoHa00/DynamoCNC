@@ -37,6 +37,7 @@ public class Machine {
     @Column(name = "machine_type", nullable = false)
     private String machineType;
 
+    // Consider as machineId, change name later
     @Column(name = "machine_group", nullable = true)
     private String machineGroup;
 

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class StaffKpiDto {
-    private Integer Id;
+    private Integer kpiId;
     private Integer year;
     private Integer month;
     private Float pgTimeGoal;
@@ -19,5 +19,7 @@ public class StaffKpiDto {
     private Float kpi;
     private String createdDate;
     private String updatedDate;
-    private Integer staffId;
+    private String staffId;
+    private Integer Id;
+    private String staffName;
 }

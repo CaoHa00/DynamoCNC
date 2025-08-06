@@ -39,10 +39,10 @@ public class MachineKpiController {
 
     }
 
-    @PutMapping("/{machine_id}")
-    public ResponseEntity<MachineKpiDto> updateMachineKpi(@PathVariable("machine_id") Integer machineId,
+    @PutMapping("/{id}")
+    public ResponseEntity<MachineKpiDto> updateMachineKpi(@PathVariable("id") Integer Id,
             @RequestBody MachineKpiDto machineKpiDto) {
-        MachineKpiDto updateMachineKpis = machineKpiService.updateMachineKpiByMachineId(machineId, machineKpiDto);
+        MachineKpiDto updateMachineKpis = machineKpiService.updateMachineKpi(Id, machineKpiDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateMachineKpis);
     }
 
