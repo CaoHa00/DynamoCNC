@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.OperateHistoryDto;
 import com.example.Dynamo_Backend.dto.StaffDto;
-import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.OperateHistory;
@@ -39,7 +38,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                 String machineId = arr[0];
                 String status = arr[1];
                 DrawingCodeProcessDto drawingCodeProcessDto = drawingCodeProcessService
-                                .getDrawingCodeProcessDtoByMachineId(Integer.parseInt(machineId));
+                                .getProcessDtoByMachineId(Integer.parseInt(machineId));
                 OperateHistory operateHistory = null;
                 long currentTimestamp = System.currentTimeMillis();
                 CurrentStaff currentStaff = currentStaffRepository

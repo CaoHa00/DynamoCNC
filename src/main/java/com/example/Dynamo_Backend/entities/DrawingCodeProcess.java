@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -96,8 +97,12 @@ public class DrawingCodeProcess {
     @JsonManagedReference(value = "stats-process")
     private List<Log> logs;
 
-    @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<Plan> plans;
+    private Plan plan;
+
+    @OneToOne(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private ProcessTime processTime;
 
 }

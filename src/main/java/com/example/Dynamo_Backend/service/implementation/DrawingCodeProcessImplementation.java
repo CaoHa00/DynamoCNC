@@ -60,9 +60,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 if (drawingCodeProcessDto.getIsPlan() == 1) {
                         PlanDto plan = DrawingCodeProcessMapper.mapToPlanDto(drawingCodeProcessDto);
                         plan.setProcessId(savedrawingCodeProcess.getProcessId());
-                        planService.addPlan(plan);
-                        savedrawingCodeProcess.setPlans(new ArrayList<>());
-                        savedrawingCodeProcess.getPlans().add(PlanMapper.mapToPlan(plan));
+                        PlanDto planDto = planService.addPlan(plan);
+                        savedrawingCodeProcess.setPlan(PlanMapper.mapToPlan(planDto));
                 }
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);
         }
@@ -89,7 +88,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
                 return DrawingCodeProcessMapper.toDto(
                                 OrderDetailMapper.mapToOrderDetailDto(drawingCodeProcess.getOrderDetail()),
-                                MachineMapper.mapToMachineDto(drawingCodeProcess.getMachine()), savedrawingCodeProcess);
+                                MachineMapper.mapToMachineDto(drawingCodeProcess.getMachine()), savedrawingCodeProcess,
+                                null, null, null);
         }
         // @Override
         // public DrawingCodeProcessResponseDto updateDrawingCodeProcess(String
@@ -163,7 +163,27 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 MachineDto machineDto = (machine != null)
                                 ? MachineMapper.mapToMachineDto(machine)
                                 : null;
-                return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, drawingCodeProcess);
+                return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, drawingCodeProcess, null, null, null);
+        }
+
+        @Override
+        public DrawingCodeProcessDto getProcessDtoByMachineId(Integer machineId) {
+                DrawingCodeProcess drawingCodeProcess = new DrawingCodeProcess();
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_MachineId(machineId);
+                List<DrawingCodeProcess> currentProcess = new ArrayList<>();
+                for (DrawingCodeProcess process : processes) {
+                        if (process.getProcessStatus() == 2) {
+                                currentProcess.add(process);
+                        }
+                }
+                if (currentProcess.size() > 1) {
+                        new RuntimeException("Have more than 1 processes in progess!");
+                } else if (currentProcess.size() == 1) {
+                        drawingCodeProcess = currentProcess.get(0);
+                } else {
+                        return new DrawingCodeProcessDto();
+                }
+                return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(drawingCodeProcess);
         }
 
         @Override
@@ -188,7 +208,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         }
 
         @Override
-        public List<DrawingCodeProcessResponseDto> getAll() {
+        public List<DrawingCodeProcessResponseDto> getAllTodoProcesses() {
                 List<DrawingCodeProcess> all = drawingCodeProcessRepository.findAll();
                 List<DrawingCodeProcess> todoProcesses = new ArrayList<>();
                 for (DrawingCodeProcess process : all) {
@@ -202,7 +222,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         MachineDto machineDto = (machine != null)
                                         ? MachineMapper.mapToMachineDto(machine)
                                         : null;
-                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process);
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, null, null, null);
                 }).toList();
         }
 
@@ -426,22 +446,32 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         }
 
         @Override
-        public DrawingCodeProcessDto getDrawingCodeProcessDtoByMachineId(Integer machineId) {
-                DrawingCodeProcess drawingCodeProcess = new DrawingCodeProcess();
-                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_MachineId(machineId);
-                List<DrawingCodeProcess> currentProcess = new ArrayList<>();
-                for (DrawingCodeProcess process : processes) {
-                        if (process.getProcessStatus() == 2) {
-                                currentProcess.add(process);
-                        }
-                }
-                if (currentProcess.size() > 1) {
-                        new RuntimeException("Have more than 1 processes in progess!");
-                } else if (currentProcess.size() == 1) {
-                        drawingCodeProcess = currentProcess.get(0);
-                } else {
-                        return new DrawingCodeProcessDto();
-                }
-                return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(drawingCodeProcess);
+        public List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned) {
+                List<DrawingCodeProcess> all = drawingCodeProcessRepository.findByIsPlan(planned);
+                return all.stream().map(process -> {
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapToOrderDetailDto(process.getOrderDetail());
+                        Machine machine = process.getMachine();
+                        MachineDto machineDto = (machine != null)
+                                        ? MachineMapper.mapToMachineDto(machine)
+                                        : null;
+                        PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+                        ProcessTimeDto processTimeDto = (process.getProcessTime() != null)
+                                        ? ProcessTimeMapper.mapToProcessTimeDto(process.getProcessTime())
+                                        : null;
+                        List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                                        ? process.getOperateHistories().stream().map(operate -> {
+                                                Staff staff = staffRepository.findById(operate.getStaff().getId())
+                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                "Staff is not found for process: "
+                                                                                                + operate.getStaff()
+                                                                                                                .getId()));
+                                                return StaffMapper.mapToStaffDto(staff);
+                                        }).toList()
+                                        : null;
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, staffDtos, planDto,
+                                        processTimeDto);
+                }).toList();
         }
+
 }
