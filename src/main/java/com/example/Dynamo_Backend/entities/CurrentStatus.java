@@ -22,9 +22,14 @@ public class CurrentStatus {
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(columnDefinition = "CHAR(36)")
     private String Id;
-    private String machineId;
+    @Column(name = "machineId", nullable = false)
+    private Integer machineId;
+    @Column(name = "staffId", nullable = true)
     private String staffId;
+    @Column(name = "processId", nullable = true)
     private String processId;
+    @Column(name = "time", nullable = true)
     private String time;
+    @Column(name = "status", nullable = false)
     private String status;
 }

@@ -2,6 +2,8 @@ package com.example.Dynamo_Backend.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.GroupDto;
 
 public interface GroupService {
@@ -18,5 +20,7 @@ public interface GroupService {
     List<GroupDto> getStaffStatusGroup();
 
     List<GroupDto> getGroupByGroupType(String groupType);
+
+    void importGroupFromExcel(MultipartFile file);
 
 }

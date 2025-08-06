@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
@@ -48,6 +49,12 @@ public class StaffController {
     public ResponseEntity<StaffDto> getStaffById(@PathVariable("staff_id") String Id) {
         StaffDto staff = staffService.getStaffById(Id);
         return ResponseEntity.ok(staff);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Void> uploadStaffExcel(@RequestParam("file") MultipartFile file) {
+        staffService.importStaffFromExcel(file);
+        return ResponseEntity.ok().build();
     }
 
 }

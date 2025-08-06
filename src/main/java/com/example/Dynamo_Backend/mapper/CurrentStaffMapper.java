@@ -10,6 +10,7 @@ public class CurrentStaffMapper {
         currentStaffDto.setAssignedAt(DateTimeUtil.convertTimestampToString(currentStaff.getAssignedAt()));
         currentStaffDto.setMachineId(currentStaff.getMachine().getMachineId());
         currentStaffDto.setStaffId(currentStaff.getStaff().getId());
+        currentStaffDto.setStaffIdNumber(currentStaff.getStaff().getStaffId());
         currentStaffDto.setId(currentStaff.getId());
         return currentStaffDto;
 

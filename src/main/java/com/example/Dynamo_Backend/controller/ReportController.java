@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.ReportDto;
 import com.example.Dynamo_Backend.service.ReportService;
@@ -51,6 +53,12 @@ public class ReportController {
     @DeleteMapping("/{report_id}")
     public ResponseEntity<Void> deleteReport(@PathVariable("report_id") Integer Id) {
         reportService.deleteReport(Id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Void> uploadReportExcel(@RequestParam("file") MultipartFile file) {
+        reportService.importReportFromExcel(file);
         return ResponseEntity.ok().build();
     }
 }

@@ -86,9 +86,10 @@ public class DrawingCodeProcessController {
     }
 
     @GetMapping("machine/{machineId}")
-    public ResponseEntity<DrawingCodeProcessDto> getDrawingCodeProcessByMachineId(
+    public ResponseEntity<DrawingCodeProcessResponseDto> getDrawingCodeProcessByMachineId(
             @PathVariable("machineId") Integer Id) {
-        DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService.getDrawingCodeProcessByMachineId(Id);
+        DrawingCodeProcessResponseDto drawingCodeProcess = drawingCodeProcessService
+                .getDrawingCodeProcessByMachineId(Id);
         return ResponseEntity.ok(drawingCodeProcess);
     }
 

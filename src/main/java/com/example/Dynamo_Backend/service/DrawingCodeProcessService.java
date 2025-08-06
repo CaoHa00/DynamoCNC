@@ -14,7 +14,9 @@ public interface DrawingCodeProcessService {
 
     DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
 
-    DrawingCodeProcessDto getDrawingCodeProcessByMachineId(Integer machineId);
+    DrawingCodeProcessResponseDto getDrawingCodeProcessByMachineId(Integer machineId);
+
+    DrawingCodeProcessDto getDrawingCodeProcessDtoByMachineId(Integer machineId);
 
     void deleteDrawingCodeProcess(String drawingCodeProcessId);
 

@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CurrentStaffDto {
-    private Long Id;
-    private String staffId;
-    private Integer staffIdNumber;
+public class CurrentStatusDto {
+    private String id;
     private Integer machineId;
-    private String assignedAt;
+    private String status;
+    private String time;
 }

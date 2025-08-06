@@ -2,6 +2,8 @@ package com.example.Dynamo_Backend.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.StaffKpiDto;
 
 public interface StaffKpiService {
@@ -16,4 +18,6 @@ public interface StaffKpiService {
     void deleteStaffKpi(Integer Id);
 
     List<StaffKpiDto> getStaffKpis();
+
+    void importStaffKpiFromExcel(MultipartFile file);
 }
