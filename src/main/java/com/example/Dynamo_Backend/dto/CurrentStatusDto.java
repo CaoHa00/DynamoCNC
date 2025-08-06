@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class CurrentStatusDto {
     private String id;
-    private String machineId;
+    private Integer machineId;
     private String status;
     private String time;
 }

@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.OrderDto;
 import com.example.Dynamo_Backend.service.OrderService;
 
@@ -53,5 +56,11 @@ public class OrderController {
     public ResponseEntity<OrderDto> getOrderById(@PathVariable("order_id") String Id) {
         OrderDto orders = orderService.getOrderById(Id);
         return ResponseEntity.ok(orders);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Void> uploadOrderExcel(@RequestParam("file") MultipartFile file) {
+        orderService.importOrderFromExcel(file);
+        return ResponseEntity.ok().build();
     }
 }

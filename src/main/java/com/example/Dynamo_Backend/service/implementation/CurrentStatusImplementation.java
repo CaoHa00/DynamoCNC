@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.config.MyWebSocketHandler;
+import com.example.Dynamo_Backend.dto.CurrentStatusDto;
 import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
@@ -33,7 +34,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     public void addCurrentStatus(String payload) {
         String[] arr = payload.split("-");
         String machineId = arr[0];
-        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineId);
+        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(Integer.parseInt(machineId));
         if (currentStatus == null) {
             currentStatus = new CurrentStatus();
         }
@@ -56,7 +57,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus.setProcessId(null);
         }
 
-        currentStatus.setMachineId(arr[0]);
+        currentStatus.setMachineId(Integer.parseInt(arr[0]));
         currentStatus.setStatus(arr[1]);
 
         if (arr.length < 3) {
@@ -86,6 +87,48 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     public List<CurrentStatus> all() {
         List<CurrentStatus> all = currentStatusRepository.findAll();
         return all;
+    }
+
+    @Override
+    public CurrentStatusDto addCurrentStatus(CurrentStatusDto currentStatusDto) {
+        CurrentStatus currentStatus = new CurrentStatus();
+        currentStatus.setMachineId(currentStatusDto.getMachineId());
+        currentStatus.setStatus(currentStatusDto.getStatus());
+        currentStatus.setTime(currentStatusDto.getTime());
+        currentStatus.setMachineId(currentStatusDto.getMachineId());
+        currentStatus = currentStatusRepository.save(currentStatus);
+        return CurrentStatusMapper.mapToCurrentStatusDto(currentStatus);
+    }
+
+    @Override
+    public CurrentStatusDto updateCurrentStatus(String id, CurrentStatusDto currentStatusDto) {
+        CurrentStatus currentStatus = currentStatusRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("CurrentStatus not found with id: " + id));
+        currentStatus.setMachineId(currentStatusDto.getMachineId());
+        currentStatus.setStatus(currentStatusDto.getStatus());
+        currentStatus.setTime(currentStatusDto.getTime());
+        currentStatus = currentStatusRepository.save(currentStatus);
+        return CurrentStatusMapper.mapToCurrentStatusDto(currentStatus);
+    }
+
+    @Override
+    public void deleteCurrentStatus(String currentStatusId) {
+        currentStatusRepository.deleteById(currentStatusId);
+    }
+
+    @Override
+    public CurrentStatusDto getCurrentStatusById(String id) {
+        CurrentStatus currentStatus = currentStatusRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("CurrentStatus not found with id: " + id));
+        return CurrentStatusMapper.mapToCurrentStatusDto(currentStatus);
+    }
+
+    @Override
+    public List<CurrentStatusDto> getAllCurrentStatus() {
+        List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
+        return currentStatuses.stream()
+                .map(CurrentStatusMapper::mapToCurrentStatusDto)
+                .toList();
     }
 
 }

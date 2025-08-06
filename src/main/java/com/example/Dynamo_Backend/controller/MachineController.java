@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
@@ -56,5 +58,11 @@ public class MachineController {
     public ResponseEntity<MachineDto> getMachineById(@PathVariable("machine_id") Integer Id) {
         MachineDto machine = machineService.getMachineById(Id);
         return ResponseEntity.ok(machine);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Void> uploadMachineExcel(@RequestParam("file") MultipartFile file) {
+        machineService.importMachineFromExcel(file);
+        return ResponseEntity.ok().build();
     }
 }
