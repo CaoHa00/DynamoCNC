@@ -5,18 +5,24 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import javax.crypto.Mac;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.config.MyWebSocketHandler;
 import com.example.Dynamo_Backend.dto.CurrentStatusDto;
+import com.example.Dynamo_Backend.dto.StaffDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.mapper.CurrentStatusMapper;
+import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
+import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.LogService;
 
@@ -28,6 +34,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     private final CurrentStatusRepository currentStatusRepository;
     private final CurrentStaffRepository currentStaffRepository;
     private final DrawingCodeProcessRepository drawingCodeProcessRepository;
+    private final MachineRepository machineRepository;
     private final @Lazy LogService logService;
 
     @Override
@@ -67,11 +74,15 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setTime(arr[2]);
         }
-        DrawingCodeProcess process = drawingCodeProcessRepository
-                .findById(currentStatus.getProcessId())
-                .orElseThrow(() -> new RuntimeException("Process is not found when find process for currentStatus"));
+        if (currentStatus.getProcessId() != null) {
+            DrawingCodeProcess process = drawingCodeProcessRepository
+                    .findById(currentStatus.getProcessId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Process is not found when find process for currentStatus"));
 
-        logService.addLog(currentStatus, process, currentStaff.getStaff());
+            logService.addLog(currentStatus, process, currentStaff.getStaff());
+        }
+
         currentStatusRepository.save(currentStatus);
 
         List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
@@ -129,6 +140,38 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         return currentStatuses.stream()
                 .map(CurrentStatusMapper::mapToCurrentStatusDto)
                 .toList();
+    }
+
+    @Override
+    public List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId, String status) {
+        List<Machine> machines = machineRepository.findByGroup_GroupId(groupId);
+        if (machines.isEmpty()) {
+            return List.of(); // Return empty list
+        }
+        for (Machine machine : machines) {
+            CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
+            if (currentStatus == null || !currentStatus.getStatus().equals(status)) {
+                continue; // Skip if no status or status does not match
+            }
+            CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
+            StaffDto staffDto = currentStaff != null ? StaffMapper.mapToStaffDto(currentStaff.getStaff()) : null;
+            DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+                    .findById(currentStatus.getProcessId())
+                    .orElse(null);
+            String drawingCodeName = drawingCodeProcess != null
+                    ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
+                    : null;
+
+            CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
+                    currentStatus.getId(),
+                    MachineMapper.mapToMachineDto(machine),
+                    staffDto,
+                    drawingCodeName,
+                    currentStatus.getTime(),
+                    currentStatus.getStatus());
+            return List.of(responseDto);
+        }
+        throw new UnsupportedOperationException("Unimplemented method 'getCurrentStatusByGroupId'");
     }
 
 }
