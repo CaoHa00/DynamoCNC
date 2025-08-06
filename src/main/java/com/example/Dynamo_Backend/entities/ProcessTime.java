@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,7 +36,7 @@ public class ProcessTime {
     @Column(name = "offset_time", nullable = false)
     private Float offsetTime;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "drawing_code_process_id", nullable = false)
     @JsonBackReference
     private DrawingCodeProcess drawingCodeProcess;

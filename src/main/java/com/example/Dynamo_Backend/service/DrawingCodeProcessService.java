@@ -16,13 +16,15 @@ public interface DrawingCodeProcessService {
 
     DrawingCodeProcessResponseDto getDrawingCodeProcessByMachineId(Integer machineId);
 
-    DrawingCodeProcessDto getDrawingCodeProcessDtoByMachineId(Integer machineId);
+    DrawingCodeProcessDto getProcessDtoByMachineId(Integer machineId);
 
     void deleteDrawingCodeProcess(String drawingCodeProcessId);
 
     List<DrawingCodeProcessDto> getAllDrawingCodeProcess();
 
-    List<DrawingCodeProcessResponseDto> getAll();
+    List<DrawingCodeProcessResponseDto> getAllTodoProcesses();
+
+    List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned);
 
     void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
 

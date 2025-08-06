@@ -34,5 +34,5 @@ public class DrawingCodeProcessDto {
     private Integer machineId;
     private List<OperateHistory> staffHistories;
     private List<Log> statstistics;
-    private List<Plan> plans;
+    private Plan plan;
 }

@@ -1,9 +1,13 @@
 package com.example.Dynamo_Backend.mapper;
 
+import java.util.List;
+
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.dto.PlanDto;
+import com.example.Dynamo_Backend.dto.ProcessTimeDto;
+import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
@@ -82,11 +86,13 @@ public class DrawingCodeProcessMapper {
                                                 : null,
                                 drawingCodeProcess.getOperateHistories(),
                                 drawingCodeProcess.getLogs(),
-                                drawingCodeProcess.getPlans());
+                                drawingCodeProcess.getPlan() != null ? drawingCodeProcess.getPlan()
+                                                : null);
         }
 
         public static DrawingCodeProcessResponseDto toDto(OrderDetailDto orderDetailDto, MachineDto machineDto,
-                        DrawingCodeProcess drawingCodeProcess) {
+                        DrawingCodeProcess drawingCodeProcess, List<StaffDto> staffDtos, PlanDto planDto,
+                        ProcessTimeDto processTimeDto) {
                 DrawingCodeProcessResponseDto dto = new DrawingCodeProcessResponseDto();
                 dto.setProcessId(drawingCodeProcess.getProcessId());
                 dto.setPartNumber(drawingCodeProcess.getPartNumber());
@@ -95,10 +101,6 @@ public class DrawingCodeProcessMapper {
                 dto.setProcessType(drawingCodeProcess.getProcessType());
                 dto.setProcessStatus(drawingCodeProcess.getProcessStatus());
                 dto.setPgTime(drawingCodeProcess.getPgTime());
-                // dto.setPgRunTime(drawingCodeProcess.getPgRunTime());
-                // dto.setOffsetRunTime(drawingCodeProcess.getOffsetRunTime());
-                // dto.setTotalRunningTime(drawingCodeProcess.getTotalRunningTime());
-                // dto.setTotalStopTime(drawingCodeProcess.getTotalStopTime());
                 dto.setStartTime(DateTimeUtil.convertTimestampToString(drawingCodeProcess.getStartTime()));
                 dto.setEndTime(DateTimeUtil.convertTimestampToString(drawingCodeProcess.getEndTime()));
                 dto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(drawingCodeProcess.getCreatedDate()));
@@ -108,9 +110,17 @@ public class DrawingCodeProcessMapper {
                 if (machineDto != null) {
                         dto.setMachineDto(machineDto);
                 }
+                if (planDto != null) {
+                        dto.setPlanDto(planDto);
+                }
+                if (processTimeDto != null) {
+                        dto.setProcessTimeDto(processTimeDto);
+                }
+                if (staffDtos != null) {
+                        dto.setStaffDtos(staffDtos);
+                }
                 dto.setOrderDetailDto(orderDetailDto);
                 return dto;
-
         }
 
         public static PlanDto mapToPlanDto(DrawingCodeProcessResquestDto drawingCodeProcessResquestDto) {

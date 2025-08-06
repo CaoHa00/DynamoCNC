@@ -29,7 +29,19 @@ public class DrawingCodeProcessController {
 
     @GetMapping
     public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAlldrawingCodes() {
-        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getAll();
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getAllTodoProcesses();
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
+    @GetMapping("/planned")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllPlannedDrawingCodes() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(1);
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
+    @GetMapping("/unplanned")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllUnplannedDrawingCodes() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(0);
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
