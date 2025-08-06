@@ -19,5 +19,8 @@ public interface GroupService {
 
     List<GroupDto> getStaffStatusGroup();
 
+    List<GroupDto> getGroupByGroupType(String groupType);
+
     void importGroupFromExcel(MultipartFile file);
+
 }

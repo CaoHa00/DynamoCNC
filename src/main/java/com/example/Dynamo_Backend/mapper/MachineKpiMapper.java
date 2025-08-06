@@ -39,7 +39,7 @@ public class MachineKpiMapper {
         machineKpiDto.setMonth(machineKpi.getMonth());
         machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
         machineKpiDto.setOee(machineKpi.getOee());
-
+        machineKpiDto.setMachineName(machineKpi.getMachine().getMachineName());
         return machineKpiDto;
     }
 

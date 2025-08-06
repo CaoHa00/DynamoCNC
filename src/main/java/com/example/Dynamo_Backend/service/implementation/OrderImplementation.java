@@ -12,6 +12,7 @@ import com.example.Dynamo_Backend.entities.Order;
 import com.example.Dynamo_Backend.mapper.OrderMapper;
 import com.example.Dynamo_Backend.repository.OrderRepository;
 import com.example.Dynamo_Backend.service.DrawingCodeService;
+import com.example.Dynamo_Backend.service.OrderDetailService;
 import com.example.Dynamo_Backend.service.OrderService;
 
 import lombok.AllArgsConstructor;
@@ -45,7 +46,11 @@ public class OrderImplementation implements OrderService {
 
         order.setPoNumber(orderDto.getPoNumber());
 
+        order.setStatus(orderDto.getStatus());
+
         Order updateOrder = orderRepository.save(order);
+
+        // orderDetailService.updateOrderCode("", orderId);
         return OrderMapper.mapToOrderDto(updateOrder);
     }
 

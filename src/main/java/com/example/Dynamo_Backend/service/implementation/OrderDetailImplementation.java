@@ -35,12 +35,12 @@ public class OrderDetailImplementation implements OrderDetailService {
         DrawingCode newDrawingCode = DrawingCodeMapper.mapToDrawingCode(DrawingCode);
         Order newOrder = OrderMapper.mapToOrder(order);
         long createdTimestamp = System.currentTimeMillis();
-
+        String orderCode = newOrder.getPoNumber() + "_" + newDrawingCode.getDrawingCodeName();
+        orderDetail.setOrderCode(orderCode);
         orderDetail.setDrawingCode(newDrawingCode);
         orderDetail.setOrder(newOrder);
         orderDetail.setCreatedDate(createdTimestamp);
         orderDetail.setUpdatedDate(createdTimestamp);
-
         OrderDetail saveOrderDetail = orderDetailRepository.save(orderDetail);
         return OrderDetailMapper.mapToOrderDetailDto(saveOrderDetail);
     }
@@ -48,18 +48,20 @@ public class OrderDetailImplementation implements OrderDetailService {
     @Override
     public OrderDetailDto updateOrderDetail(String Id, OrderDetailDto orderDetailDto) {
         OrderDetail orderDetail = orderDetailRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("OrderDetail is not found:" + Id));
+                .orElseThrow(() -> new RuntimeException("OrderD    etail is not found:" + Id));
         DrawingCodeDto drawingCode = drawingCodeService.getDrawingCodeById(orderDetailDto.getDrawingCodeId());
         OrderDto order = orderService.getOrderById(orderDetailDto.getOrderId());
         DrawingCode updateDrawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCode);
         long updatedTimestamp = System.currentTimeMillis();
-
+        if (orderDetailDto.getCreatedDate() == null) {
+            orderDetail.setCreatedDate(orderDetail.getCreatedDate());
+        }
         Order updateOrder = OrderMapper.mapToOrder(order);
         orderDetail.setOrder(updateOrder);
         orderDetail.setDrawingCode(updateDrawingCode);
         orderDetail.setUpdatedDate(updatedTimestamp);
         orderDetail.setQuantity(orderDetailDto.getQuantity());
-        orderDetail.setOrderCode(orderDetailDto.getOrderCode());
+        orderDetail.setOrderCode(updateOrder.getPoNumber() + "_" + updateDrawingCode.getDrawingCodeName());
         orderDetail.setOrderType(orderDetailDto.getOrderType());
         OrderDetail updatedOrderDetail = orderDetailRepository.save(orderDetail);
         return OrderDetailMapper.mapToOrderDetailDto(updatedOrderDetail);
@@ -83,6 +85,25 @@ public class OrderDetailImplementation implements OrderDetailService {
     public List<OrderDetailDto> getOrderDetails() {
         List<OrderDetail> orderDetails = orderDetailRepository.findAll();
         return orderDetails.stream().map(OrderDetailMapper::mapToOrderDetailDto).toList();
+    }
+
+    @Override
+    public void updateOrderCode(String drawingCodeId, String orderId) {
+        // OrderDetail orderDetail = null;
+        // String drawingCodeName = "";
+        // String poNumber = "";
+        // if ((drawingCodeId != null)) {
+        // orderDetail =
+        // orderDetailRepository.findByDrawingCode(drawingCodeId).orElse(null);
+        // drawingCodeName = orderDetail.getDrawingCode().getDrawingCodeName();
+        // poNumber = orderDetail.getOrder().getPoNumber();
+        // } else {
+        // orderDetail = orderDetailRepository.findByOrder(orderId).orElse(null);
+        // drawingCodeName = orderDetail.getDrawingCode().getDrawingCodeName();
+        // poNumber = orderDetail.getOrder().getPoNumber();
+        // }
+
+        // orderDetail.setOrderCode(poNumber + "_" + drawingCodeName);
     }
 
 }

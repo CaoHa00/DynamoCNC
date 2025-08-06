@@ -43,7 +43,7 @@ public class MachineKpi {
     private Float oee;
 
     @Column(name = "machine_mining_target", nullable = false)
-    private Integer machineMiningTarget;
+    private Float machineMiningTarget;
 
     @Column(name = "createdDate", nullable = false)
     private Long createdDate;

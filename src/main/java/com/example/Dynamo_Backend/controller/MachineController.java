@@ -43,7 +43,7 @@ public class MachineController {
 
     @PutMapping("/{machine_id}")
     public ResponseEntity<MachineDto> updateMachine(@PathVariable("machine_id") Integer Id,
-            @RequestBody MachineDto machineDto) {
+            @RequestBody MachineRequestDto machineDto) {
         MachineDto updateMachines = machineService.updateMachine(Id, machineDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateMachines);
     }

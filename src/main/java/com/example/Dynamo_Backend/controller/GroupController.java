@@ -64,6 +64,14 @@ public class GroupController {
         return ResponseEntity.status(HttpStatus.OK).body(groups);
     }
 
+
+    @GetMapping("/groupType/{group_type}")
+    public ResponseEntity<List<GroupDto>> getGroups(@PathVariable("group_type") String groupType) {
+        List<GroupDto> groups = groupService.getGroupByGroupType(groupType);
+        return ResponseEntity.status(HttpStatus.OK).body(groups);
+    }
+
+
     @PostMapping("/upload")
     public ResponseEntity<Void> uploadGroupExcel(@RequestParam("file") MultipartFile file) {
         groupService.importGroupFromExcel(file);

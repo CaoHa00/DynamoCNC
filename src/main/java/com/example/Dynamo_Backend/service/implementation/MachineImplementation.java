@@ -54,9 +54,9 @@ public class MachineImplementation implements MachineService {
 
         machineDto.setMachineId(saveMachine.getMachineId());
         MachineKpiDto machineKpiDto = MachineKpiMapper.mapToMachineKpiDto(machineDto);
-        MachineKpiDto saveMachineKpiDto = machineKpiService.addMachineKpi(machineKpiDto);
-        saveMachine.setMachineKpis(new ArrayList<>());
-        saveMachine.getMachineKpis().add(MachineKpiMapper.mapToMachineKpi(saveMachineKpiDto));
+        machineKpiService.addMachineKpi(machineKpiDto);
+        // saveMachine.setMachineKpis(new ArrayList<>());
+        // saveMachine.getMachineKpis().add(MachineKpiMapper.mapToMachineKpi(saveMachineKpiDto));
 
         MachineDto result = MachineMapper.mapToMachineDto(saveMachine);
 
@@ -66,7 +66,7 @@ public class MachineImplementation implements MachineService {
     }
 
     @Override
-    public MachineDto updateMachine(Integer Id, MachineDto machineDto) {
+    public MachineDto updateMachine(Integer Id, MachineRequestDto machineDto) {
         Machine machine = machineRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
@@ -79,6 +79,8 @@ public class MachineImplementation implements MachineService {
         Group group = groupRepository.findById(machineDto.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + machineDto.getGroupId()));
         machine.setGroup(group);
+        MachineKpiDto machineKpiDto = MachineKpiMapper.mapToMachineKpiDto(machineDto);
+        machineKpiService.updateMachineKpiByMachineId(Id, machineKpiDto);
         Machine updatedMachine = machineRepository.save(machine);
         return MachineMapper.mapToMachineDto(updatedMachine);
     }

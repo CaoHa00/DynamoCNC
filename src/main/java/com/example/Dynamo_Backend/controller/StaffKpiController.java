@@ -44,7 +44,7 @@ public class StaffKpiController {
     @PutMapping("/{staff_id}")
     public ResponseEntity<StaffKpiDto> updateStaffKpi(@PathVariable("staff_id") Integer staffId,
             @RequestBody StaffKpiDto staffKpiDto) {
-        StaffKpiDto updateStaffKpis = staffKpiService.updateStaffKpiByStaffId(staffId, staffKpiDto);
+        StaffKpiDto updateStaffKpis = staffKpiService.updateStaffKpi(staffId, staffKpiDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateStaffKpis);
     }
 

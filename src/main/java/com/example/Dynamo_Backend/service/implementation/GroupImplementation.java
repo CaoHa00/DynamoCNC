@@ -87,6 +87,12 @@ public class GroupImplementation implements GroupService {
     }
 
     @Override
+    public List<GroupDto> getGroupByGroupType(String groupType) {
+        List<Group> groups = groupRepository.findByGroupType(groupType);
+        return groups.stream().map(GroupMapper::mapToGroupDto).toList();
+    }
+
+   @Override
     public void importGroupFromExcel(MultipartFile file) {
         try {
             InputStream inputStream = ((MultipartFile) file).getInputStream();

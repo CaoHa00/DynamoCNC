@@ -78,22 +78,21 @@ public class MachineKpiImplementation implements MachineKpiService {
     }
 
     @Override
-    public MachineKpiDto updateMachineKpiByMachineId(Integer machineId, MachineKpiDto machineKpiDto) {
+    public MachineKpiDto updateMachineKpiByMachineId(Integer Id, MachineKpiDto machineKpiDto) {
         long updatedTimestamp = System.currentTimeMillis();
-        String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
-        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineId(machineId).stream()
-                .filter(kpi -> currentMonth.equals(String.format("%02d", kpi.getMonth())))
-                .findFirst()
+        MachineKpi machineKpi = machineKpiRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException(
-                        "No machineKpi found for machine ID: " + machineId));
-
-        Machine machine = machineRepository.findById(machineId)
+                        "No machineKpi found for machine ID: " + Id));
+        Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
                 .orElseThrow(() -> new RuntimeException("MachineKpi is not found:" + machineKpiDto.getMachineId()));
         machineKpi.setMachine(machine);
         machineKpi.setYear(machineKpiDto.getYear());
         machineKpi.setMonth(machineKpiDto.getMonth());
         machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
         machineKpi.setOee(machineKpiDto.getOee());
+        if (machineKpiDto != null) {
+            machineKpi.setCreatedDate(machineKpi.getCreatedDate());
+        }
         machineKpi.setUpdatedDate(updatedTimestamp);
         MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
         return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
