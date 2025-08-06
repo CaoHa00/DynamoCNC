@@ -113,7 +113,7 @@ public class MachineKpiImplementation implements MachineKpiService {
                 String idCell = row.getCell(0).getStringCellValue();
                 String machineId = idCell.substring(idCell.length() - 3, idCell.length() - 1);
                 machineKpiDto.setMachineId(Integer.parseInt(machineId));
-                machineKpiDto.setMachineMiningTarget((int) row.getCell(4).getNumericCellValue());
+                machineKpiDto.setMachineMiningTarget((float) row.getCell(4).getNumericCellValue());
                 machineKpiDto.setOee((float) row.getCell(5).getNumericCellValue());
                 addMachineKpi(machineKpiDto);
             }
