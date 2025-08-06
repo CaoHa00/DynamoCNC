@@ -120,16 +120,19 @@ public class MachineImplementation implements MachineService {
                 if (row.getRowNum() == 0)
                     continue;
                 Machine machineDto = new Machine();
-                machineDto.setMachineId((int) row.getCell(0).getNumericCellValue());
+                String idCell = row.getCell(0).getStringCellValue();
+                String machineId = idCell.substring(idCell.length() - 3, idCell.length() - 1);
+                machineDto.setMachineId(Integer.parseInt(machineId));
                 machineDto.setMachineName(row.getCell(1).getStringCellValue());
-                machineDto.setMachineGroup(row.getCell(2).getStringCellValue());
-                machineDto.setMachineOffice(row.getCell(3).getStringCellValue());
-                machineDto.setMachineType(row.getCell(4).getStringCellValue());
-                machineDto.setStatus(1);
-                Group group = groupRepository.findByGroupName(row.getCell(5).getStringCellValue())
+                Group group = groupRepository.findByGroupName(row.getCell(2).getStringCellValue())
                         .orElseThrow(() -> new RuntimeException(
-                                "Group is not found when add machine by excel:" + row.getCell(5).getStringCellValue()));
+                                "Group is not found when add machine by excel:" + row.getCell(2).getStringCellValue()));
                 machineDto.setGroup(group);
+                machineDto.setMachineType(row.getCell(3).getStringCellValue());
+                machineDto.setMachineGroup(row.getCell(4).getStringCellValue());
+                machineDto.setMachineOffice(row.getCell(5).getStringCellValue());
+
+                machineDto.setStatus(1);
 
                 machineList.add(machineDto);
             }

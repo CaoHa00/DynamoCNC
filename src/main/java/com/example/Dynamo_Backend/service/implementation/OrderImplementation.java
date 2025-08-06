@@ -79,7 +79,13 @@ public class OrderImplementation implements OrderService {
                 if (row.getRowNum() == 0)
                     continue;
                 OrderDto orderDto = new OrderDto();
-                orderDto.setPoNumber(row.getCell(0).getStringCellValue());
+                Cell poNumberCell = row.getCell(0);
+                if (poNumberCell.getCellType() == CellType.NUMERIC) {
+                    orderDto.setPoNumber(String.format("%.0f", poNumberCell.getNumericCellValue()));
+                } else {
+                    orderDto.setPoNumber(poNumberCell.getStringCellValue());
+                }
+                orderDto.setStatus(1);
                 addOrder(orderDto);
             }
             workbook.close();

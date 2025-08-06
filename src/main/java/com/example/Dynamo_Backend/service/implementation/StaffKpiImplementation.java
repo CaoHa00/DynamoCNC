@@ -45,7 +45,7 @@ public class StaffKpiImplementation implements StaffKpiService {
                 .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findByStaffId(staffKpiDto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
+                .orElseThrow(() -> new RuntimeException("Staff is not found:" + staffKpiDto.getStaffId()));
         staffKpi.setStaff(staff);
         staffKpi.setYear(staffKpiDto.getYear());
         staffKpi.setMonth(staffKpiDto.getMonth());

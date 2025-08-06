@@ -119,18 +119,19 @@ public class GroupKpiImplementation implements GroupKpiService {
                 groupKpi.setYear(year);
                 groupKpi.setMonth(month);
                 groupKpi.setWeek(week);
-                groupKpi.setOffice(row.getCell(2).getStringCellValue());
+                groupKpi.setIsMonth(0);
+                groupKpi.setOffice(row.getCell(1).getStringCellValue());
+                Group group = groupRepository.findByGroupName(row.getCell(2).getStringCellValue())
+                        .orElseThrow(() -> new RuntimeException(
+                                "Group is not found when add group KPI by excel:"
+                                        + row.getCell(2).getStringCellValue()));
+                groupKpi.setGroup(group);
                 groupKpi.setWorkingHourGoal((int) row.getCell(3).getNumericCellValue());
                 groupKpi.setWorkingHourDifference((int) row.getCell(4).getNumericCellValue());
                 groupKpi.setWorkingHour((int) row.getCell(5).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);
-                Group group = groupRepository.findById(row.getCell(6).getStringCellValue())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Group is not found when add group KPI by excel:"
-                                        + row.getCell(6).getStringCellValue()));
-                groupKpi.setGroup(group);
                 groupKpiList.add(groupKpi);
             }
             groupKpiRepository.saveAll(groupKpiList);
@@ -153,20 +154,23 @@ public class GroupKpiImplementation implements GroupKpiService {
                 if (row.getRowNum() == 0)
                     continue;
                 GroupKpi groupKpi = new GroupKpi();
-                groupKpi.setYear((int) row.getCell(1).getNumericCellValue());
-                groupKpi.setMonth((int) row.getCell(2).getNumericCellValue());
+                groupKpi.setYear((int) row.getCell(0).getNumericCellValue());
+                groupKpi.setMonth((int) row.getCell(1).getNumericCellValue());
+                groupKpi.setWeek(0);
+                groupKpi.setIsMonth(1);
                 groupKpi.setOffice(row.getCell(2).getStringCellValue());
-                groupKpi.setWorkingHourGoal((int) row.getCell(3).getNumericCellValue());
-                groupKpi.setWorkingHourDifference((int) row.getCell(4).getNumericCellValue());
-                groupKpi.setWorkingHour((int) row.getCell(5).getNumericCellValue());
+                Group group = groupRepository.findByGroupName(row.getCell(3).getStringCellValue())
+                        .orElseThrow(() -> new RuntimeException(
+                                "Group is not found when add group KPI by excel:"
+                                        + row.getCell(3).getStringCellValue()));
+                groupKpi.setGroup(group);
+                groupKpi.setWorkingHourGoal((int) row.getCell(4).getNumericCellValue());
+                groupKpi.setWorkingHourDifference((int) row.getCell(5).getNumericCellValue());
+                groupKpi.setWorkingHour((int) row.getCell(6).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);
-                Group group = groupRepository.findById(row.getCell(6).getStringCellValue())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Group is not found when add group KPI by excel:"
-                                        + row.getCell(6).getStringCellValue()));
-                groupKpi.setGroup(group);
+
                 groupKpiList.add(groupKpi);
             }
             groupKpiRepository.saveAll(groupKpiList);
