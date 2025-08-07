@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.service.implementation;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.crypto.Mac;
@@ -145,19 +146,21 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     @Override
     public List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId, String status) {
         List<Machine> machines = machineRepository.findByGroup_GroupId(groupId);
+        List<CurrentStatusResponseDto> result = new ArrayList<>();
+
         if (machines.isEmpty()) {
             return List.of(); // Return empty list
         }
         for (Machine machine : machines) {
             CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
-            if (currentStatus == null || !currentStatus.getStatus().equals(status)) {
+            if (currentStatus == null || !currentStatus.getStatus().contains(status)) {
                 continue; // Skip if no status or status does not match
             }
             CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
             StaffDto staffDto = currentStaff != null ? StaffMapper.mapToStaffDto(currentStaff.getStaff()) : null;
-            DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+            DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null ? drawingCodeProcessRepository
                     .findById(currentStatus.getProcessId())
-                    .orElse(null);
+                    .orElse(null) : null;
             String drawingCodeName = drawingCodeProcess != null
                     ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
                     : null;
@@ -169,9 +172,9 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                     drawingCodeName,
                     currentStatus.getTime(),
                     currentStatus.getStatus());
-            return List.of(responseDto);
+            result.add(responseDto);
         }
-        throw new UnsupportedOperationException("Unimplemented method 'getCurrentStatusByGroupId'");
+        return result;
     }
 
 }

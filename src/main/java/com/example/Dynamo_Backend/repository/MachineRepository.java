@@ -8,4 +8,7 @@ import com.example.Dynamo_Backend.entities.Machine;
 
 public interface MachineRepository extends JpaRepository<Machine, Integer> {
     List<Machine> findByGroup_GroupId(String groupId);
+
+    List<Machine> findByGroup_GroupName(String groupName);
+
 }
