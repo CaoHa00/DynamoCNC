@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.GroupDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 import com.example.Dynamo_Backend.service.GroupService;
 
 import lombok.AllArgsConstructor;
@@ -81,5 +82,11 @@ public class GroupController {
     public ResponseEntity<Map<String, Long>> getGroupCountByGroupId(@PathVariable("group_id") String groupId) {
         Map<String, Long> groupCount = groupService.getGroupCountByGroupId(groupId);
         return ResponseEntity.status(HttpStatus.OK).body(groupCount);
+    }
+
+    @GetMapping("/machine/{payload}")
+    public ResponseEntity<GroupResponseDto> getGroupByMachineId(@PathVariable("payload") String payload) {
+        GroupResponseDto group = groupService.getGroupByMachineId(payload);
+        return ResponseEntity.status(HttpStatus.OK).body(group);
     }
 }

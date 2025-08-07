@@ -1,6 +1,8 @@
 package com.example.Dynamo_Backend.config;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,16 +22,22 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import com.example.Dynamo_Backend.dto.GroupDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 import com.example.Dynamo_Backend.event.OperateHistoryMessageEvent;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
+import com.example.Dynamo_Backend.service.GroupService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 
 @Configuration
 @AllArgsConstructor
 public class MQTTConfig {
-    final CurrentStatusService currentStatusService;
+    private final CurrentStatusService currentStatusService;
     private final ApplicationEventPublisher eventPublisher;
+    private final GroupService groupService;
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
@@ -74,6 +82,30 @@ public class MQTTConfig {
                     System.out.println(message.getPayload().toString());
                     currentStatusService.addCurrentStatus(message.getPayload().toString());
                     eventPublisher.publishEvent(new OperateHistoryMessageEvent(message.getPayload().toString()));
+                    GroupResponseDto groupDto = groupService.getGroupByMachineId(message.getPayload().toString());
+                    if (groupDto != null) {
+                        List<CurrentStatusResponseDto> statusList = currentStatusService
+                                .getCurrentStatusByGroupId(groupDto.getGroupId());
+                        Map<String, Long> statusCount = groupService.getGroupCountByGroupId(groupDto.getGroupId());
+                        try {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            String jsonMessage = objectMapper.writeValueAsString(
+                                    new java.util.HashMap<String, Object>() {
+                                        {
+                                            put("type", groupDto.getGroupName().concat("-status"));
+                                            put("data", statusList);
+                                        }
+                                    });
+                            MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+
+                            String statusCountJson = objectMapper.writeValueAsString(
+                                    Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",
+                                            statusCount));
+                            MyWebSocketHandler.sendGroupStatusToClients(statusCountJson);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     try {
                         MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
                     } catch (IOException e) {

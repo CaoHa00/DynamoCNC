@@ -51,11 +51,10 @@ public class CurrentStatusController {
         return ResponseEntity.ok(currentStatus);
     }
 
-    @GetMapping("/by-group/")
+    @GetMapping("/by-group/{groupId}")
     public ResponseEntity<List<CurrentStatusResponseDto>> getCurrentStatusByGroupId(
-            @RequestParam("groupId") String groupId,
-            @RequestParam("status") String status) {
-        List<CurrentStatusResponseDto> currentStatuss = currentStatusService.getCurrentStatusByGroupId(groupId, status);
+            @PathVariable("groupId") String groupId) {
+        List<CurrentStatusResponseDto> currentStatuss = currentStatusService.getCurrentStatusByGroupId(groupId);
         return ResponseEntity.status(HttpStatus.OK).body(currentStatuss);
     }
 

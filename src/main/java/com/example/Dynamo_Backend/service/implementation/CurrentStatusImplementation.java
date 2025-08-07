@@ -144,7 +144,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     }
 
     @Override
-    public List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId, String status) {
+    public List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId) {
         List<Machine> machines = machineRepository.findByGroup_GroupId(groupId);
         List<CurrentStatusResponseDto> result = new ArrayList<>();
 
@@ -153,10 +153,13 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         }
         for (Machine machine : machines) {
             CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
-            if (currentStatus == null || !currentStatus.getStatus().contains(status)) {
-                continue; // Skip if no status or status does not match
+            if (currentStatus == null) {
+                continue;
             }
             CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
+            if (currentStaff != null) {
+                currentStaff.getStaff().setStaffKpis(null);
+            }
             StaffDto staffDto = currentStaff != null ? StaffMapper.mapToStaffDto(currentStaff.getStaff()) : null;
             DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null ? drawingCodeProcessRepository
                     .findById(currentStatus.getProcessId())
@@ -164,7 +167,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             String drawingCodeName = drawingCodeProcess != null
                     ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
                     : null;
-
+            machine.setMachineKpis(null);
             CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
                     currentStatus.getId(),
                     MachineMapper.mapToMachineDto(machine),

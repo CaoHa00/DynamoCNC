@@ -51,6 +51,10 @@ public class StaffMapper {
                 staffDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getUpdatedDate()));
                 String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
                 StaffKpi staffKpi = null;
+                if (staff.getStaffKpis() == null || staff.getStaffKpis().isEmpty()) {
+                        staffDto.setStaffKpiDtos(null);
+                        return staffDto;
+                }
                 for (StaffKpi mk : staff.getStaffKpis()) {
                         if (currentMonth.equals(String.format("%02d", mk.getMonth()))) {
                                 staffKpi = mk;

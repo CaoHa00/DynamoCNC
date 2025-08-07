@@ -21,6 +21,5 @@ public interface CurrentStatusService {
 
     List<CurrentStatusDto> getAllCurrentStatus();
 
-    List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId,
-            String status);
+    List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId);
 }

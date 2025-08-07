@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.CurrentStatusDto;
 import com.example.Dynamo_Backend.dto.GroupDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
@@ -21,7 +22,6 @@ import com.example.Dynamo_Backend.mapper.GroupMapper;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
-import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.GroupService;
 
 import lombok.AllArgsConstructor;
@@ -151,5 +151,15 @@ public class GroupImplementation implements GroupService {
                 .collect(Collectors.groupingBy(status -> status, Collectors.counting()));
 
         return statusCount;
+    }
+
+    @Override
+    public GroupResponseDto getGroupByMachineId(String payload) {
+        String[] arr = payload.split("-");
+        String machineId = arr[0];
+        Group group = groupRepository.findByMachineId(machineId)
+                .orElseThrow(() -> new RuntimeException("Group not found for machineId: " + machineId));
+
+        return GroupMapper.mapToGroupResponseDto(group);
     }
 }
