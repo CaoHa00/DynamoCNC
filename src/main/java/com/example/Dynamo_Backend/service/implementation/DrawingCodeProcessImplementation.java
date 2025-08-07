@@ -1,23 +1,28 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.config.MyWebSocketHandler;
 import com.example.Dynamo_Backend.dto.*;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.*;
 import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.*;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 
@@ -33,6 +38,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         OperateHistoryRepository operateHistoryRepository;
         CurrentStaffService currentStaffService;
         ProcessTimeRepository processTimeRepository;
+        private CurrentStatusService currentStatusService;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -294,6 +300,22 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .setHeader("mqtt_topic", "myTopic")
                                 .build();
                 boolean sent = mqttOutboundChannel.send(message);
+                List<CurrentStatusResponseDto> statusList = currentStatusService
+                                .getCurrentStatusByGroupId(machine.getGroup().getGroupId());
+                try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String jsonMessage = objectMapper.writeValueAsString(
+                                        new java.util.HashMap<String, Object>() {
+                                                {
+                                                        put("type", machine.getGroup().getGroupName()
+                                                                        .concat("-status"));
+                                                        put("data", statusList);
+                                                }
+                                        });
+                        MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
                 if (sent) {
                         System.out.println("Message sent successfully: " + payload);
                 } else {
@@ -340,7 +362,24 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 machine.setStatus(1);
                 machineRepository.save(machine);
 
+                List<CurrentStatusResponseDto> statusList = currentStatusService
+                                .getCurrentStatusByGroupId(machine.getGroup().getGroupId());
+                try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String jsonMessage = objectMapper.writeValueAsString(
+                                        new java.util.HashMap<String, Object>() {
+                                                {
+                                                        put("type", machine.getGroup().getGroupName()
+                                                                        .concat("-status"));
+                                                        put("data", statusList);
+                                                }
+                                        });
+                        MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);
+
         }
 
         // reset lai currentStatus -- chua lam
