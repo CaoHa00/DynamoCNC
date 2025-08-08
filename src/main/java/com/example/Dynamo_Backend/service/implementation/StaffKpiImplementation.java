@@ -64,20 +64,15 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto updateStaffKpiByStaffId(String staffId, StaffKpiDto staffKpiDto) {
         long updatedTimestamp = System.currentTimeMillis();
-        String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
-        String currentYear = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
         StaffKpi staffKpi = staffKpiRepository.findByStaff_Id(staffId).stream()
-                .filter(kpi -> currentMonth.equals(String.format("%02d", kpi.getMonth()))
-                        && currentYear.equals(String.format("%02d", kpi.getYear())))
+                .filter(kpi -> staffKpiDto.getMonth() == kpi.getMonth() &&
+                        staffKpiDto.getYear() == kpi.getYear())
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException(
-                        "No staffKpi found for staff ID: " + staffId));
+                        "No staffKpi found for staff ID: " + staffId));// orElse add new StaffKpi
 
-        Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
-        staffKpi.setStaff(staff);
-        staffKpi.setYear(staffKpiDto.getYear());
-        staffKpi.setMonth(staffKpiDto.getMonth());
+        // staffKpi.setYear(staffKpiDto.getYear());
+        // staffKpi.setMonth(staffKpiDto.getMonth());
         staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
         staffKpi.setKpi(staffKpiDto.getKpi());
         staffKpi.setOleGoal(staffKpiDto.getOleGoal());

@@ -50,19 +50,20 @@ public class StaffMapper {
                 staffDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getCreatedDate()));
                 staffDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getUpdatedDate()));
                 String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
-                StaffKpi staffKpi = null;
-                if (staff.getStaffKpis() == null || staff.getStaffKpis().isEmpty()) {
-                        staffDto.setStaffKpiDtos(null);
-                        return staffDto;
-                }
-                for (StaffKpi mk : staff.getStaffKpis()) {
-                        if (currentMonth.equals(String.format("%02d", mk.getMonth()))) {
-                                staffKpi = mk;
+                String currentYear = String.valueOf(LocalDate.now().getYear());
+                if (staff.getStaffKpis() != null) {
+                        StaffKpi staffKpi = staff.getStaffKpis().stream()
+                                        .filter(mk -> currentMonth.equals(String.format("%02d", mk.getMonth())) &&
+                                                        currentYear.equals(String.valueOf(mk.getYear())))
+                                        .findFirst()
+                                        .orElse(null);
+                        if (staffKpi != null) {
+                                staffDto.setStaffKpiDtos(StaffKpiMapper.mapToStaffKpiDto(staffKpi));
                         }
+                } else {
+                        staffDto.setStaffKpiDtos(null);
                 }
-                if (staffKpi != null) {
-                        staffDto.setStaffKpiDtos(StaffKpiMapper.mapToStaffKpiDto(staffKpi));
-                }
+
                 return staffDto;
         }
 }

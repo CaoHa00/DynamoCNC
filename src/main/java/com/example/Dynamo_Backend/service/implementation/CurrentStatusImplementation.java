@@ -42,18 +42,19 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     public void addCurrentStatus(String payload) {
         String[] arr = payload.split("-");
         String machineId = arr[0];
-        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(Integer.parseInt(machineId));
+        int machineIdInt = Integer.parseInt(machineId) + 1;
+        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
         if (currentStatus == null) {
             currentStatus = new CurrentStatus();
         }
-        CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(Integer.parseInt(machineId));
+        CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
         if (currentStaff != null) {
             currentStatus.setStaffId(currentStaff.getStaff().getId());
         } else {
             currentStatus.setStaffId(null);
         }
         List<DrawingCodeProcess> drawingCodeProcesses = drawingCodeProcessRepository
-                .findByMachine_MachineId(Integer.parseInt(machineId));
+                .findByMachine_MachineId(machineIdInt);
         if (drawingCodeProcesses.size() > 0) {
             for (DrawingCodeProcess drawingCodeProcess : drawingCodeProcesses) {
                 if (drawingCodeProcess.getStartTime() > drawingCodeProcess.getEndTime()) {
@@ -65,7 +66,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus.setProcessId(null);
         }
 
-        currentStatus.setMachineId(Integer.parseInt(arr[0]));
+        currentStatus.setMachineId(machineIdInt);
         currentStatus.setStatus(arr[1]);
 
         if (arr.length < 3) {
