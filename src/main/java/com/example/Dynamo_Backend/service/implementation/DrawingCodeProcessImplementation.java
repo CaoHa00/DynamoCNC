@@ -92,6 +92,25 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setUpdatedDate(updatedTimestamp);
 
+                OrderDetail orderDetail = drawingCodeProcessDto.getOrderCode() != null
+                                ? orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderCode())
+                                                .orElseThrow(() -> new RuntimeException(
+                                                                "OrderDetail is not found:"
+                                                                                + drawingCodeProcessDto.getOrderCode()))
+                                : null;
+                if (orderDetail != null) {
+                        drawingCodeProcess.setOrderDetail(orderDetail);
+                }
+                if (drawingCodeProcessDto.getPartNumber() != null) {
+                        drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
+                }
+                if (drawingCodeProcessDto.getStepNumber() != null) {
+                        drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getStepNumber());
+                }
+                if (drawingCodeProcessDto.getPgTime() != null) {
+                        drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
+                }
+
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
 
                 String sendMachine = "";
@@ -133,6 +152,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 } else {
                         System.err.println("Failed to send message: " + payload);
                 }
+
                 return DrawingCodeProcessMapper.toDto(
                                 OrderDetailMapper.mapToOrderDetailDto(drawingCodeProcess.getOrderDetail()),
                                 MachineMapper.mapToMachineDto(drawingCodeProcess.getMachine()), savedrawingCodeProcess,
@@ -362,6 +382,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 } else {
                         System.err.println("Failed to send message: " + payload);
                 }
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
         }
 
         @Override
@@ -476,6 +498,10 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 } else {
                         System.err.println("Failed to send message: " + payload);
                 }
+
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
+
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);
 
         }
@@ -595,6 +621,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 } else {
                         System.err.println("Failed to send message: " + payload);
                 }
+
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
         }
 
         @Override

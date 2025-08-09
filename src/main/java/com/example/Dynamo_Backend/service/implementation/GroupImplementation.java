@@ -157,8 +157,10 @@ public class GroupImplementation implements GroupService {
     public GroupResponseDto getGroupByMachineId(String payload) {
         String[] arr = payload.split("-");
         String machineId = arr[0];
-        Group group = groupRepository.findByMachineId(machineId)
-                .orElseThrow(() -> new RuntimeException("Group not found for machineId: " + machineId));
+        Integer machineIdInt = Integer.parseInt(machineId) + 1;
+        String machineStr = String.format("%02d", machineIdInt);
+        Group group = groupRepository.findByMachineId(machineStr)
+                .orElseThrow(() -> new RuntimeException("Group not found for machineId: " + machineStr));
 
         return GroupMapper.mapToGroupResponseDto(group);
     }

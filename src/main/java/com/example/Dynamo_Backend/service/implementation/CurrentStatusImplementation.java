@@ -48,7 +48,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus = new CurrentStatus();
         }
         CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
-        if (currentStaff != null) {
+        if (currentStaff != null && currentStaff.getStaff() != null) {
             currentStatus.setStaffId(currentStaff.getStaff().getId());
         } else {
             currentStatus.setStaffId(null);
@@ -82,7 +82,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                     .orElseThrow(
                             () -> new RuntimeException("Process is not found when find process for currentStatus"));
 
-            logService.addLog(currentStatus, process, currentStaff.getStaff());
+            logService.addLog(currentStatus, process, currentStaff != null ? currentStaff.getStaff() : null);
         }
 
         currentStatusRepository.save(currentStatus);
@@ -158,10 +158,11 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                 continue;
             }
             CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
-            if (currentStaff != null) {
+            if (currentStaff.getStaff() != null) {
                 currentStaff.getStaff().setStaffKpis(null);
             }
-            StaffDto staffDto = currentStaff != null ? StaffMapper.mapToStaffDto(currentStaff.getStaff()) : null;
+            StaffDto staffDto = currentStaff.getStaff() != null ? StaffMapper.mapToStaffDto(currentStaff.getStaff())
+                    : null;
             DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null ? drawingCodeProcessRepository
                     .findById(currentStatus.getProcessId())
                     .orElse(null) : null;
