@@ -84,6 +84,16 @@ public class DrawingCodeProcessController {
         return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
     }
 
+    @PutMapping("/admin/{process_id}")
+    public ResponseEntity<DrawingCodeProcessResponseDto> updateDrawingCodeProcessByAdmin(
+            @PathVariable("process_id") String Id,
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateProcessByAdmin(
+                Id,
+                drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
+    }
+
     @DeleteMapping("/{drawingCodeProcess_id}")
     public ResponseEntity<Void> deletedrawingCodeProcess(@PathVariable("drawingCodeProcess_id") String Id) {
         drawingCodeProcessService.deleteDrawingCodeProcess(Id);

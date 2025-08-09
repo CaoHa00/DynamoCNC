@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
+import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 public class MachineMapper {
@@ -61,5 +63,13 @@ public class MachineMapper {
 
         return machineDto;
 
+    }
+
+    public static MachineDto mapOnlyMachineName(Machine machine) {
+        if (machine == null) {
+            return null;
+        } else {
+            return new MachineDto(machine.getMachineName());
+        }
     }
 }

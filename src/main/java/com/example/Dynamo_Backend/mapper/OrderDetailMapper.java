@@ -30,4 +30,10 @@ public class OrderDetailMapper {
         // orderDetail.setStatus(orderDetailDto.getStatus());
         return orderDetail;
     }
+
+    public static OrderDetailDto mapOrderCodeDto(OrderDetail orderDetail) {
+        if (orderDetail == null)
+            return null;
+        return new OrderDetailDto(orderDetail.getOrderDetailId(), orderDetail.getOrderCode());
+    }
 }

@@ -13,4 +13,5 @@ public interface StaffRepository extends JpaRepository<Staff, String> {
     void deleteByIdIn(List<String> ids);
 
     Optional<Staff> findByStaffId(Integer staffId);
+
 }

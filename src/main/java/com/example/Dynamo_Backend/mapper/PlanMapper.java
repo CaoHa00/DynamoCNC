@@ -13,7 +13,11 @@ public class PlanMapper {
         plan.setStartTime(DateTimeUtil.convertStringToTimestamp(planDto.getStartTime()));
         plan.setEndTime(DateTimeUtil.convertStringToTimestamp(planDto.getEndTime()));
         plan.setRemark(planDto.getRemark());
-        plan.setRemarkTime(DateTimeUtil.convertStringToTimestamp(planDto.getRemarkTime()));
+        if (planDto.getRemarkTime() == null) {
+            plan.setRemarkTime(null);
+        } else {
+            plan.setRemarkTime(DateTimeUtil.convertStringToTimestamp(planDto.getRemarkTime()));
+        }
         return plan;
     }
 
@@ -24,8 +28,16 @@ public class PlanMapper {
         planDto.setStatus(plan.getStatus());
         planDto.setStartTime(DateTimeUtil.convertTimestampToString(plan.getStartTime()));
         planDto.setEndTime(DateTimeUtil.convertTimestampToString(plan.getEndTime()));
-        planDto.setRemark(plan.getRemark());
-        planDto.setRemarkTime(DateTimeUtil.convertTimestampToString(plan.getRemarkTime()));
+        if (plan.getRemark() == null) {
+            planDto.setRemark(null);
+        } else {
+            planDto.setRemark(plan.getRemark());
+        }
+        if (plan.getRemarkTime() == null) {
+            planDto.setRemarkTime(null);
+        } else {
+            planDto.setRemarkTime(DateTimeUtil.convertTimestampToString(plan.getRemarkTime()));
+        }
         planDto.setMachineId(plan.getMachine().getMachineId());
         planDto.setPlannerId(plan.getPlanner().getId());
         planDto.setProcessId(plan.getDrawingCodeProcess().getProcessId());

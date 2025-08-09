@@ -17,7 +17,7 @@ public class DrawingCodeProcessResquestDto {
     private String startTime;
     private String endTime;
     private Integer status;
-    private String orderCode;
+    private String orderDetailId;
     private Integer machineId;
     private Integer staffId;
     private String plannerId;
