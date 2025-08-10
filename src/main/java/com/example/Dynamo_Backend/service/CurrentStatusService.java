@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.service;
 import java.util.List;
 
 import com.example.Dynamo_Backend.dto.CurrentStatusDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 
 public interface CurrentStatusService {
@@ -19,4 +20,6 @@ public interface CurrentStatusService {
     CurrentStatusDto getCurrentStatusById(String id);
 
     List<CurrentStatusDto> getAllCurrentStatus();
+
+    List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId);
 }

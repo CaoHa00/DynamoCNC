@@ -52,6 +52,10 @@ public class MachineMapper {
         machineDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
         MachineKpi machineKpi = null;
+        if (machine.getMachineKpis() == null || machine.getMachineKpis().isEmpty()) {
+            machineDto.setMachineKpiDtos(null);
+            return machineDto;
+        }
         for (MachineKpi mk : machine.getMachineKpis()) {
             if (currentMonth.equals(String.format("%02d", mk.getMonth()))) {
                 machineKpi = mk;

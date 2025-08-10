@@ -1,23 +1,29 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.config.MyWebSocketHandler;
 import com.example.Dynamo_Backend.dto.*;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.entities.*;
 import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.*;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 
@@ -34,6 +40,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         CurrentStaffService currentStaffService;
         ProcessTimeRepository processTimeRepository;
         PlanRepository planRepository;
+        private CurrentStatusService currentStatusService;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -88,7 +95,68 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setUpdatedDate(updatedTimestamp);
 
+                OrderDetail orderDetail = drawingCodeProcessDto.getOrderDetailId() != null
+                                ? orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderDetailId())
+                                                .orElseThrow(() -> new RuntimeException(
+                                                                "OrderDetail is not found:"
+                                                                                + drawingCodeProcessDto
+                                                                                                .getOrderDetailId()))
+                                : null;
+                if (orderDetail != null) {
+                        drawingCodeProcess.setOrderDetail(orderDetail);
+                }
+                if (drawingCodeProcessDto.getPartNumber() != null) {
+                        drawingCodeProcess.setPartNumber(drawingCodeProcessDto.getPartNumber());
+                }
+                if (drawingCodeProcessDto.getStepNumber() != null) {
+                        drawingCodeProcess.setStepNumber(drawingCodeProcessDto.getStepNumber());
+                }
+                if (drawingCodeProcessDto.getPgTime() != null) {
+                        drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
+                }
+
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
+
+                String sendMachine = "";
+                if (savedrawingCodeProcess.getMachine().getMachineId() < 10) {
+                        sendMachine = "0" + (savedrawingCodeProcess.getMachine().getMachineId() - 1);
+                }
+                LocalDateTime now = LocalDateTime.now();
+                Integer productStatus;
+                switch (savedrawingCodeProcess.getProcessType()) {
+                        case "Main":
+                                productStatus = 1;
+                                break;
+                        case "NG":
+                                productStatus = 2;
+                                break;
+                        case "LK":
+                                productStatus = 3;
+                                break;
+                        case "Electric":
+                                productStatus = 4;
+                                break;
+                        default:
+                                productStatus = 1;
+                                break;
+                }
+                String payload = sendMachine + "*" + staff.getStaffId() + "*" + productStatus + "*"
+                                + savedrawingCodeProcess.getOrderDetail().getOrderCode() + "*"
+                                + savedrawingCodeProcess.getPartNumber() + "*"
+                                + savedrawingCodeProcess.getStepNumber() + "*"
+                                + savedrawingCodeProcess.getManufacturingPoint() + "*"
+                                + savedrawingCodeProcess.getPgTime();
+                Message<String> message = MessageBuilder
+                                .withPayload(payload)
+                                .setHeader("mqtt_topic", "myTopic")
+                                .build();
+                boolean sent = mqttOutboundChannel.send(message);
+                if (sent) {
+                        System.out.println("Message sent successfully: " + payload);
+                } else {
+                        System.err.println("Failed to send message: " + payload);
+                }
+
                 return DrawingCodeProcessMapper.toDto(
                                 OrderDetailMapper.mapToOrderDetailDto(drawingCodeProcess.getOrderDetail()),
                                 MachineMapper.mapToMachineDto(drawingCodeProcess.getMachine()), savedrawingCodeProcess,
@@ -266,7 +334,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 String sendMachine = "";
                 if (machineId < 10) {
-                        sendMachine = "0" + machineId;
+                        sendMachine = "0" + (machineId - 1);
                 }
                 LocalDateTime now = LocalDateTime.now();
                 Integer productStatus;
@@ -297,11 +365,29 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .setHeader("mqtt_topic", "myTopic")
                                 .build();
                 boolean sent = mqttOutboundChannel.send(message);
+                List<CurrentStatusResponseDto> statusList = currentStatusService
+                                .getCurrentStatusByGroupId(machine.getGroup().getGroupId());
+                try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String jsonMessage = objectMapper.writeValueAsString(
+                                        new java.util.HashMap<String, Object>() {
+                                                {
+                                                        put("type", machine.getGroup().getGroupName()
+                                                                        .concat("-status"));
+                                                        put("data", statusList);
+                                                }
+                                        });
+                        MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
                 if (sent) {
                         System.out.println("Message sent successfully: " + payload);
                 } else {
                         System.err.println("Failed to send message: " + payload);
                 }
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
         }
 
         @Override
@@ -344,7 +430,85 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 machine.setStatus(1);
                 machineRepository.save(machine);
 
+                // List<CurrentStatusResponseDto> statusList = currentStatusService
+                // .getCurrentStatusByGroupId(machine.getGroup().getGroupId());
+                // try {
+                // ObjectMapper objectMapper = new ObjectMapper();
+                // String jsonMessage = objectMapper.writeValueAsString(
+                // new java.util.HashMap<String, Object>() {
+                // {
+                // put("type", machine.getGroup().getGroupName()
+                // .concat("-status"));
+                // put("data", statusList);
+                // }
+                // });
+                // MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                // } catch (IOException e) {
+                // e.printStackTrace();
+                // }
+
+                String sendMachine = "";
+                if (machine.getMachineId() < 10) {
+                        sendMachine = "0" + (machine.getMachineId() - 1);
+                }
+                LocalDateTime now = LocalDateTime.now();
+                Integer productStatus;
+                switch (savedrawingCodeProcess.getProcessType()) {
+                        case "Main":
+                                productStatus = 1;
+                                break;
+                        case "NG":
+                                productStatus = 2;
+                                break;
+                        case "LK":
+                                productStatus = 3;
+                                break;
+                        case "Electric":
+                                productStatus = 4;
+                                break;
+                        default:
+                                productStatus = 1;
+                                break;
+                }
+                String formatted = now.format(DateTimeFormatter.ofPattern("MMddyyHH"));
+                String payload = sendMachine + "*" + staff.getStaffId() + "*" + productStatus + "*"
+                                + savedrawingCodeProcess.getOrderDetail().getOrderCode() + "*"
+                                + savedrawingCodeProcess.getPartNumber() + "*"
+                                + savedrawingCodeProcess.getStepNumber() + "*"
+                                + savedrawingCodeProcess.getManufacturingPoint() + "*"
+                                + savedrawingCodeProcess.getPgTime();
+                Message<String> message = MessageBuilder
+                                .withPayload(payload)
+                                .setHeader("mqtt_topic", "myTopic")
+                                .build();
+                boolean sent = mqttOutboundChannel.send(message);
+                List<CurrentStatusResponseDto> statusList = currentStatusService
+                                .getCurrentStatusByGroupId(machine.getGroup().getGroupId());
+                try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String jsonMessage = objectMapper.writeValueAsString(
+                                        new java.util.HashMap<String, Object>() {
+                                                {
+                                                        put("type", machine.getGroup().getGroupName()
+                                                                        .concat("-status"));
+                                                        put("data", statusList);
+                                                }
+                                        });
+                        MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
+                if (sent) {
+                        System.out.println("Message sent successfully: " + payload);
+                } else {
+                        System.err.println("Failed to send message: " + payload);
+                }
+
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
+
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(savedrawingCodeProcess);
+
         }
 
         // reset lai currentStatus -- chua lam
@@ -447,6 +611,24 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcessRepository.save(drawingCodeProcess);
                 machineRepository.save(machine);
 
+                String sendMachine = "";
+                if (machine.getMachineId() < 10) {
+                        sendMachine = "0" + (machine.getMachineId() - 1);
+                }
+                String payload = sendMachine + "*#";
+                Message<String> message = MessageBuilder
+                                .withPayload(payload)
+                                .setHeader("mqtt_topic", "myTopic")
+                                .build();
+                boolean sent = mqttOutboundChannel.send(message);
+                if (sent) {
+                        System.out.println("Message sent successfully: " + payload);
+                } else {
+                        System.err.println("Failed to send message: " + payload);
+                }
+
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
         }
 
         @Override

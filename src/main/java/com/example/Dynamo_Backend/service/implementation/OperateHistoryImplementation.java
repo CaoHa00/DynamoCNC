@@ -43,50 +43,52 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                 long currentTimestamp = System.currentTimeMillis();
                 CurrentStaff currentStaff = currentStaffRepository
                                 .findByMachine_MachineId(Integer.parseInt(machineId));
-                // nếu máy chạy thì cập nhật
-                if (status.contains("R")) {
-                        List<OperateHistory> operateHistories = operateHistoryRepository
-                                        .findByDrawingCodeProcess_processId(drawingCodeProcessDto.getProcessId());
-                        // nếu process chưa đc vận hành
-                        for (OperateHistory operate : operateHistories) {
-                                if (operate.getInProgress() == 1) {
-                                        operateHistory = operate;
+                if (currentStaff != null) {
+                        // nếu máy chạy thì cập nhật
+                        if (status.contains("R")) {
+                                List<OperateHistory> operateHistories = operateHistoryRepository
+                                                .findByDrawingCodeProcess_processId(
+                                                                drawingCodeProcessDto.getProcessId());
+                                // nếu process chưa đc vận hành
+                                for (OperateHistory operate : operateHistories) {
+                                        if (operate.getInProgress() == 1) {
+                                                operateHistory = operate;
+                                        }
                                 }
-                        }
-                        if (operateHistories.size() == 0 || operateHistory == null) {
-                                if (currentStaff == null) {
-                                        new RuntimeException(
-                                                        "No currentStaff found for machine ID: "
-                                                                        + machineId);
-                                }
-                                operateHistory = new OperateHistory();
-                                operateHistory.setStaff(currentStaff.getStaff());
-                                operateHistory.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
-                                operateHistory.setDrawingCodeProcess(
-                                                DrawingCodeProcessMapper
-                                                                .mapToDrawingCodeProcess(drawingCodeProcessDto));
-                                operateHistory.setStartTime(currentTimestamp);
-                                operateHistory.setStopTime((long) 0);
-                                operateHistory.setInProgress(1);
-                                OperateHistory saveOperateHistory = operateHistoryRepository.save(operateHistory);
-                                return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
-                        } else {
-                                if (!operateHistory.getStaff().getId().equals(currentStaff.getStaff().getId())) {
-                                        operateHistory.setStopTime(currentTimestamp);
-                                        operateHistory.setInProgress(0);
-                                        operateHistoryRepository.save(operateHistory);
+                                if (operateHistories.size() == 0 || operateHistory == null) {
+                                        operateHistory = new OperateHistory();
+                                        operateHistory.setStaff(currentStaff.getStaff());
                                         operateHistory.setManufacturingPoint(
                                                         drawingCodeProcessDto.getManufacturingPoint());
-                                        operateHistory = new OperateHistory();
-                                        operateHistory.setDrawingCodeProcess(DrawingCodeProcessMapper
-                                                        .mapToDrawingCodeProcess(drawingCodeProcessDto));
-                                        operateHistory.setStaff(currentStaff.getStaff());
+                                        operateHistory.setDrawingCodeProcess(
+                                                        DrawingCodeProcessMapper
+                                                                        .mapToDrawingCodeProcess(
+                                                                                        drawingCodeProcessDto));
                                         operateHistory.setStartTime(currentTimestamp);
                                         operateHistory.setStopTime((long) 0);
-                                        operateHistory.setInProgress(0);
+                                        operateHistory.setInProgress(1);
                                         OperateHistory saveOperateHistory = operateHistoryRepository
                                                         .save(operateHistory);
                                         return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
+                                } else {
+                                        if (!operateHistory.getStaff().getId()
+                                                        .equals(currentStaff.getStaff().getId())) {
+                                                operateHistory.setStopTime(currentTimestamp);
+                                                operateHistory.setInProgress(0);
+                                                operateHistoryRepository.save(operateHistory);
+                                                operateHistory.setManufacturingPoint(
+                                                                drawingCodeProcessDto.getManufacturingPoint());
+                                                operateHistory = new OperateHistory();
+                                                operateHistory.setDrawingCodeProcess(DrawingCodeProcessMapper
+                                                                .mapToDrawingCodeProcess(drawingCodeProcessDto));
+                                                operateHistory.setStaff(currentStaff.getStaff());
+                                                operateHistory.setStartTime(currentTimestamp);
+                                                operateHistory.setStopTime((long) 0);
+                                                operateHistory.setInProgress(0);
+                                                OperateHistory saveOperateHistory = operateHistoryRepository
+                                                                .save(operateHistory);
+                                                return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
+                                        }
                                 }
                         }
                 }

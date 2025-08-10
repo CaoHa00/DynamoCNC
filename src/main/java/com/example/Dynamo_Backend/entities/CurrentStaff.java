@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "current_staff", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "staff_id" }),
+        // @UniqueConstraint(columnNames = { "staff_id" }),
         @UniqueConstraint(columnNames = { "machine_id" })
 })
 public class CurrentStaff {
@@ -26,6 +26,6 @@ public class CurrentStaff {
     @JoinColumn(name = "machine_id", nullable = false)
     private Machine machine;
 
-    @Column(name = "assigned_at", nullable = false)
+    @Column(name = "assigned_at", nullable = true)
     private Long assignedAt;
 }

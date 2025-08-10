@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.GroupDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 import com.example.Dynamo_Backend.service.GroupService;
 
 import lombok.AllArgsConstructor;
@@ -64,17 +66,27 @@ public class GroupController {
         return ResponseEntity.status(HttpStatus.OK).body(groups);
     }
 
-
     @GetMapping("/groupType/{group_type}")
     public ResponseEntity<List<GroupDto>> getGroups(@PathVariable("group_type") String groupType) {
         List<GroupDto> groups = groupService.getGroupByGroupType(groupType);
         return ResponseEntity.status(HttpStatus.OK).body(groups);
     }
 
-
     @PostMapping("/upload")
     public ResponseEntity<Void> uploadGroupExcel(@RequestParam("file") MultipartFile file) {
         groupService.importGroupFromExcel(file);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/count/{group_id}")
+    public ResponseEntity<Map<String, Long>> getGroupCountByGroupId(@PathVariable("group_id") String groupId) {
+        Map<String, Long> groupCount = groupService.getGroupCountByGroupId(groupId);
+        return ResponseEntity.status(HttpStatus.OK).body(groupCount);
+    }
+
+    @GetMapping("/machine/{payload}")
+    public ResponseEntity<GroupResponseDto> getGroupByMachineId(@PathVariable("payload") String payload) {
+        GroupResponseDto group = groupService.getGroupByMachineId(payload);
+        return ResponseEntity.status(HttpStatus.OK).body(group);
     }
 }
