@@ -3,20 +3,27 @@ package com.example.Dynamo_Backend.service.implementation;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.Mac;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.config.MyWebSocketHandler;
 import com.example.Dynamo_Backend.dto.CurrentStatusDto;
+import com.example.Dynamo_Backend.dto.StaffDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.mapper.CurrentStatusMapper;
+import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
+import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.LogService;
 
@@ -28,24 +35,26 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     private final CurrentStatusRepository currentStatusRepository;
     private final CurrentStaffRepository currentStaffRepository;
     private final DrawingCodeProcessRepository drawingCodeProcessRepository;
+    private final MachineRepository machineRepository;
     private final @Lazy LogService logService;
 
     @Override
     public void addCurrentStatus(String payload) {
         String[] arr = payload.split("-");
         String machineId = arr[0];
-        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(Integer.parseInt(machineId));
+        int machineIdInt = Integer.parseInt(machineId) + 1;
+        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
         if (currentStatus == null) {
             currentStatus = new CurrentStatus();
         }
-        CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(Integer.parseInt(machineId));
-        if (currentStaff != null) {
+        CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
+        if (currentStaff != null && currentStaff.getStaff() != null) {
             currentStatus.setStaffId(currentStaff.getStaff().getId());
         } else {
             currentStatus.setStaffId(null);
         }
         List<DrawingCodeProcess> drawingCodeProcesses = drawingCodeProcessRepository
-                .findByMachine_MachineId(Integer.parseInt(machineId));
+                .findByMachine_MachineId(machineIdInt);
         if (drawingCodeProcesses.size() > 0) {
             for (DrawingCodeProcess drawingCodeProcess : drawingCodeProcesses) {
                 if (drawingCodeProcess.getStartTime() > drawingCodeProcess.getEndTime()) {
@@ -57,7 +66,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus.setProcessId(null);
         }
 
-        currentStatus.setMachineId(Integer.parseInt(arr[0]));
+        currentStatus.setMachineId(machineIdInt);
         currentStatus.setStatus(arr[1]);
 
         if (arr.length < 3) {
@@ -67,11 +76,15 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setTime(arr[2]);
         }
-        DrawingCodeProcess process = drawingCodeProcessRepository
-                .findById(currentStatus.getProcessId())
-                .orElseThrow(() -> new RuntimeException("Process is not found when find process for currentStatus"));
+        if (currentStatus.getProcessId() != null) {
+            DrawingCodeProcess process = drawingCodeProcessRepository
+                    .findById(currentStatus.getProcessId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Process is not found when find process for currentStatus"));
 
-        logService.addLog(currentStatus, process, currentStaff.getStaff());
+            logService.addLog(currentStatus, process, currentStaff != null ? currentStaff.getStaff() : null);
+        }
+
         currentStatusRepository.save(currentStatus);
 
         List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
@@ -129,6 +142,44 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         return currentStatuses.stream()
                 .map(CurrentStatusMapper::mapToCurrentStatusDto)
                 .toList();
+    }
+
+    @Override
+    public List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId) {
+        List<Machine> machines = machineRepository.findByGroup_GroupId(groupId);
+        List<CurrentStatusResponseDto> result = new ArrayList<>();
+
+        if (machines.isEmpty()) {
+            return List.of(); // Return empty list
+        }
+        for (Machine machine : machines) {
+            CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
+            if (currentStatus == null) {
+                continue;
+            }
+            CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
+            if (currentStaff.getStaff() != null) {
+                currentStaff.getStaff().setStaffKpis(null);
+            }
+            StaffDto staffDto = currentStaff.getStaff() != null ? StaffMapper.mapToStaffDto(currentStaff.getStaff())
+                    : null;
+            DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null ? drawingCodeProcessRepository
+                    .findById(currentStatus.getProcessId())
+                    .orElse(null) : null;
+            String drawingCodeName = drawingCodeProcess != null
+                    ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
+                    : null;
+            machine.setMachineKpis(null);
+            CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
+                    currentStatus.getId(),
+                    MachineMapper.mapToMachineDto(machine),
+                    staffDto,
+                    drawingCodeName,
+                    currentStatus.getTime(),
+                    currentStatus.getStatus());
+            result.add(responseDto);
+        }
+        return result;
     }
 
 }

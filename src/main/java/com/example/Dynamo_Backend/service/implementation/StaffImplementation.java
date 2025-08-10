@@ -44,6 +44,7 @@ public class StaffImplementation implements StaffService {
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + staffRequestDto.getGroupId()));
 
         staff.setGroup(group);
+        staff.setStatus(1);
         staff.setCreatedDate(createdTimestamp);
         staff.setUpdatedDate(createdTimestamp);
         staff.setStaffKpis(new ArrayList<StaffKpi>());
@@ -99,7 +100,7 @@ public class StaffImplementation implements StaffService {
         staff.setStaffOffice(staffDto.getStaffOffice());
         staff.setStaffSection(staffDto.getStaffSection());
         staff.setShortName(staffDto.getShortName());
-        staff.setStatus(staffDto.getStatus());
+        staff.setStatus(1);
         staff.setUpdatedDate(updatedTimestamp);
         Group group = groupRepository.findById(staffDto.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + staffDto.getGroupId()));

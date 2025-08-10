@@ -69,7 +69,9 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     public void deleteCurrentStaff(Long Id) {
         CurrentStaff currentStaff = currentStaffRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("CurrentStaff is not found:" + Id));
-        currentStaffRepository.delete(currentStaff);
+        currentStaff.setStaff(null);
+        currentStaffRepository.save(currentStaff);
+        // currentStaffRepository.delete(currentStaff);
     }
 
     @Override
