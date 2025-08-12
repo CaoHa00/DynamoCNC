@@ -100,4 +100,10 @@ public class OrderImplementation implements OrderService {
         }
     }
 
+    @Override
+    public List<OrderDto> getAllActiveOrder() {
+        List<Order> orders = orderRepository.findAllByStatus(1);
+        return orders.stream().map(OrderMapper::mapToOrderDto).toList();
+    }
+
 }

@@ -100,7 +100,7 @@ public class StaffImplementation implements StaffService {
         staff.setStaffOffice(staffDto.getStaffOffice());
         staff.setStaffSection(staffDto.getStaffSection());
         staff.setShortName(staffDto.getShortName());
-        staff.setStatus(1);
+        staff.setStatus(staffDto.getStatus());
         staff.setUpdatedDate(updatedTimestamp);
         Group group = groupRepository.findById(staffDto.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + staffDto.getGroupId()));
@@ -151,5 +151,11 @@ public class StaffImplementation implements StaffService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<StaffDto> getAllStaffByStatus() {
+        List<Staff> staffs = staffRepository.findAllByStatus(1);
+        return staffs.stream().map(StaffMapper::mapToStaffDto).toList();
     }
 }

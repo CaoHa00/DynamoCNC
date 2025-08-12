@@ -33,6 +33,12 @@ public class DrawingCodeProcessController {
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
+    @GetMapping("/completed")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllCompleteddrawingCodes() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getCompletedProcess();
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
     @GetMapping("/planned")
     public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllPlannedDrawingCodes() {
         List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(1);

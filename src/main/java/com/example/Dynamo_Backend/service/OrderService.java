@@ -18,5 +18,7 @@ public interface OrderService {
 
     List<OrderDto> getAllOrder();
 
+    List<OrderDto> getAllActiveOrder();
+
     void importOrderFromExcel(MultipartFile file);
 }

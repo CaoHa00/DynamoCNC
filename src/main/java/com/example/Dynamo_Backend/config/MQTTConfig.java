@@ -45,7 +45,7 @@ public class MQTTConfig {
         MqttConnectOptions options = new MqttConnectOptions();
 
         // options.setServerURIs(new String[] { "tcp://10.60.253.11:1883" });
-        options.setServerURIs(new String[] { "tcp://127.0.0.1:1883" });
+        options.setServerURIs(new String[] { "tcp://10.60.192.39:1883" });
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);
         factory.setConnectionOptions(options);

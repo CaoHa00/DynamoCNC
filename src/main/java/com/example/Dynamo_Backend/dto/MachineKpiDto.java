@@ -17,4 +17,5 @@ public class MachineKpiDto {
     private String updatedDate;
     private Integer machineId;
     private String machineName;
+    private Integer machineStatus;
 }

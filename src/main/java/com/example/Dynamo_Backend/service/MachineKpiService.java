@@ -20,4 +20,5 @@ public interface MachineKpiService {
     List<MachineKpiDto> getMachineKpis();
 
     void importMachineKpiFromExcel(MultipartFile file);
+
 }

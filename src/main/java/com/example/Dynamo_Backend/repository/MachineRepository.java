@@ -11,4 +11,6 @@ public interface MachineRepository extends JpaRepository<Machine, Integer> {
 
     List<Machine> findByGroup_GroupName(String groupName);
 
+    List<Machine> findAllByStatus(Integer status);
+
 }

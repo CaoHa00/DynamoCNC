@@ -16,6 +16,8 @@ public interface StaffService {
 
     List<StaffDto> getAllStaffs();
 
+    List<StaffDto> getAllStaffByStatus();
+
     StaffDto getStaffById(String Id);
 
     void importStaffFromExcel(MultipartFile file);

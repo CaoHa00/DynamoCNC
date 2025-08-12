@@ -22,4 +22,5 @@ public class StaffKpiDto {
     private String staffId;
     private Integer Id;
     private String staffName;
+    private Integer staffStatus;
 }

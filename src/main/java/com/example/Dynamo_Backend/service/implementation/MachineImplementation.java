@@ -39,7 +39,7 @@ public class MachineImplementation implements MachineService {
 
     @Override
     public MachineDto addMachine(MachineRequestDto machineDto) {
-        int status = 1;
+        int status = 0;
         long createdTimestamp = System.currentTimeMillis();
         Machine machine = MachineMapper.mapToMachine(machineDto);
         machine.setStatus(status);
@@ -144,6 +144,12 @@ public class MachineImplementation implements MachineService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to import machines from Excel file: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<MachineDto> getActiveMachines() {
+        List<Machine> machines = machineRepository.findAllByStatus(1);
+        return machines.stream().map(MachineMapper::mapToMachineDto).toList();
     }
 
 }

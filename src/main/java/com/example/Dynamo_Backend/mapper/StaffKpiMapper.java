@@ -59,7 +59,7 @@ public class StaffKpiMapper {
         staffKpiDto.setWorkGoal(staffKpi.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffKpi.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffKpi.getManufacturingPoint());
-
+        staffKpiDto.setStaffStatus(staffKpi.getStaff().getStatus());
         return staffKpiDto;
     }
 }

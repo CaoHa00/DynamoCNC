@@ -25,6 +25,12 @@ public class StaffController {
         return ResponseEntity.status(HttpStatus.OK).body(staffs);
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<StaffDto>> getAllActiveStatus() {
+        List<StaffDto> staffs = staffService.getAllStaffByStatus();
+        return ResponseEntity.status(HttpStatus.OK).body(staffs);
+    }
+
     @PostMapping
     public ResponseEntity<StaffDto> addStaff(@RequestBody StaffRequestDto staffRequestDto) {
         StaffDto staff = staffService.addStaff(staffRequestDto);

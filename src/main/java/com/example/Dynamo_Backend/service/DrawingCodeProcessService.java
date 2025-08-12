@@ -35,4 +35,6 @@ public interface DrawingCodeProcessService {
     DrawingCodeProcessResponseDto updateProcessByAdmin(String drawingCodeProcessId,
             DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
+    List<DrawingCodeProcessResponseDto> getCompletedProcess();
+
 }

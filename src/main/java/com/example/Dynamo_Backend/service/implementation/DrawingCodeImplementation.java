@@ -97,4 +97,10 @@ public class DrawingCodeImplementation implements DrawingCodeService {
             throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage());
         }
     }
+
+    @Override
+    public List<DrawingCodeDto> getAllActiveDrawingCode() {
+        List<DrawingCode> drawingCodes = drawingCodeRepository.findAllByStatus(1);
+        return drawingCodes.stream().map(DrawingCodeMapper::mapToDrawingCodeDto).toList();
+    }
 }

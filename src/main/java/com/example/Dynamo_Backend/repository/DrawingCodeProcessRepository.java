@@ -10,4 +10,6 @@ public interface DrawingCodeProcessRepository extends JpaRepository<DrawingCodeP
     List<DrawingCodeProcess> findByMachine_MachineId(Integer machineId);
 
     List<DrawingCodeProcess> findByIsPlan(Integer planned);
+
+    List<DrawingCodeProcess> findByProcessStatus(Integer processStatus);
 }

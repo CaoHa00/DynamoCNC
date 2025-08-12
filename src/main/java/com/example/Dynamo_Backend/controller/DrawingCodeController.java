@@ -33,6 +33,12 @@ public class DrawingCodeController {
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<DrawingCodeDto>> getAllActivedrawingCodes() {
+        List<DrawingCodeDto> drawingCodes = drawingCodeService.getAllActiveDrawingCode();
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
     @PostMapping
     public ResponseEntity<DrawingCodeDto> adddrawingCode(@RequestBody DrawingCodeDto drawingCodeDto) {
         DrawingCodeDto drawingCode = drawingCodeService.addDrawingCode(drawingCodeDto);

@@ -47,10 +47,10 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         public DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto) {
                 long createdTimestamp = System.currentTimeMillis();
                 int status = 1;
-                OrderDetail orderDetail = orderDetailRepository.findById(drawingCodeProcessDto.getOrderDetailId())
+                OrderDetail orderDetail = orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderCode())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "OrderDetail is not found:"
-                                                                + drawingCodeProcessDto.getOrderDetailId()));
+                                                                + drawingCodeProcessDto.getOrderCode()));
                 // Machine machine =
                 // machineRepository.findById(drawingCodeProcessDto.getMachineId())
                 // .orElseThrow(() -> new RuntimeException("Machine is not found:" +
@@ -95,12 +95,12 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
                 drawingCodeProcess.setUpdatedDate(updatedTimestamp);
 
-                OrderDetail orderDetail = drawingCodeProcessDto.getOrderDetailId() != null
-                                ? orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderDetailId())
+                OrderDetail orderDetail = drawingCodeProcessDto.getOrderCode() != null
+                                ? orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderCode())
                                                 .orElseThrow(() -> new RuntimeException(
                                                                 "OrderDetail is not found:"
                                                                                 + drawingCodeProcessDto
-                                                                                                .getOrderDetailId()))
+                                                                                                .getOrderCode()))
                                 : null;
                 if (orderDetail != null) {
                         drawingCodeProcess.setOrderDetail(orderDetail);
@@ -395,10 +395,10 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 long createdTimestamp = System.currentTimeMillis();
                 int status = 1;
                 OrderDetail orderDetail = orderDetailRepository
-                                .findByOrderCode(drawingCodeProcessDto.getOrderDetailId())
+                                .findByOrderCode(drawingCodeProcessDto.getOrderCode())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "OrderDetail is not found:"
-                                                                + drawingCodeProcessDto.getOrderDetailId()));
+                                                                + drawingCodeProcessDto.getOrderCode()));
                 Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId())
                                 .orElseThrow(() -> new RuntimeException("Machine is not found:" +
                                                 drawingCodeProcessDto.getMachineId()));
@@ -638,7 +638,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         OrderDetailDto orderDetailDto = OrderDetailMapper.mapOrderCodeDto(process.getOrderDetail());
                         Machine machine = process.getMachine();
                         MachineDto machineDto = (machine != null)
-                                        ? MachineMapper.mapToMachineDto(machine)
+                                        ? MachineMapper.mapOnlyMachineName(machine)
                                         : null;
                         PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
                                         : null;
@@ -668,7 +668,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId).orElse(null);
                 Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId()).orElse(null);
 
-                OrderDetail orderDetail = orderDetailRepository.findById(drawingCodeProcessDto.getOrderDetailId())
+                OrderDetail orderDetail = orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderCode())
                                 .orElse(null);
                 process.setOrderDetail(orderDetail);
                 process.setPartNumber(drawingCodeProcess.getPartNumber());
@@ -702,4 +702,32 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
         }
 
+        @Override
+        public List<DrawingCodeProcessResponseDto> getCompletedProcess() {
+                List<DrawingCodeProcess> all = drawingCodeProcessRepository.findByProcessStatus(3);
+                return all.stream().map(process -> {
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapOrderCodeDto(process.getOrderDetail());
+                        Machine machine = process.getMachine();
+                        MachineDto machineDto = (machine != null)
+                                        ? MachineMapper.mapOnlyMachineName(machine)
+                                        : null;
+                        PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+                        ProcessTimeDto processTimeDto = (process.getProcessTime() != null)
+                                        ? ProcessTimeMapper.mapToProcessTimeDto(process.getProcessTime())
+                                        : null;
+                        List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                                        ? process.getOperateHistories().stream().map(operate -> {
+                                                Staff staff = staffRepository.findById(operate.getStaff().getId())
+                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                "Staff is not found for process: "
+                                                                                                + operate.getStaff()
+                                                                                                                .getId()));
+                                                return StaffMapper.mapToStaffDto(staff);
+                                        }).toList()
+                                        : null;
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, staffDtos, planDto,
+                                        processTimeDto);
+                }).toList();
+        }
 }
