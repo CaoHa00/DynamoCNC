@@ -33,6 +33,12 @@ public class DrawingCodeProcessController {
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
+    @GetMapping("/completed")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllCompleteddrawingCodes() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getCompletedProcess();
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
     @GetMapping("/planned")
     public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllPlannedDrawingCodes() {
         List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(1);
@@ -79,6 +85,16 @@ public class DrawingCodeProcessController {
             @PathVariable("drawingCodeProcess_id") String Id,
             @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
         DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateDrawingCodeProcess(
+                Id,
+                drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
+    }
+
+    @PutMapping("/admin/{process_id}")
+    public ResponseEntity<DrawingCodeProcessResponseDto> updateDrawingCodeProcessByAdmin(
+            @PathVariable("process_id") String Id,
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateProcessByAdmin(
                 Id,
                 drawingCodeProcessDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);

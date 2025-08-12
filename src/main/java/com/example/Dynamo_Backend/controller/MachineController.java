@@ -34,6 +34,12 @@ public class MachineController {
         return ResponseEntity.status(HttpStatus.OK).body(machines);
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<MachineDto>> getAllActvieMachines() {
+        List<MachineDto> machines = machineService.getActiveMachines();
+        return ResponseEntity.status(HttpStatus.OK).body(machines);
+    }
+
     @PostMapping
     public ResponseEntity<MachineDto> addMachine(@RequestBody MachineRequestDto machineDto) {
         MachineDto machine = machineService.addMachine(machineDto);

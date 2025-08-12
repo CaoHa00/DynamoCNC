@@ -64,12 +64,9 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto updateStaffKpiByStaffId(String staffId, StaffKpiDto staffKpiDto) {
         long updatedTimestamp = System.currentTimeMillis();
-        StaffKpi staffKpi = staffKpiRepository.findByStaff_Id(staffId).stream()
-                .filter(kpi -> staffKpiDto.getMonth() == kpi.getMonth() &&
-                        staffKpiDto.getYear() == kpi.getYear())
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(
-                        "No staffKpi found for staff ID: " + staffId));// orElse add new StaffKpi
+
+        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(staffId, staffKpiDto.getMonth(),
+                staffKpiDto.getYear());
 
         // staffKpi.setYear(staffKpiDto.getYear());
         // staffKpi.setMonth(staffKpiDto.getMonth());

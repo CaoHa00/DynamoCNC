@@ -32,4 +32,9 @@ public interface DrawingCodeProcessService {
 
     void doneProcess(String processId);
 
+    DrawingCodeProcessResponseDto updateProcessByAdmin(String drawingCodeProcessId,
+            DrawingCodeProcessResquestDto drawingCodeProcessDto);
+
+    List<DrawingCodeProcessResponseDto> getCompletedProcess();
+
 }

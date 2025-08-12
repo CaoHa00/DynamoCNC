@@ -19,5 +19,7 @@ public interface MachineService {
 
     List<MachineDto> getMachines();
 
+    List<MachineDto> getActiveMachines();
+
     void importMachineFromExcel(MultipartFile file);
 }

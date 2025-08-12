@@ -14,6 +14,7 @@ import com.example.Dynamo_Backend.dto.MachineKpiDto;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.Staff;
+import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
@@ -80,10 +81,14 @@ public class MachineKpiImplementation implements MachineKpiService {
     @Override
     public MachineKpiDto updateMachineKpiByMachineId(Integer Id, MachineKpiDto machineKpiDto) {
         long updatedTimestamp = System.currentTimeMillis();
-        MachineKpi machineKpi = machineKpiRepository.findById(Id)
+
+        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineId(Id).stream()
+                .filter(kpi -> kpi.getMonth().equals(machineKpiDto.getMonth())
+                        && kpi.getYear().equals(machineKpiDto.getYear()))
+                .findFirst()
                 .orElseThrow(() -> new RuntimeException(
-                        "No machineKpi found for machine ID: " + Id));
-        Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
+                        "No staffKpi found for staff ID: " + Id));
+        Machine machine = machineRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("MachineKpi is not found:" + machineKpiDto.getMachineId()));
         machineKpi.setMachine(machine);
         machineKpi.setYear(machineKpiDto.getYear());

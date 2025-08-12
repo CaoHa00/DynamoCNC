@@ -32,6 +32,12 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(orders);
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<OrderDto>> getAllActiveOrders() {
+        List<OrderDto> orders = orderService.getAllActiveOrder();
+        return ResponseEntity.status(HttpStatus.OK).body(orders);
+    }
+
     @PostMapping
     public ResponseEntity<OrderDto> addOrder(@RequestBody OrderDto orderDto) {
         OrderDto order = orderService.addOrder(orderDto);

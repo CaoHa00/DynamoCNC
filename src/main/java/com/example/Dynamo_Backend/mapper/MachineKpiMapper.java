@@ -40,6 +40,7 @@ public class MachineKpiMapper {
         machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
         machineKpiDto.setOee(machineKpi.getOee());
         machineKpiDto.setMachineName(machineKpi.getMachine().getMachineName());
+        machineKpiDto.setMachineStatus(machineKpi.getMachine().getStatus());
         return machineKpiDto;
     }
 

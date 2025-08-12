@@ -32,9 +32,9 @@ public class Plan {
     private Integer status;
     @Column(name = "in_progress", nullable = false)
     private Integer inProgress;
-    @Column(name = "remark", nullable = false)
+    @Column(name = "remark", nullable = true)
     private Float remark;
-    @Column(name = "remark_time", nullable = false)
+    @Column(name = "remark_time", nullable = true)
     private Long remarkTime;
     @Column(name = "created_date", nullable = false)
     private Long createdDate;

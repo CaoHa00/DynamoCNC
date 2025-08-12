@@ -23,6 +23,7 @@ public class ProcessTimeMapper {
         processTimeDto.setRunTime(processTime.getRunTime());
         processTimeDto.setSpanTime(processTime.getSpanTime());
         processTimeDto.setStopTime(processTime.getStopTime());
+        processTimeDto.setDrawingCodeProcessId(processTime.getDrawingCodeProcess().getProcessId());
         return processTimeDto;
     }
 }

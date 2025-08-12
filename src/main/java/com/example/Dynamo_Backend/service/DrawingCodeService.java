@@ -17,5 +17,7 @@ public interface DrawingCodeService {
 
     List<DrawingCodeDto> getAllDrawingCode();
 
+    List<DrawingCodeDto> getAllActiveDrawingCode();
+
     void importDrawingCodeFromExcel(MultipartFile file);
 }
