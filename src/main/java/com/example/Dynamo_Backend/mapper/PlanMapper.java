@@ -39,7 +39,10 @@ public class PlanMapper {
             planDto.setRemarkTime(DateTimeUtil.convertTimestampToString(plan.getRemarkTime()));
         }
         planDto.setMachineId(plan.getMachine().getMachineId());
-        planDto.setPlannerId(plan.getPlanner().getId());
+        if (plan.getPlanner() != null) {
+            planDto.setPlannerId(plan.getPlanner().getId());
+        }
+
         planDto.setProcessId(plan.getDrawingCodeProcess().getProcessId());
         planDto.setStaffId(plan.getStaff().getStaffId());
         planDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(plan.getCreatedDate()));
