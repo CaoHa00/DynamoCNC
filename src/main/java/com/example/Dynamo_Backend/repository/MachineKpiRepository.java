@@ -8,4 +8,9 @@ import com.example.Dynamo_Backend.entities.MachineKpi;
 
 public interface MachineKpiRepository extends JpaRepository<MachineKpi, Integer> {
     List<MachineKpi> findByMachine_machineId(Integer id);
+
+    List<MachineKpi> findByGroup_groupId(String group);
+
+    MachineKpi findByMachine_machineIdAndMonthAndYear(Integer id, int month, int year);
+
 }

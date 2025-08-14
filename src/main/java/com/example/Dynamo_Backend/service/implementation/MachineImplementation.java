@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
+import com.example.Dynamo_Backend.dto.StaffKpiDto;
 import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
@@ -46,10 +47,6 @@ public class MachineImplementation implements MachineService {
         machine.setCreatedDate(createdTimestamp);
         machine.setUpdatedDate(createdTimestamp);
         machine.setMachineKpis(new ArrayList<MachineKpi>());
-        Group group = groupRepository.findById(machineDto.getGroupId())
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + machineDto.getGroupId()));
-
-        machine.setGroup(group);
         Machine saveMachine = machineRepository.save(machine);
 
         machineDto.setMachineId(saveMachine.getMachineId());
@@ -76,11 +73,12 @@ public class MachineImplementation implements MachineService {
         machine.setMachineType(machineDto.getMachineType());
         machine.setStatus(machineDto.getStatus());
         machine.setUpdatedDate(updatedTimestamp);
-        Group group = groupRepository.findById(machineDto.getGroupId())
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + machineDto.getGroupId()));
-        machine.setGroup(group);
         MachineKpiDto machineKpiDto = MachineKpiMapper.mapToMachineKpiDto(machineDto);
-        machineKpiService.updateMachineKpiByMachineId(Id, machineKpiDto);
+        MachineKpi existingKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(Id, machineDto.getMonth(),
+                machineDto.getYear());
+        if (!existingKpi.isSameAs(machineKpiDto)) {
+            machineKpiService.updateMachineKpiByMachineId(Id, machineKpiDto);
+        }
         Machine updatedMachine = machineRepository.save(machine);
         return MachineMapper.mapToMachineDto(updatedMachine);
     }
@@ -126,10 +124,6 @@ public class MachineImplementation implements MachineService {
                 String machineId = idCell.substring(idCell.length() - 3, idCell.length() - 1);
                 machineDto.setMachineId(Integer.parseInt(machineId));
                 machineDto.setMachineName(row.getCell(1).getStringCellValue());
-                Group group = groupRepository.findByGroupName(row.getCell(2).getStringCellValue())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Group is not found when add machine by excel:" + row.getCell(2).getStringCellValue()));
-                machineDto.setGroup(group);
                 machineDto.setMachineType(row.getCell(3).getStringCellValue());
                 machineDto.setMachineGroup(row.getCell(4).getStringCellValue());
                 machineDto.setMachineOffice(row.getCell(5).getStringCellValue());

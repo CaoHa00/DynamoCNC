@@ -54,12 +54,6 @@ public class Staff {
     private long createdDate;
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
-
-    @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    @JsonBackReference
-    private Group group;
-
     @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "staff-group")
     private List<StaffGroup> staffGroups;

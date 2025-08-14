@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         ProcessTimeRepository processTimeRepository;
         PlanRepository planRepository;
         private CurrentStatusService currentStatusService;
+        GroupRepository groupRepository;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -300,6 +302,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         @Override
         public void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId) {
                 long timestampNow = System.currentTimeMillis();
+
                 DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId)
                                 .orElseThrow(() -> new RuntimeException(
                                                 "DrawingCodeProcess is not found:" + drawingCodeProcessId));
@@ -312,7 +315,6 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
 
                 // check: just the empty machine(status=0) can start
-
                 Machine machine = machineRepository.findById(machineId).orElseThrow(() -> new RuntimeException(
                                 "Machine is not found:" + machineId));
                 machine.setStatus(1);
@@ -365,14 +367,21 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .setHeader("mqtt_topic", "myTopic")
                                 .build();
                 boolean sent = mqttOutboundChannel.send(message);
+
+                // Get group by machine id in current year and month,if there is no current one,
+                // get the nearest previous - Find in machine kpi
+                int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+                int currentYear = LocalDate.now().getYear();
+                Group group = groupRepository.findLatestByMachineId(machineId, currentMonth, currentYear).orElse(null);
+
                 List<CurrentStatusResponseDto> statusList = currentStatusService
-                                .getCurrentStatusByGroupId(machine.getGroup().getGroupId());
+                                .getCurrentStatusByGroupId(group.getGroupId());
                 try {
                         ObjectMapper objectMapper = new ObjectMapper();
                         String jsonMessage = objectMapper.writeValueAsString(
                                         new java.util.HashMap<String, Object>() {
                                                 {
-                                                        put("type", machine.getGroup().getGroupName()
+                                                        put("type", group.getGroupName()
                                                                         .concat("-status"));
                                                         put("data", statusList);
                                                 }
@@ -482,14 +491,20 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .setHeader("mqtt_topic", "myTopic")
                                 .build();
                 boolean sent = mqttOutboundChannel.send(message);
+
+                int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+                int currentYear = LocalDate.now().getYear();
+
+                Group group = groupRepository.findLatestByMachineId(machine.getMachineId(), currentMonth, currentYear)
+                                .orElse(null);
                 List<CurrentStatusResponseDto> statusList = currentStatusService
-                                .getCurrentStatusByGroupId(machine.getGroup().getGroupId());
+                                .getCurrentStatusByGroupId(group.getGroupId());
                 try {
                         ObjectMapper objectMapper = new ObjectMapper();
                         String jsonMessage = objectMapper.writeValueAsString(
                                         new java.util.HashMap<String, Object>() {
                                                 {
-                                                        put("type", machine.getGroup().getGroupName()
+                                                        put("type", group.getGroupName()
                                                                         .concat("-status"));
                                                         put("data", statusList);
                                                 }

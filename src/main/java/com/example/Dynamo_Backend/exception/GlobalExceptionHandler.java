@@ -32,4 +32,5 @@ public class GlobalExceptionHandler {
         error.put("ExpectedJSONFormat", validationErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
 }

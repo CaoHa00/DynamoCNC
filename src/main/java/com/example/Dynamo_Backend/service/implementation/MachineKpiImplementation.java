@@ -1,8 +1,6 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
@@ -11,11 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
+import com.example.Dynamo_Backend.entities.Group;
+
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
-import com.example.Dynamo_Backend.entities.Staff;
-import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
+import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.MachineKpiService;
@@ -27,6 +26,7 @@ import lombok.AllArgsConstructor;
 public class MachineKpiImplementation implements MachineKpiService {
     MachineKpiRepository machineKpiRepository;
     MachineRepository machineRepository;
+    GroupRepository groupRepository;
 
     @Override
     public MachineKpiDto addMachineKpi(MachineKpiDto machineKpiDto) {
@@ -34,6 +34,9 @@ public class MachineKpiImplementation implements MachineKpiService {
         Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + machineKpiDto.getMachineId()));
         MachineKpi machineKpi = MachineKpiMapper.mapToMachineKpi(machineKpiDto);
+        Group group = groupRepository.findById(machineKpiDto.getGroupId())
+                .orElseThrow(() -> new RuntimeException("Group is not found:" + machineKpiDto.getGroupId()));
+        machineKpi.setGroup(group);
         machineKpi.setMachine(machine);
         machineKpi.setCreatedDate(createdTimestamp);
         machineKpi.setUpdatedDate(createdTimestamp);
@@ -43,19 +46,23 @@ public class MachineKpiImplementation implements MachineKpiService {
 
     @Override
     public MachineKpiDto updateMachineKpi(Integer Id, MachineKpiDto machineKpiDto) {
-        MachineKpi machineKpi = machineKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
-        long updatedTimestamp = System.currentTimeMillis();
-        Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + machineKpiDto.getMachineId()));
-        machineKpi.setMachine(machine);
-        machineKpi.setYear(machineKpiDto.getYear());
-        machineKpi.setMonth(machineKpiDto.getMonth());
-        machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
-        machineKpi.setOee(machineKpiDto.getOee());
-        machineKpi.setUpdatedDate(updatedTimestamp);
-        MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
-        return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
+        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(Id,
+                machineKpiDto.getMonth(), machineKpiDto.getYear());
+        if (machineKpi != null && machineKpi.isSameAs(machineKpiDto)) {
+            throw new IllegalArgumentException("Goal of this machine is already set");
+        } else {
+            machineKpi = machineKpiRepository.findById(Id).orElse(null);
+            long updatedTimestamp = System.currentTimeMillis();
+            Group group = groupRepository.findById(machineKpiDto.getGroupId()).orElse(null);
+            machineKpi.setGroup(group);
+            machineKpi.setYear(machineKpiDto.getYear());
+            machineKpi.setMonth(machineKpiDto.getMonth());
+            machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
+            machineKpi.setOee(machineKpiDto.getOee());
+            machineKpi.setUpdatedDate(updatedTimestamp);
+            MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
+            return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
+        }
     }
 
     @Override
@@ -82,25 +89,24 @@ public class MachineKpiImplementation implements MachineKpiService {
     public MachineKpiDto updateMachineKpiByMachineId(Integer Id, MachineKpiDto machineKpiDto) {
         long updatedTimestamp = System.currentTimeMillis();
 
-        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineId(Id).stream()
-                .filter(kpi -> kpi.getMonth().equals(machineKpiDto.getMonth())
-                        && kpi.getYear().equals(machineKpiDto.getYear()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(
-                        "No staffKpi found for staff ID: " + Id));
-        Machine machine = machineRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("MachineKpi is not found:" + machineKpiDto.getMachineId()));
-        machineKpi.setMachine(machine);
-        machineKpi.setYear(machineKpiDto.getYear());
-        machineKpi.setMonth(machineKpiDto.getMonth());
-        machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
-        machineKpi.setOee(machineKpiDto.getOee());
-        if (machineKpiDto != null) {
-            machineKpi.setCreatedDate(machineKpi.getCreatedDate());
+        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(Id,
+                machineKpiDto.getMonth(), machineKpiDto.getYear());
+        if (machineKpi.isSameAs(machineKpiDto)) {
+            throw new IllegalArgumentException("Goal of this machine is already set");
+        } else {
+            Group group = groupRepository.findById(machineKpiDto.getGroupId()).orElse(null);
+            machineKpi.setGroup(group);
+            machineKpi.setYear(machineKpiDto.getYear());
+            machineKpi.setMonth(machineKpiDto.getMonth());
+            machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
+            machineKpi.setOee(machineKpiDto.getOee());
+            if (machineKpiDto != null) {
+                machineKpi.setCreatedDate(machineKpi.getCreatedDate());
+            }
+            machineKpi.setUpdatedDate(updatedTimestamp);
+            MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
+            return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
         }
-        machineKpi.setUpdatedDate(updatedTimestamp);
-        MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
-        return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
     }
 
     @Override

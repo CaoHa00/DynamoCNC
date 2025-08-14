@@ -1,9 +1,12 @@
 package com.example.Dynamo_Backend.entities;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.example.Dynamo_Backend.dto.MachineKpiDto;
+import com.example.Dynamo_Backend.dto.StaffKpiDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -54,4 +57,19 @@ public class MachineKpi {
     @JoinColumn(name = "machine_id", nullable = false)
     @JsonBackReference
     private Machine machine;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id", nullable = false)
+    @JsonBackReference(value = "group-machine-kpi")
+    private Group group;
+
+    public boolean isSameAs(MachineKpiDto dto) {
+        return Objects.equals(this.oee, dto.getOee()) &&
+                Objects.equals(this.getMachineMiningTarget(), dto.getMachineMiningTarget()) &&
+                Objects.equals(this.getMonth(), dto.getMonth()) &&
+                Objects.equals(this.getGroup().getGroupId(), dto.getGroupId()) &&
+                Objects.equals(this.getYear(), dto.getYear()) &&
+                Objects.equals(this.getMachine().getMachineId(), dto.getMachineId());
+    }
+
 }

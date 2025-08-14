@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.service.implementation;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,12 +39,14 @@ public class StaffImplementation implements StaffService {
 
     @Override
     public StaffDto addStaff(StaffRequestDto staffRequestDto) {
+
+        Optional<Staff> existingStaff = staffRepository.findByStaffId(staffRequestDto.getStaffId());
+        if (existingStaff.isPresent()) {
+            throw new IllegalArgumentException("Staff ID already exists");
+        }
         Staff staff = StaffMapper.mapToEntity(staffRequestDto);
         long createdTimestamp = System.currentTimeMillis();
-        Group group = groupRepository.findById(staffRequestDto.getGroupId())
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + staffRequestDto.getGroupId()));
 
-        staff.setGroup(group);
         staff.setStatus(1);
         staff.setCreatedDate(createdTimestamp);
         staff.setUpdatedDate(createdTimestamp);
@@ -102,12 +105,15 @@ public class StaffImplementation implements StaffService {
         staff.setShortName(staffDto.getShortName());
         staff.setStatus(staffDto.getStatus());
         staff.setUpdatedDate(updatedTimestamp);
-        Group group = groupRepository.findById(staffDto.getGroupId())
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + staffDto.getGroupId()));
-        staff.setGroup(group);
-
         StaffKpiDto staffKpiDto = StaffKpiMapper.mapToStaffKpiDto(staffDto);
-        staffKpiService.updateStaffKpiByStaffId(staff.getId(), staffKpiDto);
+        StaffKpi existingKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(
+                staff.getId(),
+                staffKpiDto.getMonth(),
+                staffKpiDto.getYear());
+        if (!existingKpi.isSameAs(staffKpiDto)) {
+            staffKpiService.updateStaffKpiByStaffId(staff.getId(), staffKpiDto);
+
+        }
         Staff updatedStaff = staffRepository.save(staff);
         return StaffMapper.mapToStaffDto(updatedStaff);
     }
@@ -136,7 +142,6 @@ public class StaffImplementation implements StaffService {
                 Group group = groupRepository.findByGroupName(row.getCell(4).getStringCellValue())
                         .orElseThrow(() -> new RuntimeException(
                                 "Group is not found when add staff by excel:" + row.getCell(5).getStringCellValue()));
-                staffDto.setGroup(group);
                 staffDto.setStaffSection(row.getCell(5).getStringCellValue());
                 staffDto.setStatus(1);
 

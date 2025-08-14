@@ -40,6 +40,7 @@ public class StaffKpiMapper {
         staffKpiDto.setWorkGoal(staffRequestDto.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffRequestDto.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffRequestDto.getManufacturingPoint());
+        staffKpiDto.setGroupId(staffRequestDto.getGroupId());
         return staffKpiDto;
     }
 
@@ -51,6 +52,8 @@ public class StaffKpiMapper {
         staffKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getCreatedDate()));
         staffKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getUpdatedDate()));
         staffKpiDto.setStaffId(staffKpi.getStaff().getId());
+        staffKpiDto.setGroupId(staffKpi.getGroup().getGroupId());
+        staffKpiDto.setGroupName(staffKpi.getGroup().getGroupName());
         staffKpiDto.setYear(staffKpi.getYear());
         staffKpiDto.setMonth(staffKpi.getMonth());
         staffKpiDto.setPgTimeGoal(staffKpi.getPgTimeGoal());
