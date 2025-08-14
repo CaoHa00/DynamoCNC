@@ -11,6 +11,8 @@ public interface MachineKpiRepository extends JpaRepository<MachineKpi, Integer>
 
     List<MachineKpi> findByGroup_groupId(String group);
 
+    List<MachineKpi> findByGroup_groupIdAndMonthAndYear(String group, int month, int year);
+
     MachineKpi findByMachine_machineIdAndMonthAndYear(Integer id, int month, int year);
 
 }
