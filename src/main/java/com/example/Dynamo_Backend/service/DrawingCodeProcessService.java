@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
@@ -14,7 +15,10 @@ public interface DrawingCodeProcessService {
 
         DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
 
-        DrawingCodeProcessResponseDto getDrawingCodeProcessByMachineId(Integer machineId);
+        Map<String, Object> getDrawingCodeProcessByMachineId(Integer machineId);
+        // List<DrawingCodeProcessResponseDto> getDrawingCodeProcessByMachineId(Integer
+        // machineId);
+
 
         DrawingCodeProcessDto getProcessDtoByMachineId(Integer machineId);
 

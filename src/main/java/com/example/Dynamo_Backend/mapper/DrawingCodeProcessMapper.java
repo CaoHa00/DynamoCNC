@@ -154,7 +154,11 @@ public class DrawingCodeProcessMapper {
                 }
                 plan.setStaffId(drawingCodeProcessResquestDto.getStaffId());
                 plan.setMachineId(drawingCodeProcessResquestDto.getMachineId());
-                plan.setPlannerId(drawingCodeProcessResquestDto.getPlannerId());
+                if (drawingCodeProcessResquestDto.getPlannerId() == null) {
+                        plan.setPlannerId(null);
+                } else {
+                        plan.setPlannerId(drawingCodeProcessResquestDto.getPlannerId());
+                }
 
                 return plan;
         }

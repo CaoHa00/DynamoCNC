@@ -10,7 +10,9 @@ import org.springframework.messaging.handler.annotation.support.MethodArgumentNo
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
+@ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidJson(HttpMessageNotReadableException ex) {
@@ -31,6 +33,11 @@ public class GlobalExceptionHandler {
         }
         error.put("ExpectedJSONFormat", validationErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<String> handleBusinessException(BusinessException ex) {
+        return ResponseEntity.status(450).body(ex.getMessage());
     }
 
 }

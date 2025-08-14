@@ -105,7 +105,6 @@ public class MachineImplementation implements MachineService {
     public List<MachineDto> getMachines() {
         List<Machine> machines = machineRepository.findAll();
         return machines.stream().map(MachineMapper::mapToMachineDto).toList();
-
     }
 
     @Override
