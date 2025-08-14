@@ -1,40 +1,43 @@
 package com.example.Dynamo_Backend.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 
 public interface DrawingCodeProcessService {
-    DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto);
+        DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
-    DrawingCodeProcessResponseDto updateDrawingCodeProcess(String drawingCodeProcessId,
-            DrawingCodeProcessResquestDto drawingCodeProcessDto);
+        DrawingCodeProcessResponseDto updateDrawingCodeProcess(String drawingCodeProcessId,
+                        DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
-    DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
+        DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
 
-    DrawingCodeProcessResponseDto getDrawingCodeProcessByMachineId(Integer machineId);
+        Map<String, Object> getDrawingCodeProcessByMachineId(Integer machineId);
+        // List<DrawingCodeProcessResponseDto> getDrawingCodeProcessByMachineId(Integer
+        // machineId);
 
-    DrawingCodeProcessDto getProcessDtoByMachineId(Integer machineId);
+        DrawingCodeProcessDto getProcessDtoByMachineId(Integer machineId);
 
-    void deleteDrawingCodeProcess(String drawingCodeProcessId);
+        void deleteDrawingCodeProcess(String drawingCodeProcessId);
 
-    List<DrawingCodeProcessDto> getAllDrawingCodeProcess();
+        List<DrawingCodeProcessDto> getAllDrawingCodeProcess();
 
-    List<DrawingCodeProcessResponseDto> getAllTodoProcesses();
+        List<DrawingCodeProcessResponseDto> getAllTodoProcesses();
 
-    List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned);
+        List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned);
 
-    void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
+        void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
 
-    DrawingCodeProcessDto addProcessByOperator(DrawingCodeProcessResquestDto drawingCodeProcessDto);
+        DrawingCodeProcessDto addProcessByOperator(DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
-    void doneProcess(String processId);
+        void doneProcess(String processId);
 
-    DrawingCodeProcessResponseDto updateProcessByAdmin(String drawingCodeProcessId,
-            DrawingCodeProcessResquestDto drawingCodeProcessDto);
+        DrawingCodeProcessResponseDto updateProcessByAdmin(String drawingCodeProcessId,
+                        DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
-    List<DrawingCodeProcessResponseDto> getCompletedProcess();
+        List<DrawingCodeProcessResponseDto> getCompletedProcess();
 
 }

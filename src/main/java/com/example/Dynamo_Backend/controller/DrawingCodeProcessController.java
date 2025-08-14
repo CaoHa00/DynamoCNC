@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,9 +115,9 @@ public class DrawingCodeProcessController {
     }
 
     @GetMapping("machine/{machineId}")
-    public ResponseEntity<DrawingCodeProcessResponseDto> getDrawingCodeProcessByMachineId(
+    public ResponseEntity<Map<String, Object>> getDrawingCodeProcessByMachineId(
             @PathVariable("machineId") Integer Id) {
-        DrawingCodeProcessResponseDto drawingCodeProcess = drawingCodeProcessService
+        Map<String, Object> drawingCodeProcess = drawingCodeProcessService
                 .getDrawingCodeProcessByMachineId(Id);
         return ResponseEntity.ok(drawingCodeProcess);
     }
