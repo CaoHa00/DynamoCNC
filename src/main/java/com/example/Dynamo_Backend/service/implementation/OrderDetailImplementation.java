@@ -8,6 +8,7 @@ import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.OrderDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.entities.DrawingCode;
+import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.entities.Order;
 import com.example.Dynamo_Backend.mapper.DrawingCodeMapper;
@@ -26,6 +27,7 @@ public class OrderDetailImplementation implements OrderDetailService {
     public OrderDetailRepository orderDetailRepository;
     public OrderService orderService;
     public DrawingCodeService drawingCodeService;
+    public GroupRepository groupRepository;
 
     @Override
     public OrderDetailDto addOrderDetail(OrderDetailDto orderDetailDto) {
@@ -36,6 +38,9 @@ public class OrderDetailImplementation implements OrderDetailService {
         Order newOrder = OrderMapper.mapToOrder(order);
         long createdTimestamp = System.currentTimeMillis();
         String orderCode = newOrder.getPoNumber() + "_" + newDrawingCode.getDrawingCodeName();
+        Group managerGroup = groupRepository.findById(orderDetailDto.getManagerGroupId())
+                .orElseGet(null);
+        orderDetail.setManagerGroup(managerGroup);
         orderDetail.setOrderCode(orderCode);
         orderDetail.setDrawingCode(newDrawingCode);
         orderDetail.setOrder(newOrder);
@@ -57,12 +62,19 @@ public class OrderDetailImplementation implements OrderDetailService {
             orderDetail.setCreatedDate(orderDetail.getCreatedDate());
         }
         Order updateOrder = OrderMapper.mapToOrder(order);
+        Group managerGroup = groupRepository.findById(orderDetailDto.getManagerGroupId())
+                .orElseGet(null);
+        if (managerGroup != null) {
+            orderDetail.setManagerGroup(managerGroup);
+        }
+
         orderDetail.setOrder(updateOrder);
         orderDetail.setDrawingCode(updateDrawingCode);
         orderDetail.setUpdatedDate(updatedTimestamp);
         orderDetail.setQuantity(orderDetailDto.getQuantity());
         orderDetail.setOrderCode(updateOrder.getPoNumber() + "_" + updateDrawingCode.getDrawingCodeName());
         orderDetail.setOrderType(orderDetailDto.getOrderType());
+        orderDetail.setPgTimeGoal(orderDetailDto.getPgTimeGoal());
         OrderDetail updatedOrderDetail = orderDetailRepository.save(orderDetail);
         return OrderDetailMapper.mapToOrderDetailDto(updatedOrderDetail);
     }

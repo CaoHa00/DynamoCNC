@@ -41,9 +41,11 @@ public class OrderDetail {
     private long createdDate;
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
+    @Column(name = "pg_time_goal", nullable = true)
+    private Float pgTimeGoal;
 
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = true)
     @JsonBackReference
     private Order order;
 
@@ -51,6 +53,11 @@ public class OrderDetail {
     @JoinColumn(name = "drawing_code_id", nullable = false)
     @JsonBackReference
     private DrawingCode drawingCode;
+
+    @ManyToOne
+    @JoinColumn(name = "manager_group_id", nullable = true)
+    @JsonBackReference
+    private Group managerGroup;
     // @Column(name = "status", nullable = false)
     // private int status;
     // @ManyToOne

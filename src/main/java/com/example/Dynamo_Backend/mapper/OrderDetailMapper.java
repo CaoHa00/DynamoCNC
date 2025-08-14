@@ -18,6 +18,9 @@ public class OrderDetailMapper {
         orderDetailDto.setOrderCode(orderDetail.getOrderCode());
         orderDetailDto.setOrderType(orderDetail.getOrderType());
         orderDetailDto.setQuantity(orderDetail.getQuantity());
+        orderDetailDto.setManagerGroupId(
+                orderDetail.getManagerGroup() != null ? orderDetail.getManagerGroup().getGroupId() : null);
+        orderDetailDto.setPgTimeGoal(orderDetail.getPgTimeGoal());
         return orderDetailDto;
     }
 
@@ -27,6 +30,7 @@ public class OrderDetailMapper {
         orderDetail.setOrderCode(orderDetailDto.getOrderCode());
         orderDetail.setOrderType(orderDetailDto.getOrderType());
         orderDetail.setQuantity(orderDetailDto.getQuantity());
+        orderDetail.setPgTimeGoal(orderDetailDto.getPgTimeGoal());
         // orderDetail.setStatus(orderDetailDto.getStatus());
         return orderDetail;
     }

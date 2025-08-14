@@ -293,7 +293,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         MachineDto machineDto = (machine != null)
                                         ? MachineMapper.mapToMachineDto(machine)
                                         : null;
-                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, null, null, null);
+                        PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, null, planDto, null);
                 }).toList();
         }
 
@@ -594,12 +596,21 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 spanTime = doneTime - logs.get(0).getTimeStamp();
                                 runTime += doneTime - logs.get(lastIndex).getTimeStamp();
                         }
+                        // convert ms to seconds
+                        // processTime.setSpanTime(spanTime / 1000f);
+                        // processTime.setRunTime(runTime / 1000f);
+                        // processTime.setPgTime(pgTime / 1000f);
+                        // processTime.setStopTime(stopTime / 1000f);
+                        // processTime.setOffsetTime(offsetTime / 1000f);
+                        // processTime.setDrawingCodeProcess(drawingCodeProcess);
+                        // processTimeRepository.save(processTime);
 
-                        processTime.setSpanTime(spanTime / 1000f); // convert ms to seconds
-                        processTime.setRunTime(runTime / 1000f);
-                        processTime.setPgTime(pgTime / 1000f);
-                        processTime.setStopTime(stopTime / 1000f);
-                        processTime.setOffsetTime(offsetTime / 1000f);
+                        // convert ms to hours
+                        processTime.setSpanTime(spanTime / 3600000f); // ms to hours
+                        processTime.setRunTime(runTime / 3600000f);
+                        processTime.setPgTime(pgTime / 3600000f);
+                        processTime.setStopTime(stopTime / 3600000f);
+                        processTime.setOffsetTime(offsetTime / 3600000f);
                         processTime.setDrawingCodeProcess(drawingCodeProcess);
                         processTimeRepository.save(processTime);
                 }

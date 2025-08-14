@@ -20,6 +20,8 @@ public class OrderDetailDto {
     private String orderType;
     private String createdDate;
     private String updatedDate;
+    private Float pgTimeGoal;
+    private String managerGroupId;
     // private int status;
 
     public OrderDetailDto(String orderDetailId, String orderCode) {
