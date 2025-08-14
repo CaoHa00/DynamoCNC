@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -143,7 +144,11 @@ public class CurrentStatusImplementation implements CurrentStatusService {
 
     @Override
     public List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId) {
-        List<Machine> machines = machineRepository.findByGroup_GroupId(groupId);
+        int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+        int currentYear = LocalDate.now().getYear();
+
+        List<Machine> machines = machineRepository.findMachinesByGroupIdLatestOrCurrent(groupId, currentMonth,
+                currentYear);
         List<CurrentStatusResponseDto> result = new ArrayList<>();
 
         if (machines.isEmpty()) {

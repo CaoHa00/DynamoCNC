@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.StaffKpiDto;
+import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
+import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.service.StaffKpiService;
@@ -25,13 +27,22 @@ import lombok.AllArgsConstructor;
 public class StaffKpiImplementation implements StaffKpiService {
     StaffKpiRepository staffKpiRepository;
     StaffRepository staffRepository;
+    GroupRepository groupRepository;
 
     @Override
     public StaffKpiDto addStaffKpi(StaffKpiDto staffKpiDto) {
+        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(staffKpiDto.getStaffId(),
+                staffKpiDto.getMonth(),
+                staffKpiDto.getYear());
+        if (staffKpi != null) {
+            throw new IllegalArgumentException("Goal of this staff is already set");
+        }
         long createdTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
                 .orElseThrow(() -> new RuntimeException("StaffKpiKpi is not found:" + staffKpiDto.getStaffId()));
-        StaffKpi staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
+        staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
+        Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
+        staffKpi.setGroup(group);
         staffKpi.setStaff(staff);
         staffKpi.setCreatedDate(createdTimestamp);
         staffKpi.setUpdatedDate(createdTimestamp);
@@ -41,47 +52,80 @@ public class StaffKpiImplementation implements StaffKpiService {
 
     @Override
     public StaffKpiDto updateStaffKpi(Integer Id, StaffKpiDto staffKpiDto) {
-        StaffKpi staffKpi = staffKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
-        long updatedTimestamp = System.currentTimeMillis();
-        String a = staffKpiDto.getStaffId();
-        Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
-        staffKpi.setStaff(staff);
-        staffKpi.setYear(staffKpiDto.getYear());
-        staffKpi.setMonth(staffKpiDto.getMonth());
-        staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
-        staffKpi.setKpi(staffKpiDto.getKpi());
-        staffKpi.setOleGoal(staffKpiDto.getOleGoal());
-        staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
-        staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
-        staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
-        staffKpi.setUpdatedDate(updatedTimestamp);
-        StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
-        return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
+        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(staffKpiDto.getStaffId(),
+                staffKpiDto.getMonth(),
+                staffKpiDto.getYear());
+        if (staffKpi != null) {
+            if (staffKpi.isSameAs(staffKpiDto)) {
+                throw new IllegalArgumentException("Goal of this staff is already set");
+            } else {
+                Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
+                staffKpi = staffKpiRepository.findById(Id).orElse(null);
+                staffKpi.setGroup(group);
+                long updatedTimestamp = System.currentTimeMillis();
+                Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
+                        .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
+                staffKpi.setStaff(staff);
+                staffKpi.setYear(staffKpiDto.getYear());
+                staffKpi.setMonth(staffKpiDto.getMonth());
+                staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
+                staffKpi.setKpi(staffKpiDto.getKpi());
+                staffKpi.setOleGoal(staffKpiDto.getOleGoal());
+                staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
+                staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
+                staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
+                staffKpi.setUpdatedDate(updatedTimestamp);
+                StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
+                return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
+            }
+        } else {
+            Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
+            staffKpi = staffKpiRepository.findById(Id).orElse(null);
+            staffKpi.setGroup(group);
+            long updatedTimestamp = System.currentTimeMillis();
+            Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
+                    .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
+            staffKpi.setStaff(staff);
+            staffKpi.setYear(staffKpiDto.getYear());
+            staffKpi.setMonth(staffKpiDto.getMonth());
+            staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
+            staffKpi.setKpi(staffKpiDto.getKpi());
+            staffKpi.setOleGoal(staffKpiDto.getOleGoal());
+            staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
+            staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
+            staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
+            staffKpi.setUpdatedDate(updatedTimestamp);
+            StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
+            return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
+        }
     }
 
     @Override
     public StaffKpiDto updateStaffKpiByStaffId(String staffId, StaffKpiDto staffKpiDto) {
         long updatedTimestamp = System.currentTimeMillis();
-
-        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(staffId, staffKpiDto.getMonth(),
+        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(staffId,
+                staffKpiDto.getMonth(),
                 staffKpiDto.getYear());
-
-        // staffKpi.setYear(staffKpiDto.getYear());
-        // staffKpi.setMonth(staffKpiDto.getMonth());
-        staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
-        staffKpi.setKpi(staffKpiDto.getKpi());
-        staffKpi.setOleGoal(staffKpiDto.getOleGoal());
-        staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
-        staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
-        staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
-        if (staffKpiDto.getCreatedDate() == null) {
-            staffKpi.setCreatedDate(staffKpi.getCreatedDate());
+        if (staffKpi.isSameAs(staffKpiDto)) {
+            throw new IllegalArgumentException("Goal of this staff is already set");
+        } else {
+            Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
+            staffKpi.setGroup(group);
+            staffKpi.setYear(staffKpiDto.getYear());
+            staffKpi.setMonth(staffKpiDto.getMonth());
+            staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
+            staffKpi.setKpi(staffKpiDto.getKpi());
+            staffKpi.setOleGoal(staffKpiDto.getOleGoal());
+            staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
+            staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
+            staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
+            if (staffKpiDto.getCreatedDate() == null) {
+                staffKpi.setCreatedDate(staffKpi.getCreatedDate());
+            }
+            staffKpi.setUpdatedDate(updatedTimestamp);
+            StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
+            return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
         }
-        staffKpi.setUpdatedDate(updatedTimestamp);
-        StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
-        return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
     }
 
     @Override

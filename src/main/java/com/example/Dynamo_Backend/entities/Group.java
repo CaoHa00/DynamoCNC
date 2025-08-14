@@ -39,12 +39,12 @@ public class Group {
     private String groupType;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Staff> staffs;
+    @JsonManagedReference(value = "group-staff-kpi")
+    private List<StaffKpi> staffkpis;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Machine> machines;
+    @JsonManagedReference(value = "group-machine-kpi")
+    private List<MachineKpi> machineKpis;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "group-staff")

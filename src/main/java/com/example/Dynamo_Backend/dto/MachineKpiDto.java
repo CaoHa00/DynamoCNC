@@ -18,4 +18,6 @@ public class MachineKpiDto {
     private Integer machineId;
     private String machineName;
     private Integer machineStatus;
+    private String groupId;
+    private String groupName;
 }

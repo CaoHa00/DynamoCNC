@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -132,9 +133,12 @@ public class GroupImplementation implements GroupService {
 
     @Override
     public Map<String, Long> getGroupCountByGroupId(String groupId) {
+        int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+        int currentYear = LocalDate.now().getYear();
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found with ID: " + groupId));
-        List<Machine> machines = machineRepository.findByGroup_GroupId(group.getGroupId());
+        List<Machine> machines = machineRepository.findMachinesByGroupIdLatestOrCurrent(group.getGroupId(),
+                currentMonth, currentYear);
         Map<String, Long> statusCount = machines.stream()
                 .map(machine -> {
                     CurrentStatus status = currentStatusRepository
@@ -155,11 +159,13 @@ public class GroupImplementation implements GroupService {
 
     @Override
     public GroupResponseDto getGroupByMachineId(String payload) {
+        int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+        int currentYear = LocalDate.now().getYear();
         String[] arr = payload.split("-");
         String machineId = arr[0];
         Integer machineIdInt = Integer.parseInt(machineId) + 1;
         String machineStr = String.format("%02d", machineIdInt);
-        Group group = groupRepository.findByMachineId(machineStr)
+        Group group = groupRepository.findLatestByMachineId(machineIdInt, currentMonth, currentYear)
                 .orElseThrow(() -> new RuntimeException("Group not found for machineId: " + machineStr));
 
         return GroupMapper.mapToGroupResponseDto(group);

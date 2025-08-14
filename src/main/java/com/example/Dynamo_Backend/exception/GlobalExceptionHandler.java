@@ -39,4 +39,5 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleBusinessException(BusinessException ex) {
         return ResponseEntity.status(450).body(ex.getMessage());
     }
+
 }
