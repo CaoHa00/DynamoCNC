@@ -35,6 +35,8 @@ public class MachineKpiMapper {
         machineKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
         machineKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
         machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());
+        machineKpiDto.setGroupId(machineKpi.getGroup().getGroupId());
+        machineKpiDto.setGroupName(machineKpi.getGroup().getGroupName());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
         machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
@@ -46,7 +48,7 @@ public class MachineKpiMapper {
 
     public static MachineKpiDto mapToMachineKpiDto(MachineRequestDto machineKpi) {
         MachineKpiDto machineKpiDto = new MachineKpiDto();
-
+        machineKpiDto.setGroupId(machineKpi.getGroupId());
         machineKpiDto.setMachineId(machineKpi.getMachineId());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());

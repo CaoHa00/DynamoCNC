@@ -57,7 +57,7 @@ public class Plan {
     private Machine machine;
 
     @ManyToOne
-    @JoinColumn(name = "planner_id", nullable = false)
+    @JoinColumn(name = "planner_id", nullable = true)
     @JsonBackReference
     private Admin planner;
 }

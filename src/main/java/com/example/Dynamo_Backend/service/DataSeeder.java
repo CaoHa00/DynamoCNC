@@ -50,7 +50,7 @@ public class DataSeeder {
                                                 new Group(null, "Group 9", "staff", null, null, null, null, null, null,
                                                                 System.currentTimeMillis(),
                                                                 System.currentTimeMillis()),
-                                                new Group(null, "Group 10", "machine", null, null, null, null, null,
+                                                new Group(null, "Group 10", "staff", null, null, null, null, null,
                                                                 null,
                                                                 System.currentTimeMillis(),
                                                                 System.currentTimeMillis())));

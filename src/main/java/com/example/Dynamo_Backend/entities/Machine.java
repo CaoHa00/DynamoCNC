@@ -58,11 +58,6 @@ public class Machine {
     @JsonManagedReference(value = "machine-group")
     private List<MachineGroup> machineGroups;
 
-    @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    @JsonBackReference
-    private Group group;
-
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "machine-process")
     private List<DrawingCodeProcess> drawingCodeProcesses;

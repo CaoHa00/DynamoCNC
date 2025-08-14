@@ -1,6 +1,5 @@
 package com.example.Dynamo_Backend.service.implementation;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -53,13 +52,19 @@ public class PlanImplementation implements PlanService {
                 Machine machine = machineRepository.findById(planDto.getMachineId())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "Machine is not found:" + planDto.getMachineId()));
-                Admin admin = adminRepository.findById(planDto.getPlannerId())
-                                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+                // after security, check if admin login
+                if (planDto.getPlannerId() == null) {
+                        plan.setPlanner(null);
+                } else {
+                        Admin admin = adminRepository.findById(planDto.getPlannerId())
+                                        .orElse(null);
+                        plan.setPlanner(admin);
+                }
 
                 plan.setDrawingCodeProcess(drawingCodeProcess);
                 plan.setMachine(machine);
                 plan.setStaff(staff);
-                plan.setPlanner(admin);
                 plan.setCreatedDate(createdTimestamp);
                 plan.setUpdatedDate(createdTimestamp);
                 Plan savedPlan = planRepository.save(plan);
