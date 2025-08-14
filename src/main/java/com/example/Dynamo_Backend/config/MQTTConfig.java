@@ -22,7 +22,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import com.example.Dynamo_Backend.dto.GroupDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 import com.example.Dynamo_Backend.event.OperateHistoryMessageEvent;
@@ -45,7 +44,7 @@ public class MQTTConfig {
         MqttConnectOptions options = new MqttConnectOptions();
 
         // options.setServerURIs(new String[] { "tcp://10.60.253.11:1883" });
-        options.setServerURIs(new String[] { "tcp://10.60.192.39:1883" });
+        options.setServerURIs(new String[] { "tcp://10.70.166.119:1883" });
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);
         factory.setConnectionOptions(options);

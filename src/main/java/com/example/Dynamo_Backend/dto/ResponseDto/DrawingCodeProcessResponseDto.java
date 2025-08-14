@@ -7,7 +7,6 @@ import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.dto.PlanDto;
 import com.example.Dynamo_Backend.dto.ProcessTimeDto;
 import com.example.Dynamo_Backend.dto.StaffDto;
-import com.example.Dynamo_Backend.entities.Plan;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
