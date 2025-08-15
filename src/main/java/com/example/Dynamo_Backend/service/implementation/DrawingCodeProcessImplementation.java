@@ -2,9 +2,6 @@ package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +42,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         PlanRepository planRepository;
         private CurrentStatusService currentStatusService;
         GroupRepository groupRepository;
+        ProcessTimeSummaryService processTimeSummaryService;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -698,6 +696,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         processTime.setDrawingCodeProcess(drawingCodeProcess);
                         processTimeRepository.save(processTime);
                 }
+                processTimeSummaryService.sumTimesByOrderCode(drawingCodeProcess.getOrderDetail().getOrderCode());
 
                 CurrentStaffDto currentStaffDto = currentStaffService
                                 .getCurrentStaffByMachineId(machine.getMachineId());

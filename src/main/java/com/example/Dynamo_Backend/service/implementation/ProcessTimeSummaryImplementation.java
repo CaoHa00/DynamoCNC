@@ -1,11 +1,9 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import com.example.Dynamo_Backend.dto.ProcessTimeSummaryDto;
-import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.entities.ProcessTimeSummary;
 import com.example.Dynamo_Backend.mapper.ProcessTimeSummaryMapper;
-import com.example.Dynamo_Backend.repository.OrderDetailRepository;
 import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
 import com.example.Dynamo_Backend.repository.ProcessTimeSummaryRepository;
 import com.example.Dynamo_Backend.service.ProcessTimeSummaryService;
