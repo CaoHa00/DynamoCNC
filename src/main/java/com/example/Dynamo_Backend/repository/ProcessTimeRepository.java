@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 
 public interface ProcessTimeRepository extends JpaRepository<ProcessTime, Integer> {
-    List<ProcessTime> findAllByDrawingCodeProcess_OrderDetail_OrderCode(String orderCode);
+    List<ProcessTime> findAllByDrawingCodeProcess_OrderDetail_OrderDetailId(String orderDetailId);
 }

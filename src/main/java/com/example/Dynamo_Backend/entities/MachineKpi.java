@@ -69,6 +69,7 @@ public class MachineKpi {
                 Objects.equals(this.getMonth(), dto.getMonth()) &&
                 Objects.equals(this.getGroup().getGroupId(), dto.getGroupId()) &&
                 Objects.equals(this.getYear(), dto.getYear()) &&
+                Objects.equals(this.getGroup().getGroupId(), dto.getGroupId()) &&
                 Objects.equals(this.getMachine().getMachineId(), dto.getMachineId());
     }
 
