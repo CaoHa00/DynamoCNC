@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.dto.OrderDto;
+import com.example.Dynamo_Backend.dto.ProcessTimeSummaryDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.OrderDetailResponseDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.entities.Group;
@@ -17,6 +19,7 @@ import com.example.Dynamo_Backend.mapper.OrderMapper;
 import com.example.Dynamo_Backend.service.DrawingCodeService;
 import com.example.Dynamo_Backend.service.OrderDetailService;
 import com.example.Dynamo_Backend.service.OrderService;
+import com.example.Dynamo_Backend.service.ProcessTimeSummaryService;
 import com.example.Dynamo_Backend.repository.*;
 
 import lombok.AllArgsConstructor;
@@ -28,6 +31,7 @@ public class OrderDetailImplementation implements OrderDetailService {
     public OrderService orderService;
     public DrawingCodeService drawingCodeService;
     public GroupRepository groupRepository;
+    public ProcessTimeSummaryService processTimeSummaryService;
 
     @Override
     public OrderDetailDto addOrderDetail(OrderDetailDto orderDetailDto) {
@@ -80,13 +84,6 @@ public class OrderDetailImplementation implements OrderDetailService {
     }
 
     @Override
-    public OrderDetailDto getOrderDetailById(String Id) {
-        OrderDetail orderDetail = orderDetailRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("OrderDetail is not found:" + Id));
-        return OrderDetailMapper.mapToOrderDetailDto(orderDetail);
-    }
-
-    @Override
     public void deleteOrderDetail(String Id) {
         OrderDetail orderDetail = orderDetailRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("OrderDetail is not found:" + Id));
@@ -94,9 +91,13 @@ public class OrderDetailImplementation implements OrderDetailService {
     }
 
     @Override
-    public List<OrderDetailDto> getOrderDetails() {
-        List<OrderDetail> orderDetails = orderDetailRepository.findAll();
-        return orderDetails.stream().map(OrderDetailMapper::mapToOrderDetailDto).toList();
+    public List<OrderDetailResponseDto> getOrderDetails() {
+        return orderDetailRepository.findAll().stream()
+                .map(od -> {
+                    ProcessTimeSummaryDto summary = processTimeSummaryService.getByOrderDetailId(od.getOrderDetailId());
+                    return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
+                })
+                .toList();
     }
 
     @Override
@@ -116,6 +117,12 @@ public class OrderDetailImplementation implements OrderDetailService {
         // }
 
         // orderDetail.setOrderCode(poNumber + "_" + drawingCodeName);
+    }
+
+    @Override
+    public OrderDetailDto getOrderDetailById(String Id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getOrderDetailById'");
     }
 
 }

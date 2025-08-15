@@ -1,6 +1,8 @@
 package com.example.Dynamo_Backend.mapper;
 
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
+import com.example.Dynamo_Backend.dto.ProcessTimeSummaryDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.OrderDetailResponseDto;
 import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 
@@ -21,6 +23,29 @@ public class OrderDetailMapper {
         orderDetailDto.setManagerGroupId(
                 orderDetail.getManagerGroup() != null ? orderDetail.getManagerGroup().getGroupId() : null);
         orderDetailDto.setPgTimeGoal(orderDetail.getPgTimeGoal());
+        return orderDetailDto;
+    }
+
+    public static OrderDetailResponseDto mapToOrderDetailResponseDto(OrderDetail orderDetail,
+            ProcessTimeSummaryDto processTimeSummaryDto) {
+        OrderDetailResponseDto orderDetailDto = new OrderDetailResponseDto();
+
+        orderDetailDto.setOrderDetailId(orderDetail.getOrderDetailId());
+        orderDetailDto.setDrawingCodeId(orderDetail.getDrawingCode().getDrawingCodeId());
+        orderDetailDto.setDrawingCodeName(orderDetail.getDrawingCode().getDrawingCodeName());
+        orderDetailDto.setPoNumber(orderDetail.getOrder().getPoNumber());
+        orderDetailDto.setOrderId(orderDetail.getOrder().getOrderId());
+        orderDetailDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getCreatedDate()));
+        orderDetailDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getUpdatedDate()));
+        orderDetailDto.setOrderCode(orderDetail.getOrderCode());
+        orderDetailDto.setOrderType(orderDetail.getOrderType());
+        orderDetailDto.setQuantity(orderDetail.getQuantity());
+        orderDetailDto.setManagerGroupId(
+                orderDetail.getManagerGroup() != null ? orderDetail.getManagerGroup().getGroupId() : null);
+        orderDetailDto.setPgTimeGoal(orderDetail.getPgTimeGoal());
+        if (processTimeSummaryDto != null) {
+            orderDetailDto.setProcessTimeSummaryDto(processTimeSummaryDto);
+        }
         return orderDetailDto;
     }
 

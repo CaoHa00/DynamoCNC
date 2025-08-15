@@ -23,15 +23,15 @@ public class ProcessTimeSummaryController {
         return ResponseEntity.status(HttpStatus.OK).body(summaries);
     }
 
-    @GetMapping("/{orderCode}")
-    public ResponseEntity<ProcessTimeSummaryDto> getByOrderCode(@PathVariable String orderCode) {
-        ProcessTimeSummaryDto summary = service.getByOrderCode(orderCode);
+    @GetMapping("/{orderDetailId}")
+    public ResponseEntity<ProcessTimeSummaryDto> getByOrderCode(@PathVariable String orderDetailId) {
+        ProcessTimeSummaryDto summary = service.getByOrderDetailId(orderDetailId);
         return ResponseEntity.status(HttpStatus.OK).body(summary);
     }
 
-    @PostMapping("/sum/{orderCode}")
-    public ResponseEntity<ProcessTimeSummaryDto> sumTimesByOrderCode(@PathVariable String orderCode) {
-        ProcessTimeSummaryDto processTimeSummaryDto = service.sumTimesByOrderCode(orderCode);
+    @PostMapping("/sum/{orderDetailId}")
+    public ResponseEntity<ProcessTimeSummaryDto> sumTimesByOrderCode(@PathVariable String orderDetailId) {
+        ProcessTimeSummaryDto processTimeSummaryDto = service.sumTimesByOrderDetailId(orderDetailId);
         return ResponseEntity.status(HttpStatus.CREATED).body(processTimeSummaryDto);
     }
 }
