@@ -14,4 +14,7 @@ public class GroupEfficiencyResponseDto {
     private float pgEfficiency;
     private float valueEfficiency;
     private float oee;
+    private float offsetLoss;
+    private float otherLoss;
+
 }
