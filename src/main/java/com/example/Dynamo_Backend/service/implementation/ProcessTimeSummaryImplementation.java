@@ -1,11 +1,9 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import com.example.Dynamo_Backend.dto.ProcessTimeSummaryDto;
-import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.entities.ProcessTimeSummary;
 import com.example.Dynamo_Backend.mapper.ProcessTimeSummaryMapper;
-import com.example.Dynamo_Backend.repository.OrderDetailRepository;
 import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
 import com.example.Dynamo_Backend.repository.ProcessTimeSummaryRepository;
 import com.example.Dynamo_Backend.service.ProcessTimeSummaryService;
@@ -30,8 +28,8 @@ public class ProcessTimeSummaryImplementation implements ProcessTimeSummaryServi
     }
 
     @Override
-    public ProcessTimeSummaryDto getByOrderCode(String orderCode) {
-        ProcessTimeSummary summary = repository.findByOrderDetail_OrderCode(orderCode).orElse(null);
+    public ProcessTimeSummaryDto getByOrderDetailId(String orderDetailId) {
+        ProcessTimeSummary summary = repository.findByOrderDetail_OrderDetailId(orderDetailId).orElse(null);
         if (summary == null) {
             return new ProcessTimeSummaryDto(0, 0, 0, 0f, 0f, 0f, 0f, 0f, 0f, null);
         }
@@ -39,9 +37,9 @@ public class ProcessTimeSummaryImplementation implements ProcessTimeSummaryServi
     }
 
     @Override
-    public ProcessTimeSummaryDto sumTimesByOrderCode(String orderCode) {
+    public ProcessTimeSummaryDto sumTimesByOrderDetailId(String orderDetailId) {
         List<ProcessTime> processTimes = processTimeRepository
-                .findAllByDrawingCodeProcess_OrderDetail_OrderCode(orderCode);
+                .findAllByDrawingCodeProcess_OrderDetail_OrderDetailId(orderDetailId);
         int quantity = processTimes.stream()
                 .mapToInt(pt -> pt.getDrawingCodeProcess().getPartNumber())
                 .max()
@@ -61,7 +59,7 @@ public class ProcessTimeSummaryImplementation implements ProcessTimeSummaryServi
             totalOffsetTime += pt.getOffsetTime();
             manufacturing_point += pt.getDrawingCodeProcess().getManufacturingPoint();
         }
-        ProcessTimeSummary summary = repository.findByOrderDetail_OrderCode(orderCode).orElse(null);
+        ProcessTimeSummary summary = repository.findByOrderDetail_OrderDetailId(orderDetailId).orElse(null);
         if (summary == null) {
             summary = new ProcessTimeSummary();
         }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.OrderDetailResponseDto;
 import com.example.Dynamo_Backend.service.OrderDetailService;
 
 import lombok.AllArgsConstructor;
@@ -24,8 +25,8 @@ public class OrderDetailController {
     public final OrderDetailService orderDetailService;
 
     @GetMapping
-    public ResponseEntity<List<OrderDetailDto>> getAllOrderDetails() {
-        List<OrderDetailDto> orderDetails = orderDetailService.getOrderDetails();
+    public ResponseEntity<List<OrderDetailResponseDto>> getAllOrderDetails() {
+        List<OrderDetailResponseDto> orderDetails = orderDetailService.getOrderDetails();
         return ResponseEntity.status(HttpStatus.OK).body(orderDetails);
     }
 

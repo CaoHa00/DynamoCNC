@@ -139,9 +139,15 @@ public class DrawingCodeProcessMapper {
                 PlanDto plan = new PlanDto();
                 plan.setProcessId(processId);
                 plan.setInProgress(1);
-                plan.setStartTime(drawingCodeProcessResquestDto.getStartTime());
-                plan.setEndTime(drawingCodeProcessResquestDto.getEndTime());
-                plan.setStatus(drawingCodeProcessResquestDto.getStatus());
+                if (drawingCodeProcessResquestDto.getStartTime() != null) {
+                        plan.setStartTime(drawingCodeProcessResquestDto.getStartTime());
+                }
+                if (drawingCodeProcessResquestDto.getEndTime() != null) {
+                        plan.setEndTime(drawingCodeProcessResquestDto.getEndTime());
+                }
+                if (drawingCodeProcessResquestDto.getStatus() != null) {
+                        plan.setStatus(drawingCodeProcessResquestDto.getStatus());
+                }
                 if (drawingCodeProcessResquestDto.getRemark() == null) {
                         plan.setRemark(drawingCodeProcessResquestDto.getRemark());
                 } else {

@@ -7,7 +7,7 @@ import java.util.List;
 public interface ProcessTimeSummaryService {
     List<ProcessTimeSummaryDto> getAll();
 
-    ProcessTimeSummaryDto getByOrderCode(String orderCode);
+    ProcessTimeSummaryDto getByOrderDetailId(String orderDetailId);
 
-    ProcessTimeSummaryDto sumTimesByOrderCode(String orderCode);
+    ProcessTimeSummaryDto sumTimesByOrderDetailId(String orderDetailId);
 }

@@ -31,9 +31,14 @@ public class MachineKpiImplementation implements MachineKpiService {
     @Override
     public MachineKpiDto addMachineKpi(MachineKpiDto machineKpiDto) {
         long createdTimestamp = System.currentTimeMillis();
+        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(machineKpiDto.getId(),
+                machineKpiDto.getMonth(), machineKpiDto.getYear());
+        if (machineKpi != null) {
+            throw new IllegalArgumentException("Goal of this machine is already set");
+        }
         Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + machineKpiDto.getMachineId()));
-        MachineKpi machineKpi = MachineKpiMapper.mapToMachineKpi(machineKpiDto);
+        machineKpi = MachineKpiMapper.mapToMachineKpi(machineKpiDto);
         Group group = groupRepository.findById(machineKpiDto.getGroupId())
                 .orElseThrow(() -> new RuntimeException("Group is not found:" + machineKpiDto.getGroupId()));
         machineKpi.setGroup(group);
@@ -46,23 +51,32 @@ public class MachineKpiImplementation implements MachineKpiService {
 
     @Override
     public MachineKpiDto updateMachineKpi(Integer Id, MachineKpiDto machineKpiDto) {
-        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(Id,
+        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
+                machineKpiDto.getMachineId(),
                 machineKpiDto.getMonth(), machineKpiDto.getYear());
+        if (machineKpi != null && !machineKpi.getId().equals(Id)) {
+            throw new IllegalArgumentException("Goal of this machine is already set");
+        }
         if (machineKpi != null && machineKpi.isSameAs(machineKpiDto)) {
             throw new IllegalArgumentException("Goal of this machine is already set");
-        } else {
-            machineKpi = machineKpiRepository.findById(Id).orElse(null);
-            long updatedTimestamp = System.currentTimeMillis();
-            Group group = groupRepository.findById(machineKpiDto.getGroupId()).orElse(null);
-            machineKpi.setGroup(group);
-            machineKpi.setYear(machineKpiDto.getYear());
-            machineKpi.setMonth(machineKpiDto.getMonth());
-            machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
-            machineKpi.setOee(machineKpiDto.getOee());
-            machineKpi.setUpdatedDate(updatedTimestamp);
-            MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
-            return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
         }
+
+        if (machineKpi == null) {
+            machineKpi = machineKpiRepository.findById(Id)
+                    .orElseThrow(() -> new RuntimeException("StaffKpi not found with id: " + Id));
+        }
+        Machine machine = machineRepository.findById(machineKpiDto.getMachineId()).orElse(null);
+        long updatedTimestamp = System.currentTimeMillis();
+        Group group = groupRepository.findById(machineKpiDto.getGroupId()).orElse(null);
+        machineKpi.setMachine(machine);
+        machineKpi.setGroup(group);
+        machineKpi.setYear(machineKpiDto.getYear());
+        machineKpi.setMonth(machineKpiDto.getMonth());
+        machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
+        machineKpi.setOee(machineKpiDto.getOee());
+        machineKpi.setUpdatedDate(updatedTimestamp);
+        MachineKpi saveMachineKpi = machineKpiRepository.save(machineKpi);
+        return MachineKpiMapper.mapToMachineKpiDto(saveMachineKpi);
     }
 
     @Override
