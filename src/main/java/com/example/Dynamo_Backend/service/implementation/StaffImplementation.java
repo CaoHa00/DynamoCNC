@@ -103,7 +103,7 @@ public class StaffImplementation implements StaffService {
         staff.setStaffOffice(staffDto.getStaffOffice());
         staff.setStaffSection(staffDto.getStaffSection());
         staff.setShortName(staffDto.getShortName());
-        staff.setStatus(staffDto.getStatus());
+        staff.setStatus(staffDto.getStatus() != null ? staffDto.getStatus() : staff.getStatus());
         staff.setUpdatedDate(updatedTimestamp);
         StaffKpiDto staffKpiDto = StaffKpiMapper.mapToStaffKpiDto(staffDto);
         StaffKpi existingKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(
