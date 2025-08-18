@@ -696,7 +696,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         processTime.setDrawingCodeProcess(drawingCodeProcess);
                         processTimeRepository.save(processTime);
                 }
-                processTimeSummaryService.sumTimesByOrderCode(drawingCodeProcess.getOrderDetail().getOrderCode());
+                processTimeSummaryService
+                                .sumTimesByOrderDetailId(drawingCodeProcess.getOrderDetail().getOrderDetailId());
 
                 CurrentStaffDto currentStaffDto = currentStaffService
                                 .getCurrentStaffByMachineId(machine.getMachineId());
