@@ -112,7 +112,6 @@ public class StaffImplementation implements StaffService {
                 staffKpiDto.getYear());
         if (!existingKpi.isSameAs(staffKpiDto)) {
             staffKpiService.updateStaffKpiByStaffId(staff.getId(), staffKpiDto);
-
         }
         Staff updatedStaff = staffRepository.save(staff);
         return StaffMapper.mapToStaffDto(updatedStaff);

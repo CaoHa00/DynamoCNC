@@ -6,5 +6,5 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProcessTimeSummaryRepository extends JpaRepository<ProcessTimeSummary, Integer> {
-    Optional<ProcessTimeSummary> findByOrderDetail_OrderCode(String orderCode);
+    Optional<ProcessTimeSummary> findByOrderDetail_OrderDetailId(String orderDetailId);
 }

@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.service;
 import java.util.List;
 
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.OrderDetailResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.entities.Order;
 
@@ -15,7 +16,7 @@ public interface OrderDetailService {
 
     void deleteOrderDetail(String Id);
 
-    List<OrderDetailDto> getOrderDetails();
+    List<OrderDetailResponseDto> getOrderDetails();
 
     void updateOrderCode(String drawingCodeId, String orderId);
 }

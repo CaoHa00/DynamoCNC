@@ -51,53 +51,48 @@ public class StaffKpiImplementation implements StaffKpiService {
     }
 
     @Override
-    public StaffKpiDto updateStaffKpi(Integer Id, StaffKpiDto staffKpiDto) {
-        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(staffKpiDto.getStaffId(),
-                staffKpiDto.getMonth(),
-                staffKpiDto.getYear());
-        if (staffKpi != null) {
-            if (staffKpi.isSameAs(staffKpiDto)) {
-                throw new IllegalArgumentException("Goal of this staff is already set");
-            } else {
-                Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
-                staffKpi = staffKpiRepository.findById(Id).orElse(null);
-                staffKpi.setGroup(group);
-                long updatedTimestamp = System.currentTimeMillis();
-                Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-                        .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
-                staffKpi.setStaff(staff);
-                staffKpi.setYear(staffKpiDto.getYear());
-                staffKpi.setMonth(staffKpiDto.getMonth());
-                staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
-                staffKpi.setKpi(staffKpiDto.getKpi());
-                staffKpi.setOleGoal(staffKpiDto.getOleGoal());
-                staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
-                staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
-                staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
-                staffKpi.setUpdatedDate(updatedTimestamp);
-                StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
-                return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
-            }
-        } else {
-            Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
-            staffKpi = staffKpiRepository.findById(Id).orElse(null);
-            staffKpi.setGroup(group);
-            long updatedTimestamp = System.currentTimeMillis();
-            Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-                    .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
-            staffKpi.setStaff(staff);
-            staffKpi.setYear(staffKpiDto.getYear());
-            staffKpi.setMonth(staffKpiDto.getMonth());
-            staffKpi.setPgTimeGoal(staffKpiDto.getPgTimeGoal());
-            staffKpi.setKpi(staffKpiDto.getKpi());
-            staffKpi.setOleGoal(staffKpiDto.getOleGoal());
-            staffKpi.setWorkGoal(staffKpiDto.getWorkGoal());
-            staffKpi.setMachineTimeGoal(staffKpiDto.getMachineTimeGoal());
-            staffKpi.setManufacturingPoint(staffKpiDto.getManufacturingPoint());
-            staffKpi.setUpdatedDate(updatedTimestamp);
-            StaffKpi saveStaffKpi = staffKpiRepository.save(staffKpi);
-            return StaffKpiMapper.mapToStaffKpiDto(saveStaffKpi);
+    public StaffKpiDto updateStaffKpi(Integer id, StaffKpiDto dto) {
+        // Try to find an existing KPI by staff + month + year
+        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(
+                dto.getStaffId(), dto.getMonth(), dto.getYear());
+
+        // If it exists and is not the same record, reject
+        if (staffKpi != null && !staffKpi.getId().equals(id)) {
+            throw new IllegalArgumentException("Goal of this staff is already set");
         }
+
+        // If it exists and is identical, reject
+        if (staffKpi != null && staffKpi.isSameAs(dto)) {
+            throw new IllegalArgumentException("Goal of this staff is already set");
+        }
+
+        // Load the record by ID if not found earlier
+        if (staffKpi == null) {
+            staffKpi = staffKpiRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("StaffKpi not found with id: " + id));
+        }
+
+        // Set related entities
+        Group group = groupRepository.findById(dto.getGroupId()).orElse(null);
+        Staff staff = staffRepository.findById(dto.getStaffId())
+                .orElseThrow(() -> new RuntimeException("Staff not found: " + dto.getStaffId()));
+
+        // Update fields
+        staffKpi.setGroup(group);
+        staffKpi.setStaff(staff);
+        staffKpi.setYear(dto.getYear());
+        staffKpi.setMonth(dto.getMonth());
+        staffKpi.setPgTimeGoal(dto.getPgTimeGoal());
+        staffKpi.setKpi(dto.getKpi());
+        staffKpi.setOleGoal(dto.getOleGoal());
+        staffKpi.setWorkGoal(dto.getWorkGoal());
+        staffKpi.setMachineTimeGoal(dto.getMachineTimeGoal());
+        staffKpi.setManufacturingPoint(dto.getManufacturingPoint());
+        staffKpi.setUpdatedDate(System.currentTimeMillis());
+
+        // Save & return
+        StaffKpi saved = staffKpiRepository.save(staffKpi);
+        return StaffKpiMapper.mapToStaffKpiDto(saved);
     }
 
     @Override

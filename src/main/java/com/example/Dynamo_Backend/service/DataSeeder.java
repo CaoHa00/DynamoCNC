@@ -7,6 +7,7 @@ import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
+
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.Order;
@@ -25,6 +26,7 @@ import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.OrderDetailRepository;
 import com.example.Dynamo_Backend.repository.OrderRepository;
 import com.example.Dynamo_Backend.repository.PlanRepository;
+
 import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
 import com.example.Dynamo_Backend.repository.ReportRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
@@ -328,6 +330,7 @@ public class DataSeeder {
                         DrawingCode drawingCode3 = new DrawingCode();
                         drawingCode3.setDrawingCodeName("9927-V4");
                         drawingCode3.setStatus(1);
+
                         drawingCode3.setCreatedDate(createdTimestamp);
                         drawingCode3.setUpdatedDate(createdTimestamp);
                         drawingCodeRepository.save(drawingCode3);
@@ -470,6 +473,7 @@ public class DataSeeder {
                         drawingCodeProcess4.setIsPlan(1);
                         drawingCodeProcess4.setStatus(1);
                         drawingCodeProcess4.setProcessStatus(1);
+
                         drawingCodeProcess4.setCreatedDate(createdTimestamp);
                         drawingCodeProcess4.setUpdatedDate(createdTimestamp);
                         processRepository.save(drawingCodeProcess4);

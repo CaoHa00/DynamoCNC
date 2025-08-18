@@ -79,8 +79,8 @@ public class StaffKpi {
                 Objects.equals(this.getManufacturingPoint(), dto.getManufacturingPoint()) &&
                 Objects.equals(this.getMonth(), dto.getMonth()) &&
                 Objects.equals(this.getYear(), dto.getYear()) &&
+                Objects.equals(this.getGroup().getGroupId(), dto.getGroupId()) &&
                 Objects.equals(this.getStaff().getId(), dto.getStaffId());
-
     }
 
 }
