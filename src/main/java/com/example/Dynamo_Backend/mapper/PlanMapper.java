@@ -10,8 +10,12 @@ public class PlanMapper {
         plan.setId(planDto.getId());
         plan.setInProgress(planDto.getInProgress());
         plan.setStatus(planDto.getStatus());
-        plan.setStartTime(DateTimeUtil.convertStringToTimestamp(planDto.getStartTime()));
-        plan.setEndTime(DateTimeUtil.convertStringToTimestamp(planDto.getEndTime()));
+        if (planDto.getStartTime() != null) {
+            plan.setStartTime(DateTimeUtil.convertStringToTimestamp(planDto.getStartTime()));
+        }
+        if (planDto.getEndTime() != null) {
+            plan.setEndTime(DateTimeUtil.convertStringToTimestamp(planDto.getEndTime()));
+        }
         plan.setRemark(planDto.getRemark());
         if (planDto.getRemarkTime() == null) {
             plan.setRemarkTime(null);
@@ -26,8 +30,12 @@ public class PlanMapper {
         planDto.setId(plan.getId());
         planDto.setInProgress(plan.getInProgress());
         planDto.setStatus(plan.getStatus());
-        planDto.setStartTime(DateTimeUtil.convertTimestampToString(plan.getStartTime()));
-        planDto.setEndTime(DateTimeUtil.convertTimestampToString(plan.getEndTime()));
+        if (plan.getStartTime() != null) {
+            planDto.setStartTime(DateTimeUtil.convertTimestampToString(plan.getStartTime()));
+        }
+        if (plan.getEndTime() != null) {
+            planDto.setEndTime(DateTimeUtil.convertTimestampToString(plan.getEndTime()));
+        }
         if (plan.getRemark() == null) {
             planDto.setRemark(null);
         } else {

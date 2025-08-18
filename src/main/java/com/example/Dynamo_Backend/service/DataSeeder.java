@@ -6,11 +6,14 @@ import com.example.Dynamo_Backend.entities.Admin;
 import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
+import com.example.Dynamo_Backend.entities.GroupKpi;
+
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.Order;
 import com.example.Dynamo_Backend.entities.OrderDetail;
 import com.example.Dynamo_Backend.entities.Plan;
+import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.repository.AdminRepository;
@@ -23,6 +26,8 @@ import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.OrderDetailRepository;
 import com.example.Dynamo_Backend.repository.OrderRepository;
 import com.example.Dynamo_Backend.repository.PlanRepository;
+
+import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
 import com.example.Dynamo_Backend.repository.ReportRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
@@ -47,6 +52,7 @@ public class DataSeeder {
         private final PlanRepository planRepository;
         private final AdminRepository adminRepository;
         private final ReportRepository reportRepository;
+        private final ProcessTimeRepository processTimeRepository;
 
         long createdTimestamp = System.currentTimeMillis();
 
@@ -309,48 +315,57 @@ public class DataSeeder {
 
                         DrawingCode drawingCode1 = new DrawingCode();
                         drawingCode1.setDrawingCodeName("9927-V2");
+                        drawingCode1.setStatus(1);
                         drawingCode1.setCreatedDate(createdTimestamp);
                         drawingCode1.setUpdatedDate(createdTimestamp);
                         drawingCodeRepository.save(drawingCode1);
 
                         DrawingCode drawingCode2 = new DrawingCode();
                         drawingCode2.setDrawingCodeName("9927-V3");
+                        drawingCode2.setStatus(1);
                         drawingCode2.setCreatedDate(createdTimestamp);
                         drawingCode2.setUpdatedDate(createdTimestamp);
                         drawingCodeRepository.save(drawingCode2);
 
                         DrawingCode drawingCode3 = new DrawingCode();
                         drawingCode3.setDrawingCodeName("9927-V4");
+                        drawingCode3.setStatus(1);
+
                         drawingCode3.setCreatedDate(createdTimestamp);
                         drawingCode3.setUpdatedDate(createdTimestamp);
                         drawingCodeRepository.save(drawingCode3);
 
                         DrawingCode drawingCode4 = new DrawingCode();
                         drawingCode4.setDrawingCodeName("9927-V5");
+                        drawingCode4.setStatus(1);
                         drawingCode4.setCreatedDate(createdTimestamp);
                         drawingCode4.setUpdatedDate(createdTimestamp);
                         drawingCodeRepository.save(drawingCode4);
 
                         Order order = new Order();
                         order.setPoNumber("20250101");
+                        order.setStatus(1);
                         order.setCreatedDate(createdTimestamp);
                         order.setUpdatedDate(createdTimestamp);
                         orderRepository.save(order);
 
                         Order order1 = new Order();
                         order1.setPoNumber("20250102");
+                        order1.setStatus(1);
                         order1.setCreatedDate(createdTimestamp);
                         order1.setUpdatedDate(createdTimestamp);
                         orderRepository.save(order1);
 
                         Order order2 = new Order();
                         order2.setPoNumber("20250103");
+                        order2.setStatus(1);
                         order2.setCreatedDate(createdTimestamp);
                         order2.setUpdatedDate(createdTimestamp);
                         orderRepository.save(order2);
 
                         Order order3 = new Order();
                         order3.setPoNumber("20250104");
+                        order3.setStatus(1);
                         order3.setCreatedDate(createdTimestamp);
                         order3.setUpdatedDate(createdTimestamp);
                         orderRepository.save(order3);
@@ -443,7 +458,7 @@ public class DataSeeder {
                         drawingCodeProcess3.setIsPlan(0); // Not planned yet
                         drawingCodeProcess3.setMachine(machine2);
                         drawingCodeProcess3.setStatus(1); // Not started
-                        drawingCodeProcess3.setProcessStatus(0);
+                        drawingCodeProcess3.setProcessStatus(1);
                         drawingCodeProcess3.setCreatedDate(createdTimestamp);
                         drawingCodeProcess3.setUpdatedDate(createdTimestamp);
                         processRepository.save(drawingCodeProcess3);
@@ -457,7 +472,8 @@ public class DataSeeder {
                         drawingCodeProcess4.setPgTime(100L);
                         drawingCodeProcess4.setIsPlan(1);
                         drawingCodeProcess4.setStatus(1);
-                        drawingCodeProcess4.setProcessStatus(2);
+                        drawingCodeProcess4.setProcessStatus(1);
+
                         drawingCodeProcess4.setCreatedDate(createdTimestamp);
                         drawingCodeProcess4.setUpdatedDate(createdTimestamp);
                         processRepository.save(drawingCodeProcess4);
@@ -512,6 +528,48 @@ public class DataSeeder {
                         plan4.setCreatedDate(createdTimestamp);
                         plan4.setUpdatedDate(createdTimestamp);
                         planRepository.save(plan4);
+
+                        // For Group Efficiency
+                        GroupKpi groupKpi = new GroupKpi();
+                        groupKpi.setGroup(group4); // reference to your Group entity
+                        groupKpi.setIsMonth(0); // 0 for week, 1 for month
+                        groupKpi.setWeek(4); // week number
+                        groupKpi.setMonth(7); // July
+                        groupKpi.setYear(2025);
+                        groupKpi.setWorkingHourGoal(40);
+                        groupKpi.setWorkingHourDifference(0);
+                        groupKpi.setCreatedDate(createdTimestamp);
+                        groupKpi.setUpdatedDate(createdTimestamp);
+                        groupKpi.setOffice("D-11");
+                        groupKpi.setWorkingHour(40); // or any float value
+                        groupKpiRepository.save(groupKpi);
+
+                        DrawingCodeProcess process = new DrawingCodeProcess();
+                        process.setMachine(machine3); // reference to your Machine entity
+                        process.setStartTime(1753056000000L); // 2025-07-21
+                        process.setEndTime(1753315200000L); // 2025-07-24
+                        process.setIsPlan(0);
+                        process.setStatus(1);
+                        process.setProcessStatus(3);
+                        process.setPartNumber(1);
+                        process.setStepNumber(1);
+                        process.setManufacturingPoint(40);
+                        process.setPgTime(30L);
+                        process.setCreatedDate(createdTimestamp);
+                        process.setUpdatedDate(createdTimestamp);
+                        process.setProcessType("chính");
+                        process.setOrderDetail(orderDetail);
+                        processRepository.save(process);
+
+                        ProcessTime processTime = new ProcessTime();
+                        processTime.setDrawingCodeProcess(process); // reference to DrawingCodeProcess
+                        processTime.setRunTime(10f);
+                        processTime.setPgTime(5f);
+                        processTime.setOffsetTime(1f);
+                        processTime.setSpanTime(10f);
+                        processTime.setStopTime(0f);
+
+                        processTimeRepository.save(processTime);
 
                 }
         }

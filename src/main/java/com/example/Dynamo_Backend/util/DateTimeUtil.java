@@ -12,6 +12,11 @@ public class DateTimeUtil {
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
+    public static long convertStringToTimestampDate(String dateTimeStr) {
+        LocalDate localDate = LocalDate.parse(dateTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
     public static String convertTimestampToString(long timestamp) {
         return Instant.ofEpochMilli(timestamp)
                 .atZone(ZoneId.systemDefault())

@@ -24,9 +24,9 @@ public class Plan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
-    @Column(name = "start_time", nullable = false)
+    @Column(name = "start_time", nullable = true)
     private Long startTime;
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time", nullable = true)
     private Long endTime;
     @Column(name = "status", nullable = false)
     private Integer status;

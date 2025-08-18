@@ -67,6 +67,7 @@ public class PlanImplementation implements PlanService {
                 plan.setStaff(staff);
                 plan.setCreatedDate(createdTimestamp);
                 plan.setUpdatedDate(createdTimestamp);
+                plan.setStatus(1);
                 Plan savedPlan = planRepository.save(plan);
 
                 return PlanMapper.mapToPlanDto(savedPlan);
