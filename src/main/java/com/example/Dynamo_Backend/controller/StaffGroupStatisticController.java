@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.StaffGroupOverviewDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.StaffGroupStatisticDto;
-import com.example.Dynamo_Backend.service.StaffGroupStatisticService;
+import com.example.Dynamo_Backend.service.GroupStatisticService;
 
 import lombok.AllArgsConstructor;
 
@@ -17,19 +17,19 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("api/staff-group-statistic")
 public class StaffGroupStatisticController {
-    private final StaffGroupStatisticService staffGroupStatisticService;
+    private final GroupStatisticService groupStatisticService;
 
     @GetMapping("/overview")
-    public ResponseEntity<List<StaffGroupOverviewDto>> getStaffGroupOverview(
+    public ResponseEntity<List<StaffGroupOverviewDto>> getGroupOverview(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
-        List<StaffGroupOverviewDto> overview = staffGroupStatisticService.getStaffGroupOverview(requestDto);
+        List<StaffGroupOverviewDto> overview = groupStatisticService.getGroupOverview(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(overview);
     }
 
     @GetMapping("/statistic")
-    public ResponseEntity<StaffGroupStatisticDto> getStaffGroupStatistic(
+    public ResponseEntity<StaffGroupStatisticDto> getGroupStatistic(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
-        StaffGroupStatisticDto statistic = staffGroupStatisticService.getStaffGroupStatistic(requestDto);
+        StaffGroupStatisticDto statistic = groupStatisticService.getGroupStatistic(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(statistic);
     }
 }

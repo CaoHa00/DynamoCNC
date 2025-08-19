@@ -20,11 +20,11 @@ import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
-import com.example.Dynamo_Backend.service.StaffGroupStatisticService;
+import com.example.Dynamo_Backend.service.GroupStatisticService;
 import com.example.Dynamo_Backend.util.TimeRange;
 
 @Service
-public class StaffGroupStatisticImplementation implements StaffGroupStatisticService {
+public class StaffGroupStatisticImplementation implements GroupStatisticService {
     @Autowired
     GroupRepository groupRepository;
 
@@ -35,7 +35,7 @@ public class StaffGroupStatisticImplementation implements StaffGroupStatisticSer
     OperateHistoryRepository operateHistoryRepository;
 
     @Override
-    public StaffGroupStatisticDto getStaffGroupStatistic(GroupEfficiencyRequestDto requestDto) {
+    public StaffGroupStatisticDto getGroupStatistic(GroupEfficiencyRequestDto requestDto) {
         String startDate = requestDto.getStartDate().concat(" 00:00:00"); // Should be "2025-07-21"
         String endDate = requestDto.getEndDate().concat(" 23:59:59");
         requestDto.setStartDate(startDate);
@@ -113,7 +113,7 @@ public class StaffGroupStatisticImplementation implements StaffGroupStatisticSer
     }
 
     @Override
-    public List<StaffGroupOverviewDto> getStaffGroupOverview(GroupEfficiencyRequestDto requestDto) {
+    public List<StaffGroupOverviewDto> getGroupOverview(GroupEfficiencyRequestDto requestDto) {
         String startDate = requestDto.getStartDate().concat(" 00:00:00");
         String endDate = requestDto.getEndDate().concat(" 23:59:59");
         requestDto.setStartDate(startDate);
@@ -156,4 +156,5 @@ public class StaffGroupStatisticImplementation implements StaffGroupStatisticSer
         }
         return overviewDtos;
     }
+
 }
