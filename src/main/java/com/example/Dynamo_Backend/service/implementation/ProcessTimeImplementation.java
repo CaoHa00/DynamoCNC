@@ -72,7 +72,8 @@ public class ProcessTimeImplementation implements ProcessTimeService {
     public ProcessTime calculateProcessTime(DrawingCodeProcess drawingCodeProcess) {
         List<Log> logs = drawingCodeProcess.getLogs();
         ProcessTime processTime = new ProcessTime();
-        Long doneTime = System.currentTimeMillis();
+        Long doneTime = drawingCodeProcess.getEndTime() != null ? drawingCodeProcess.getEndTime()
+                : System.currentTimeMillis();
         logs.sort((log1, log2) -> Long.compare(log1.getTimeStamp(), log2.getTimeStamp()));
         if (!logs.isEmpty() && drawingCodeProcess.getMachine().getMachineId() <= 9) {
             long spanTime = 0L;
