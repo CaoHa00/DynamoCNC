@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
@@ -18,8 +19,10 @@ import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
+import com.example.Dynamo_Backend.service.ProcessTimeService;
 import com.example.Dynamo_Backend.util.TimeRange;
 
+@Service
 public class MachineGroupStatisticImplementation implements MachineGroupStatisticService {
     @Autowired
     private MachineKpiRepository machineKpiRepository;
@@ -29,6 +32,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private ProcessTimeService processTimeService;
 
     @Override
     public MachineGroupStatisticDto getGroupStatistic(GroupEfficiencyRequestDto requestDto) {
@@ -64,8 +70,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
 
         for (MachineKpi machineKpi : machineKpiList) {
             List<DrawingCodeProcess> drawingCodeProcesses = processRepository
-                    .findByMachine_MachineId(machineKpi.getId());
+                    .findByMachine_MachineId(machineKpi.getMachine().getMachineId());
             if (drawingCodeProcesses != null && !drawingCodeProcesses.isEmpty()) {
+                // calculate error time
                 for (DrawingCodeProcess process : drawingCodeProcesses) {
                     if (process.getStartTime() > timePeriodInfo.getEndDate() ||
                             process.getEndTime() < timePeriodInfo.getStartDate()) {
@@ -77,58 +84,41 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     totalRunTime += processTime.getRunTime();
                     totalSpanTime += processTime.getSpanTime();
                     totalStopTime += processTime.getStopTime();
+
                     List<Log> logs = process.getLogs();
-                    if (logs.isEmpty()) {
+                    if (logs == null || logs.isEmpty()) {
                         continue;
                     }
-                    // calculate error time
-                    // for (DrawingCodeProcess process : drawingCodeProcesses) {
-                    // if (process.getStartTime() > timePeriodInfo.getEndDate() ||
-                    // process.getEndTime() < timePeriodInfo.getStartDate()) {
-                    // continue;
-                    // }
-                    // ProcessTime processTime = process.getProcessTime();
-                    // totalOffsetTime += processTime.getOffsetTime();
-                    // totalPgTime += processTime.getPgTime();
-                    // totalRunTime += processTime.getRunTime();
-                    // totalSpanTime += processTime.getSpanTime();
-                    // totalStopTime += processTime.getStopTime();
+                    logs.sort((l1, l2) -> Long.compare(l1.getTimeStamp(), l2.getTimeStamp()));
 
-                    // List<Log> logs = process.getLogs();
-                    // if (logs == null || logs.isEmpty()) {
-                    // continue;
-                    // }
-
-                    // // Sort logs by timeStamp
-                    // logs.sort((l1, l2) -> Long.compare(l1.getTimeStamp(), l2.getTimeStamp()));
-
-                    // // Sum error time
-                    // for (int i = 0; i < logs.size() - 1; i++) {
-                    // Log current = logs.get(i);
-                    // Log next = logs.get(i + 1);
-                    // if ("error".equalsIgnoreCase(current.getStatus())) {
-                    // totalErrorTime += (next.getTimeStamp() - current.getTimeStamp());
-                    // }
-                    // }
-                    // }
+                    // Sum error time
+                    for (int i = 0; i < logs.size() - 1; i++) {
+                        Log current = logs.get(i);
+                        Log next = logs.get(i + 1);
+                        if (current.getStatus().contains("E")) {
+                            totalErrorTime += (next.getTimeStamp() - current.getTimeStamp());
+                        }
+                    }
                 }
             }
         }
+
         Float previousTotalRunTime = 0f;
         Float previousTotalStopTime = 0f;
         Float previousTotalPgTime = 0f;
         Float previousTotalOffsetTime = 0f;
         Float previousTotalSpanTime = 0f;
+        Float previousTotalErrorTime = 0f;
         TimePeriodInfo previousTime = TimeRange.getPreviousTimeRange(timePeriodInfo);
         List<MachineKpi> previousMachineKpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
                 requestDto.getGroupId(), previousTime.getMonth(), previousTime.getYear());
         if (previousMachineKpiList.isEmpty()) {
             return new MachineGroupStatisticDto(group.getGroupId(), group.getGroupName(), totalRunTime, totalStopTime,
-                    totalPgTime, totalOffsetTime, totalSpanTime, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
+                    totalPgTime, totalOffsetTime, totalSpanTime, totalErrorTime, 0f, 0f, 0f, 0f, 0f, 0f);
         }
         for (MachineKpi machineKpi : previousMachineKpiList) {
             List<DrawingCodeProcess> drawingCodeProcesses = processRepository
-                    .findByMachine_MachineId(machineKpi.getId());
+                    .findByMachine_MachineId(machineKpi.getMachine().getMachineId());
             if (drawingCodeProcesses != null && !drawingCodeProcesses.isEmpty()) {
                 for (DrawingCodeProcess process : drawingCodeProcesses) {
                     if (process.getStartTime() > previousTime.getEndDate() ||
@@ -136,11 +126,24 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                         continue;
                     }
                     ProcessTime processTime = process.getProcessTime();
+                    if (processTime == null) {
+                        processTime = processTimeService.calculateProcessTime(process);
+                    }
                     previousTotalOffsetTime += processTime.getOffsetTime();
                     previousTotalPgTime += processTime.getPgTime();
                     previousTotalRunTime += processTime.getRunTime();
                     previousTotalSpanTime += processTime.getSpanTime();
                     previousTotalStopTime += processTime.getStopTime();
+                    List<Log> logs = process.getLogs();
+                    if (logs != null && !logs.isEmpty()) {
+                        for (int i = 0; i < logs.size() - 1; i++) {
+                            Log current = logs.get(i);
+                            Log next = logs.get(i + 1);
+                            if (current.getStatus().contains("E")) {
+                                previousTotalErrorTime += (next.getTimeStamp() - current.getTimeStamp());
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -162,6 +165,10 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
 
         if (previousTotalStopTime != 0f) {
             totalStopTimeRate = ((totalStopTime - previousTotalStopTime) / previousTotalStopTime) * 100;
+        }
+
+        if (previousTotalErrorTime != 0f) {
+            totalErrorTimeRate = ((totalErrorTime - previousTotalErrorTime) / previousTotalErrorTime) * 100;
         }
 
         return new MachineGroupStatisticDto(group.getGroupId(), group.getGroupName(),
@@ -193,7 +200,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             Float totalPgTimeExpect = 0f;
             overviewDto.setNumberOfProcesses(0);
             List<DrawingCodeProcess> drawingCodeProcesses = processRepository
-                    .findByMachine_MachineId(machineKpi.getId());
+                    .findByMachine_MachineId(machineKpi.getMachine().getMachineId());
             if (drawingCodeProcesses != null && !drawingCodeProcesses.isEmpty()) {
                 overviewDto.setNumberOfProcesses(drawingCodeProcesses.size());
                 for (DrawingCodeProcess process : drawingCodeProcesses) {
@@ -203,6 +210,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                         continue;
                     }
                     ProcessTime processTime = process.getProcessTime();
+                    if (processTime == null) {
+                        processTime = processTimeService.calculateProcessTime(process);
+                    }
                     totalOffsetTime += processTime.getOffsetTime();
                     totalPgTime += processTime.getPgTime();
                     totalRunTime += processTime.getRunTime();
