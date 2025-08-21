@@ -119,41 +119,53 @@ public class StaffImplementation implements StaffService {
 
     @Override
     public void importStaffFromExcel(MultipartFile file) {
-        try {
-            InputStream inputStream = ((MultipartFile) file).getInputStream();
-            Workbook workbook = new XSSFWorkbook(inputStream);
+        try (InputStream inputStream = file.getInputStream();
+                Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
-            List<Staff> staffList = new ArrayList<>();
+            List<StaffKpi> staffKpiList = new ArrayList<>();
+
+            java.time.LocalDate now = java.time.LocalDate.now();
+            int currentMonth = now.getMonthValue();
+            int currentYear = now.getYear();
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
-                    continue;
-                Staff staffDto = new Staff();
-                Cell staffIdCell = row.getCell(0);
-                if (staffIdCell.getCellType() == CellType.NUMERIC) {
-                    staffDto.setStaffId((int) staffIdCell.getNumericCellValue());
-                } else {
-                    staffDto.setStaffId(Integer.parseInt(staffIdCell.getStringCellValue()));
-                }
-                staffDto.setStaffName(row.getCell(1).getStringCellValue());
-                staffDto.setShortName(row.getCell(2).getStringCellValue());
-                staffDto.setStaffOffice(row.getCell(3).getStringCellValue());
-                Group group = groupRepository.findByGroupName(row.getCell(4).getStringCellValue())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Group is not found when add staff by excel:" + row.getCell(5).getStringCellValue()));
-                staffDto.setStaffSection(row.getCell(5).getStringCellValue());
-                staffDto.setStatus(1);
+                if (row.getRowNum() < 2)
+                    continue; // Skip header rows
 
-                staffList.add(staffDto);
+                Staff staff = new Staff();
+                staff.setStaffId(Integer.parseInt(row.getCell(0).toString().trim()));
+                staff.setStaffName(row.getCell(1).getStringCellValue());
+                staff.setShortName(row.getCell(2).getStringCellValue());
+                staff.setStaffOffice(row.getCell(3).getStringCellValue());
+                staff.setStaffSection(row.getCell(4).getStringCellValue());
+                staff.setStatus(1);
+
+                // Save staff first to get ID for KPI
+                Staff savedStaff = staffRepository.save(staff);
+
+                // Create StaffKpi for current month
+                StaffKpi staffKpi = new StaffKpi();
+                // Set group
+                String groupName = row.getCell(5).getStringCellValue();
+                Group group = groupRepository.findByGroupName(groupName)
+                        .orElseThrow(() -> new RuntimeException("Group not found: " + groupName));
+                staffKpi.setGroup(group);
+                staffKpi.setStaff(savedStaff);
+                staffKpi.setMonth(currentMonth);
+                staffKpi.setYear(currentYear);
+                staffKpi.setPgTimeGoal((float) row.getCell(6).getNumericCellValue());
+                staffKpi.setMachineTimeGoal((float) row.getCell(7).getNumericCellValue());
+                staffKpi.setWorkGoal((float) row.getCell(8).getNumericCellValue());
+                staffKpi.setKpi((float) row.getCell(9).getNumericCellValue());
+                staffKpi.setOleGoal((float) row.getCell(10).getNumericCellValue());
+                staffKpiList.add(staffKpi);
             }
 
-            for (Staff staff : staffList) {
-                staffRepository.save(staff);
-            }
-            workbook.close();
-            inputStream.close();
+            // Save all KPIs
+            staffKpiRepository.saveAll(staffKpiList);
+
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage());
+            throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage(), e);
         }
     }
 

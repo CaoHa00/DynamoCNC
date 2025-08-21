@@ -145,38 +145,38 @@ public class StaffKpiImplementation implements StaffKpiService {
 
     @Override
     public void importStaffKpiFromExcel(MultipartFile file) {
-        try {
-            InputStream inputStream = file.getInputStream();
-            Workbook workbook = new XSSFWorkbook(inputStream);
+        try (InputStream inputStream = file.getInputStream();
+                Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
             List<StaffKpi> staffKpiList = new ArrayList<>();
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue; // Skip header row
                 StaffKpi staffKpi = new StaffKpi();
-                staffKpi.setStaff(staffRepository.findByStaffId((int) row.getCell(0).getNumericCellValue())
+                staffKpi.setYear((int) row.getCell(2).getNumericCellValue());
+                staffKpi.setMonth((int) row.getCell(3).getNumericCellValue());
+                staffKpi.setStaff(staffRepository.findByStaffId((int) row.getCell(4).getNumericCellValue())
                         .orElseThrow(() -> new RuntimeException(
-                                "Staff not found for ID: " + row.getCell(0).getStringCellValue())));
-                staffKpi.setYear((int) row.getCell(1).getNumericCellValue());
-                staffKpi.setMonth((int) row.getCell(2).getNumericCellValue());
-                staffKpi.setManufacturingPoint((float) row.getCell(3).getNumericCellValue());
-                staffKpi.setPgTimeGoal((float) row.getCell(4).getNumericCellValue());
-                staffKpi.setMachineTimeGoal((float) row.getCell(5).getNumericCellValue());
-                staffKpi.setWorkGoal((float) row.getCell(6).getNumericCellValue());
+                                "Staff not found for ID: " + (int) row.getCell(4).getNumericCellValue())));
+                // Set group
+                String groupName = row.getCell(5).getStringCellValue();
+                Group group = groupRepository.findByGroupName(groupName)
+                        .orElseThrow(() -> new RuntimeException("Group not found: " + groupName));
+                staffKpi.setGroup(group);
 
-                staffKpi.setKpi((float) row.getCell(7).getNumericCellValue());
-                staffKpi.setOleGoal((float) row.getCell(8).getNumericCellValue());
+                staffKpi.setPgTimeGoal((float) row.getCell(6).getNumericCellValue());
+                staffKpi.setMachineTimeGoal((float) row.getCell(7).getNumericCellValue());
+                staffKpi.setWorkGoal((float) row.getCell(8).getNumericCellValue());
+                staffKpi.setKpi((float) row.getCell(9).getNumericCellValue());
+                staffKpi.setOleGoal((float) row.getCell(10).getNumericCellValue());
                 long currentTimestamp = System.currentTimeMillis();
                 staffKpi.setCreatedDate(currentTimestamp);
                 staffKpi.setUpdatedDate(currentTimestamp);
                 staffKpiList.add(staffKpi);
             }
             staffKpiRepository.saveAll(staffKpiList);
-            workbook.close();
-            inputStream.close();
         } catch (Exception e) {
             throw new RuntimeException("Failed to import staff KPI from Excel file: " + e.getMessage(), e);
         }
     }
-
 }

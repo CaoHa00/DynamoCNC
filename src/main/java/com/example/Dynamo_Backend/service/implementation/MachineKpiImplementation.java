@@ -130,17 +130,24 @@ public class MachineKpiImplementation implements MachineKpiService {
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue; // Skip header row
-                MachineKpiDto machineKpiDto = new MachineKpiDto();
-                machineKpiDto.setYear((int) row.getCell(0).getNumericCellValue());
-                machineKpiDto.setMonth((int) row.getCell(1).getNumericCellValue());
-                String idCell = row.getCell(0).getStringCellValue();
-                String machineId = idCell.substring(idCell.length() - 3, idCell.length() - 1);
-                machineKpiDto.setMachineId(Integer.parseInt(machineId));
-                machineKpiDto.setMachineMiningTarget((float) row.getCell(4).getNumericCellValue());
-                machineKpiDto.setOee((float) row.getCell(5).getNumericCellValue());
-                addMachineKpi(machineKpiDto);
+                MachineKpi machineKpi = new MachineKpi();
+                machineKpi.setYear((int) row.getCell(2).getNumericCellValue());
+                machineKpi.setMonth((int) row.getCell(3).getNumericCellValue());
+                String idCell = row.getCell(4).getStringCellValue();
+                String machineIdDigits = idCell.replaceAll("\\D+", ""); // Extract digits only
+                machineKpi.setMachine(machineRepository.findById(Integer.parseInt(machineIdDigits))
+                        .orElseThrow(() -> new RuntimeException(
+                                "Machine not found when import file excel with id: " + idCell)));
+                String groupIdCell = row.getCell(5).getStringCellValue();
+                Group group = groupRepository.findByGroupName(groupIdCell)
+                        .orElseThrow(() -> new RuntimeException(
+                                "Group not found when import file excel with id: " + groupIdCell));
+                machineKpi.setGroup(group);
+                machineKpi.setMachineMiningTarget((float) row.getCell(6).getNumericCellValue());
+                machineKpi.setOee((float) row.getCell(7).getNumericCellValue());
+                machineKpiRepository.save(machineKpi);
             }
             workbook.close();
             inputStream.close();

@@ -90,40 +90,53 @@ public class ReportImplementation implements ReportService {
 
         @Override
         public void importReportFromExcel(MultipartFile file) {
-                try {
-                        InputStream inputStream = ((MultipartFile) file).getInputStream();
-                        Workbook workbook = new XSSFWorkbook(inputStream);
+                try (InputStream inputStream = file.getInputStream();
+                                Workbook workbook = new XSSFWorkbook(inputStream)) {
                         Sheet sheet = workbook.getSheetAt(0);
+                        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                                        .ofPattern("MM/dd/yyyy");
                         for (Row row : sheet) {
-                                if (row.getRowNum() == 0)
-                                        continue;
+                                if (row.getRowNum() < 6)
+                                        continue; // Skip header rows
+
                                 Report report = new Report();
-                                report.setReportType(row.getCell(1).getStringCellValue());
-                                report.setHourDiff((int) row.getCell(2).getNumericCellValue());
+
+                                String dateStr = row.getCell(2).getStringCellValue();
+                                long dateTime = java.time.LocalDate.parse(dateStr, formatter)
+                                                .atStartOfDay(java.time.ZoneId.systemDefault())
+                                                .toInstant().toEpochMilli();
+                                report.setDateTime(dateTime);
+
                                 report.setOffice(row.getCell(3).getStringCellValue());
 
-                                Group group = groupRepository.findByGroupName(row.getCell(4).getStringCellValue())
+                                String groupName = row.getCell(4).getStringCellValue();
+                                Group group = groupRepository.findByGroupName(groupName)
                                                 .orElseThrow(() -> new RuntimeException(
-                                                                "Group is not found when add report by excel:"
-                                                                                + row.getCell(4).getStringCellValue()));
+                                                                "Group is not found when add report by excel: "
+                                                                                + groupName));
                                 report.setGroup(group);
-                                // sau login thi check authenticated de update admin
-                                Admin admin = adminRepository.findById(row.getCell(5).getStringCellValue())
+
+                                report.setReportType(row.getCell(5).getStringCellValue());
+
+                                report.setHourDiff((int) row.getCell(6).getNumericCellValue());
+
+                                String adminId = row.getCell(7).getStringCellValue();
+                                Admin admin = adminRepository.findById(adminId)
                                                 .orElseThrow(() -> new RuntimeException(
-                                                                "Admin is not found when add report by excel:"
-                                                                                + row.getCell(5).getStringCellValue()));
+                                                                "Admin is not found when add report by excel: "
+                                                                                + adminId));
                                 report.setAdmin(admin);
 
-                                long createdTimestamp = System.currentTimeMillis();
-                                report.setCreatedDate(createdTimestamp);
+                                String createdDateStr = row.getCell(8).getStringCellValue();
+                                long createdDate = java.time.LocalDate.parse(createdDateStr, formatter)
+                                                .atStartOfDay(java.time.ZoneId.systemDefault())
+                                                .toInstant().toEpochMilli();
+                                report.setCreatedDate(createdDate);
 
                                 reportRepository.save(report);
                         }
-                        workbook.close();
-                        inputStream.close();
                 } catch (Exception e) {
-                        throw new RuntimeException("Failed to import report from Excel file: " + e.getMessage());
+                        throw new RuntimeException("Failed to import report from Excel file: " + e.getMessage(), e);
                 }
         }
-
 }

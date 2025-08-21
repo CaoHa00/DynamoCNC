@@ -80,10 +80,10 @@ public class DrawingCodeImplementation implements DrawingCodeService {
             Sheet sheet = workbook.getSheetAt(0);
             List<DrawingCode> drawingCodes = new ArrayList<>();
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue;
                 DrawingCode drawingCode = new DrawingCode();
-                drawingCode.setDrawingCodeName(row.getCell(0).getStringCellValue());
+                drawingCode.setDrawingCodeName(row.getCell(2).getStringCellValue());
                 drawingCode.setStatus(1);
                 long createdTimestamp = System.currentTimeMillis();
                 drawingCode.setCreatedDate(createdTimestamp);

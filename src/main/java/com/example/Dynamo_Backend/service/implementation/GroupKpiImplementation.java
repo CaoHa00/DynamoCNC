@@ -93,11 +93,11 @@ public class GroupKpiImplementation implements GroupKpiService {
             Sheet sheet = workbook.getSheetAt(0);
             List<GroupKpi> groupKpiList = new ArrayList<>();
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue;
                 GroupKpi groupKpi = new GroupKpi();
 
-                Cell dateCell = row.getCell(0);
+                Cell dateCell = row.getCell(2);
                 LocalDate localDate;
                 if (dateCell.getCellType() == CellType.NUMERIC) {
                     localDate = dateCell.getLocalDateTimeCellValue().toLocalDate();
@@ -120,15 +120,15 @@ public class GroupKpiImplementation implements GroupKpiService {
                 groupKpi.setMonth(month);
                 groupKpi.setWeek(week);
                 groupKpi.setIsMonth(0);
-                groupKpi.setOffice(row.getCell(1).getStringCellValue());
-                Group group = groupRepository.findByGroupName(row.getCell(2).getStringCellValue())
+                groupKpi.setOffice(row.getCell(3).getStringCellValue());
+                Group group = groupRepository.findByGroupName(row.getCell(4).getStringCellValue())
                         .orElseThrow(() -> new RuntimeException(
                                 "Group is not found when add group KPI by excel:"
-                                        + row.getCell(2).getStringCellValue()));
+                                        + row.getCell(4).getStringCellValue()));
                 groupKpi.setGroup(group);
-                groupKpi.setWorkingHourGoal((int) row.getCell(3).getNumericCellValue());
-                groupKpi.setWorkingHourDifference((int) row.getCell(4).getNumericCellValue());
-                groupKpi.setWorkingHour((int) row.getCell(5).getNumericCellValue());
+                groupKpi.setWorkingHourGoal((int) row.getCell(5).getNumericCellValue());
+                groupKpi.setWorkingHourDifference((int) row.getCell(6).getNumericCellValue());
+                groupKpi.setWorkingHour((int) row.getCell(7).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);
@@ -151,22 +151,22 @@ public class GroupKpiImplementation implements GroupKpiService {
             Sheet sheet = workbook.getSheetAt(0);
             List<GroupKpi> groupKpiList = new ArrayList<>();
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue;
                 GroupKpi groupKpi = new GroupKpi();
-                groupKpi.setYear((int) row.getCell(0).getNumericCellValue());
-                groupKpi.setMonth((int) row.getCell(1).getNumericCellValue());
+                groupKpi.setYear((int) row.getCell(2).getNumericCellValue());
+                groupKpi.setMonth((int) row.getCell(3).getNumericCellValue());
                 groupKpi.setWeek(0);
                 groupKpi.setIsMonth(1);
-                groupKpi.setOffice(row.getCell(2).getStringCellValue());
-                Group group = groupRepository.findByGroupName(row.getCell(3).getStringCellValue())
+                groupKpi.setOffice(row.getCell(4).getStringCellValue());
+                Group group = groupRepository.findByGroupName(row.getCell(5).getStringCellValue())
                         .orElseThrow(() -> new RuntimeException(
                                 "Group is not found when add group KPI by excel:"
-                                        + row.getCell(3).getStringCellValue()));
+                                        + row.getCell(5).getStringCellValue()));
                 groupKpi.setGroup(group);
-                groupKpi.setWorkingHourGoal((int) row.getCell(4).getNumericCellValue());
-                groupKpi.setWorkingHourDifference((int) row.getCell(5).getNumericCellValue());
-                groupKpi.setWorkingHour((int) row.getCell(6).getNumericCellValue());
+                groupKpi.setWorkingHourGoal((int) row.getCell(6).getNumericCellValue());
+                groupKpi.setWorkingHourDifference((int) row.getCell(7).getNumericCellValue());
+                groupKpi.setWorkingHour((int) row.getCell(8).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);
