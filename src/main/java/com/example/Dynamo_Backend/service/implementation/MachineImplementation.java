@@ -119,19 +119,25 @@ public class MachineImplementation implements MachineService {
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue;
-                Machine machine = new Machine();
-                String idCell = row.getCell(2).getStringCellValue();
-                String machineIdDigits = idCell.replaceAll("\\D+", ""); // Extract digits only
-                if (!machineIdDigits.isEmpty()) {
-                    machine.setMachineId(Integer.parseInt(machineIdDigits));
-                } else {
-                    throw new BusinessException("Invalid machine ID format: " + idCell);
+                boolean missing = false;
+                for (int i = 2; i <= 8; i++) {
+                    if (row.getCell(i) == null) {
+                        missing = true;
+                        break;
+                    }
                 }
-                machine.setMachineName(row.getCell(3).getStringCellValue());
-                machine.setMachineType(row.getCell(4).getStringCellValue());
-                machine.setMachineGroup(row.getCell(5).getStringCellValue());
-                machine.setMachineOffice(row.getCell(6).getStringCellValue());
+                if (missing)
+                    continue;
+
+                Machine machine = new Machine();
+                machine.setMachineName(row.getCell(2).getStringCellValue());
+                machine.setMachineType(row.getCell(3).getStringCellValue());
+                machine.setMachineGroup(row.getCell(4).getStringCellValue());
+                machine.setMachineOffice(row.getCell(5).getStringCellValue());
                 machine.setStatus(1);
+                Long createdTimestamp = System.currentTimeMillis();
+                machine.setCreatedDate(createdTimestamp);
+                machine.setUpdatedDate(createdTimestamp);
                 Machine newMachine = machineRepository.save(machine);
 
                 MachineKpi machineKpi = new MachineKpi();
@@ -140,13 +146,15 @@ public class MachineImplementation implements MachineService {
                 machineKpi.setMonth(now.getMonthValue());
                 machineKpi.setYear(now.getYear());
                 machineKpi.setMachine(newMachine);
-                String groupIdCell = row.getCell(7).getStringCellValue();
+                String groupIdCell = row.getCell(6).getStringCellValue();
                 Group group = groupRepository.findByGroupName(groupIdCell)
                         .orElseThrow(() -> new BusinessException(
                                 "Group not found when import file excel with id: " + groupIdCell));
                 machineKpi.setGroup(group);
-                machineKpi.setMachineMiningTarget((float) row.getCell(8).getNumericCellValue());
-                machineKpi.setOee((float) row.getCell(9).getNumericCellValue());
+                machineKpi.setMachineMiningTarget((float) row.getCell(7).getNumericCellValue());
+                machineKpi.setOee((float) row.getCell(8).getNumericCellValue());
+                machineKpi.setCreatedDate(createdTimestamp);
+                machineKpi.setUpdatedDate(createdTimestamp);
                 machineKpiRepository.save(machineKpi);
             }
             workbook.close();

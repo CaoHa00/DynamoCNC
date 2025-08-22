@@ -132,21 +132,42 @@ public class MachineKpiImplementation implements MachineKpiService {
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue; // Skip header row
+                boolean missing = false;
+                for (int i = 2; i <= 7; i++) {
+                    if (row.getCell(i) == null) {
+                        missing = true;
+                        break;
+                    }
+                }
+                if (missing)
+                    continue;
                 MachineKpi machineKpi = new MachineKpi();
                 machineKpi.setYear((int) row.getCell(2).getNumericCellValue());
                 machineKpi.setMonth((int) row.getCell(3).getNumericCellValue());
-                String idCell = row.getCell(4).getStringCellValue();
-                String machineIdDigits = idCell.replaceAll("\\D+", ""); // Extract digits only
-                machineKpi.setMachine(machineRepository.findById(Integer.parseInt(machineIdDigits))
+                Cell idCell = row.getCell(4);
+                String machineIdStr;
+                if (idCell.getCellType() == CellType.NUMERIC) {
+                    machineIdStr = String.valueOf((int) idCell.getNumericCellValue());
+                } else {
+                    machineIdStr = idCell.getStringCellValue().replaceAll("\\D+", "");
+                }
+                if (machineIdStr != null && !machineIdStr.isEmpty()) {
+                    machineKpi.setMachine(machineRepository.findById(Integer.parseInt(machineIdStr))
+                            .orElseThrow(() -> new RuntimeException(
+                                    "Machine not found when import file excel with id: " + machineIdStr)));
+                } else {
+                    continue;
+                }
+                String groupCell = row.getCell(5).getStringCellValue();
+                Group group = groupRepository.findByGroupName(groupCell)
                         .orElseThrow(() -> new RuntimeException(
-                                "Machine not found when import file excel with id: " + idCell)));
-                String groupIdCell = row.getCell(5).getStringCellValue();
-                Group group = groupRepository.findByGroupName(groupIdCell)
-                        .orElseThrow(() -> new RuntimeException(
-                                "Group not found when import file excel with id: " + groupIdCell));
+                                "Group not found when import file excel with id: " + groupCell));
                 machineKpi.setGroup(group);
                 machineKpi.setMachineMiningTarget((float) row.getCell(6).getNumericCellValue());
                 machineKpi.setOee((float) row.getCell(7).getNumericCellValue());
+                long createdTimestamp = System.currentTimeMillis();
+                machineKpi.setCreatedDate(createdTimestamp);
+                machineKpi.setUpdatedDate(createdTimestamp);
                 machineKpiRepository.save(machineKpi);
             }
             workbook.close();
