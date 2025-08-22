@@ -83,7 +83,13 @@ public class DrawingCodeImplementation implements DrawingCodeService {
                 if (row.getRowNum() < 6)
                     continue;
                 DrawingCode drawingCode = new DrawingCode();
-                drawingCode.setDrawingCodeName(row.getCell(2).getStringCellValue());
+                Cell nameCell = row.getCell(2);
+                if (nameCell == null || nameCell.getCellType() == CellType.BLANK)
+                    continue;
+                String drawingCodeName = nameCell.getStringCellValue().trim();
+                if (drawingCodeName.isEmpty())
+                    continue;
+                drawingCode.setDrawingCodeName(drawingCodeName);
                 drawingCode.setStatus(1);
                 long createdTimestamp = System.currentTimeMillis();
                 drawingCode.setCreatedDate(createdTimestamp);

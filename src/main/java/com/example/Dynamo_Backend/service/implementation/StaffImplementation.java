@@ -110,7 +110,7 @@ public class StaffImplementation implements StaffService {
                 staff.getId(),
                 staffKpiDto.getMonth(),
                 staffKpiDto.getYear());
-        if (!existingKpi.isSameAs(staffKpiDto)) {
+        if (existingKpi != null && !existingKpi.isSameAs(staffKpiDto)) {
             staffKpiService.updateStaffKpiByStaffId(staff.getId(), staffKpiDto);
         }
         Staff updatedStaff = staffRepository.save(staff);
@@ -129,16 +129,33 @@ public class StaffImplementation implements StaffService {
             int currentYear = now.getYear();
 
             for (Row row : sheet) {
-                if (row.getRowNum() < 2)
+                if (row.getRowNum() < 6)
                     continue; // Skip header rows
 
+                Cell staffIdCell = row.getCell(2);
+                if (staffIdCell == null ||
+                        (staffIdCell.getCellType() == CellType.STRING
+                                && staffIdCell.getStringCellValue().trim().isEmpty())) {
+                    continue;
+                }
+
                 Staff staff = new Staff();
-                staff.setStaffId(Integer.parseInt(row.getCell(0).toString().trim()));
-                staff.setStaffName(row.getCell(1).getStringCellValue());
-                staff.setShortName(row.getCell(2).getStringCellValue());
-                staff.setStaffOffice(row.getCell(3).getStringCellValue());
-                staff.setStaffSection(row.getCell(4).getStringCellValue());
+                if (staffIdCell.getCellType() == CellType.NUMERIC) {
+                    staff.setStaffId((int) staffIdCell.getNumericCellValue());
+                } else {
+                    String staffIdStr = staffIdCell.getStringCellValue().trim();
+                    if (staffIdStr.isEmpty())
+                        continue; // Extra safety
+                    staff.setStaffId(Integer.parseInt(staffIdStr));
+                }
+                staff.setStaffName(row.getCell(3).getStringCellValue());
+                staff.setShortName(row.getCell(4).getStringCellValue());
+                staff.setStaffOffice(row.getCell(5).getStringCellValue());
+                staff.setStaffSection(row.getCell(6).getStringCellValue());
                 staff.setStatus(1);
+                long currentTimestamp = System.currentTimeMillis();
+                staff.setCreatedDate(currentTimestamp);
+                staff.setUpdatedDate(currentTimestamp);
 
                 // Save staff first to get ID for KPI
                 Staff savedStaff = staffRepository.save(staff);
@@ -146,18 +163,21 @@ public class StaffImplementation implements StaffService {
                 // Create StaffKpi for current month
                 StaffKpi staffKpi = new StaffKpi();
                 // Set group
-                String groupName = row.getCell(5).getStringCellValue();
+                String groupName = row.getCell(7).getStringCellValue();
                 Group group = groupRepository.findByGroupName(groupName)
                         .orElseThrow(() -> new RuntimeException("Group not found: " + groupName));
                 staffKpi.setGroup(group);
                 staffKpi.setStaff(savedStaff);
                 staffKpi.setMonth(currentMonth);
                 staffKpi.setYear(currentYear);
-                staffKpi.setPgTimeGoal((float) row.getCell(6).getNumericCellValue());
-                staffKpi.setMachineTimeGoal((float) row.getCell(7).getNumericCellValue());
-                staffKpi.setWorkGoal((float) row.getCell(8).getNumericCellValue());
-                staffKpi.setKpi((float) row.getCell(9).getNumericCellValue());
-                staffKpi.setOleGoal((float) row.getCell(10).getNumericCellValue());
+                staffKpi.setPgTimeGoal((float) row.getCell(8).getNumericCellValue());
+                staffKpi.setManufacturingPoint((float) row.getCell(9).getNumericCellValue());
+                staffKpi.setMachineTimeGoal((float) row.getCell(10).getNumericCellValue());
+                staffKpi.setWorkGoal((float) row.getCell(11).getNumericCellValue());
+                staffKpi.setKpi((float) row.getCell(12).getNumericCellValue());
+                staffKpi.setOleGoal((float) row.getCell(13).getNumericCellValue());
+                staffKpi.setCreatedDate(currentTimestamp);
+                staffKpi.setUpdatedDate(currentTimestamp);
                 staffKpiList.add(staffKpi);
             }
 

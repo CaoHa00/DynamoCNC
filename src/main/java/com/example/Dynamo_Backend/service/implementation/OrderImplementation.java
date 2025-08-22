@@ -84,6 +84,8 @@ public class OrderImplementation implements OrderService {
                     continue;
                 OrderDto orderDto = new OrderDto();
                 Cell poNumberCell = row.getCell(2);
+                if (poNumberCell == null)
+                    continue;
                 if (poNumberCell.getCellType() == CellType.NUMERIC) {
                     orderDto.setPoNumber(String.format("%.0f", poNumberCell.getNumericCellValue()));
                 } else {

@@ -121,6 +121,8 @@ public class ReportImplementation implements ReportService {
                                 report.setHourDiff((int) row.getCell(6).getNumericCellValue());
 
                                 String adminId = row.getCell(7).getStringCellValue();
+
+                                // maybe find by email
                                 Admin admin = adminRepository.findById(adminId)
                                                 .orElseThrow(() -> new RuntimeException(
                                                                 "Admin is not found when add report by excel: "
