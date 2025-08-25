@@ -111,11 +111,12 @@ public class MachineImplementation implements MachineService {
 
     @Override
     public void importMachineFromExcel(MultipartFile file) {
+
         try {
             InputStream inputStream = file.getInputStream();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
-
+            List<Machine> machineList = new ArrayList<>();
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue;
@@ -146,7 +147,7 @@ public class MachineImplementation implements MachineService {
                 Machine machine = new Machine();
                 machine.setMachineName(row.getCell(2).getStringCellValue());
                 machine.setMachineType(row.getCell(3).getStringCellValue());
-                machine.setMachineGroup(row.getCell(4).getStringCellValue());
+                machine.setMachineWork(row.getCell(4).getStringCellValue());
                 machine.setMachineOffice(row.getCell(5).getStringCellValue());
                 machine.setStatus(1);
                 Long createdTimestamp = System.currentTimeMillis();
