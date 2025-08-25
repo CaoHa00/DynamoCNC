@@ -67,11 +67,11 @@ public class MachineImplementation implements MachineService {
         Machine machine = machineRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
-        machine.setMachineGroup(machineDto.getMachineGroup());
+        machine.setMachineWork(machineDto.getMachineWork());
         machine.setMachineName(machineDto.getMachineName());
         machine.setMachineOffice(machineDto.getMachineOffice());
         machine.setMachineType(machineDto.getMachineType());
-        machine.setStatus(machineDto.getStatus());
+        machine.setStatus(machine.getStatus());
         machine.setUpdatedDate(updatedTimestamp);
         MachineKpiDto machineKpiDto = MachineKpiMapper.mapToMachineKpiDto(machineDto);
         MachineKpi existingKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(Id, machineDto.getMonth(),
@@ -124,7 +124,7 @@ public class MachineImplementation implements MachineService {
                 machineDto.setMachineId(Integer.parseInt(machineId));
                 machineDto.setMachineName(row.getCell(1).getStringCellValue());
                 machineDto.setMachineType(row.getCell(3).getStringCellValue());
-                machineDto.setMachineGroup(row.getCell(4).getStringCellValue());
+                machineDto.setMachineWork(row.getCell(4).getStringCellValue());
                 machineDto.setMachineOffice(row.getCell(5).getStringCellValue());
 
                 machineDto.setStatus(1);

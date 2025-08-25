@@ -14,7 +14,7 @@ public class MachineDto {
     private Integer machineId;
     private String machineName;
     private String machineType;
-    private String machineGroup;
+    private String machineWork;
     private String machineOffice;
     private Integer status;
     private String createdDate;

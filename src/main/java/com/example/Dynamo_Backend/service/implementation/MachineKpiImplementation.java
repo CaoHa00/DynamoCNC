@@ -31,7 +31,8 @@ public class MachineKpiImplementation implements MachineKpiService {
     @Override
     public MachineKpiDto addMachineKpi(MachineKpiDto machineKpiDto) {
         long createdTimestamp = System.currentTimeMillis();
-        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(machineKpiDto.getId(),
+        MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
+                machineKpiDto.getMachineId(),
                 machineKpiDto.getMonth(), machineKpiDto.getYear());
         if (machineKpi != null) {
             throw new IllegalArgumentException("Goal of this machine is already set");

@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "group_")
+@Table(name = "_group")
 public class Group {
     @Id
     @GeneratedValue(generator = "uuid2")

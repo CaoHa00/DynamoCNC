@@ -217,7 +217,7 @@ public class DataSeeder {
                         machine1.setMachineName("I-20");
                         machine1.setMachineOffice("Insert");
                         machine1.setMachineType("Phay CNC");
-                        machine1.setMachineGroup("Insert");
+                        machine1.setMachineWork("Insert");
                         machine1.setCreatedDate(createdTimestamp);
                         machine1.setUpdatedDate(createdTimestamp);
                         machineRepository.save(machine1);
@@ -226,7 +226,7 @@ public class DataSeeder {
                         machine2.setMachineName("L-30");
                         machine2.setMachineOffice("Lathe");
                         machine2.setMachineType("Tiện CNC");
-                        machine2.setMachineGroup("Lathe");
+                        machine2.setMachineWork("Lathe");
                         machine2.setCreatedDate(createdTimestamp);
                         machine2.setUpdatedDate(createdTimestamp);
                         machineRepository.save(machine2);
@@ -235,7 +235,7 @@ public class DataSeeder {
                         machine3.setMachineName("M-50");
                         machine3.setMachineOffice("Milling");
                         machine3.setMachineType("Phay CNC");
-                        machine3.setMachineGroup("Milling");
+                        machine3.setMachineWork("Milling");
                         machine3.setCreatedDate(createdTimestamp);
                         machine3.setUpdatedDate(createdTimestamp);
                         machineRepository.save(machine3);
@@ -244,7 +244,7 @@ public class DataSeeder {
                         machine4.setMachineName("D-10");
                         machine4.setMachineOffice("Drilling");
                         machine4.setMachineType("Khoan CNC");
-                        machine4.setMachineGroup("Drilling");
+                        machine4.setMachineWork("Drilling");
                         machine4.setCreatedDate(createdTimestamp);
                         machine4.setUpdatedDate(createdTimestamp);
                         machineRepository.save(machine4);
@@ -253,7 +253,7 @@ public class DataSeeder {
                         machine5.setMachineName("C-25");
                         machine5.setMachineOffice("Cutting");
                         machine5.setMachineType("Cắt CNC");
-                        machine5.setMachineGroup("Cutting");
+                        machine5.setMachineWork("Cutting");
                         machine5.setCreatedDate(createdTimestamp);
                         machine5.setUpdatedDate(createdTimestamp);
                         machineRepository.save(machine5);
@@ -388,7 +388,7 @@ public class DataSeeder {
                         orderDetail2.setManagerGroup(group4);
                         orderDetail2.setQuantity(15);
                         orderDetail2.setOrderType("SP_Chính");
-                        orderDetail2.setOrderCode(order3.getPoNumber() + "_" + drawingCode2.getDrawingCodeName());
+                        orderDetail2.setOrderCode(order2.getPoNumber() + "_" + drawingCode2.getDrawingCodeName());
                         orderDetail2.setPgTimeGoal((float) 120);
                         orderDetail2.setCreatedDate(createdTimestamp);
                         orderDetail2.setUpdatedDate(createdTimestamp);
@@ -400,7 +400,7 @@ public class DataSeeder {
                         orderDetail3.setManagerGroup(group4);
                         orderDetail3.setQuantity(8);
                         orderDetail3.setOrderType("SP_Phụ");
-                        orderDetail3.setOrderCode(order3.getPoNumber() + "_" + drawingCode3.getDrawingCodeName());
+                        orderDetail3.setOrderCode(order1.getPoNumber() + "_" + drawingCode3.getDrawingCodeName());
                         orderDetail3.setPgTimeGoal((float) 80);
                         orderDetail3.setCreatedDate(createdTimestamp);
                         orderDetail3.setUpdatedDate(createdTimestamp);
@@ -413,7 +413,7 @@ public class DataSeeder {
                         orderDetail4.setQuantity(20);
                         orderDetail4.setOrderType("SP_Chính");
                         orderDetail4.setOrderCode(
-                                        order3.getPoNumber() + "_" + drawingCode1.getDrawingCodeName() + "_BATCH2");
+                                        order.getPoNumber() + "_" + drawingCode4.getDrawingCodeName());
                         orderDetail4.setPgTimeGoal((float) 150);
                         orderDetail4.setCreatedDate(createdTimestamp);
                         orderDetail4.setUpdatedDate(createdTimestamp);
@@ -504,17 +504,17 @@ public class DataSeeder {
                         plan2.setUpdatedDate(createdTimestamp);
                         planRepository.save(plan2);
 
-                        Plan plan3 = new Plan();
-                        plan3.setInProgress(1);
-                        plan3.setStatus(1);
-                        plan3.setMachine(machine4);
-                        plan3.setDrawingCodeProcess(drawingCodeProcess3);
-                        plan3.setStaff(staff3);
-                        plan3.setStartTime(createdTimestamp);
-                        plan3.setEndTime(createdTimestamp);
-                        plan3.setCreatedDate(createdTimestamp);
-                        plan3.setUpdatedDate(createdTimestamp);
-                        planRepository.save(plan3);
+                        // Plan plan3 = new Plan();
+                        // plan3.setInProgress(1);
+                        // plan3.setStatus(1);
+                        // plan3.setMachine(machine4);
+                        // plan3.setDrawingCodeProcess(drawingCodeProcess3);
+                        // plan3.setStaff(staff3);
+                        // plan3.setStartTime(createdTimestamp);
+                        // plan3.setEndTime(createdTimestamp);
+                        // plan3.setCreatedDate(createdTimestamp);
+                        // plan3.setUpdatedDate(createdTimestamp);
+                        // planRepository.save(plan3);
 
                         Plan plan4 = new Plan();
                         plan4.setInProgress(1);

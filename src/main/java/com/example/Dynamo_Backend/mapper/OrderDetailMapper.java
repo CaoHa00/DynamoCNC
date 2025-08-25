@@ -42,6 +42,8 @@ public class OrderDetailMapper {
         orderDetailDto.setQuantity(orderDetail.getQuantity());
         orderDetailDto.setManagerGroupId(
                 orderDetail.getManagerGroup() != null ? orderDetail.getManagerGroup().getGroupId() : null);
+        orderDetailDto.setManagerGroupName(
+                orderDetail.getManagerGroup() != null ? orderDetail.getManagerGroup().getGroupName() : null);
         orderDetailDto.setPgTimeGoal(orderDetail.getPgTimeGoal());
         if (processTimeSummaryDto != null) {
             orderDetailDto.setProcessTimeSummaryDto(processTimeSummaryDto);
