@@ -14,8 +14,10 @@ public class ProcessTimeSummaryMapper {
                 entity.getSpanTime(),
                 entity.getRunTime(),
                 entity.getStopTime(),
-                entity.getOffsetTime(),
-                entity.getOrderDetail() != null ? entity.getOrderDetail().getOrderCode() : null);
+                entity.getOffsetTime()
+        // entity.getOrderDetail() != null ? entity.getOrderDetail().getOrderCode() :
+        // null
+        );
     }
 
     public static ProcessTimeSummary toEntity(ProcessTimeSummaryDto dto) {

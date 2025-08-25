@@ -19,7 +19,7 @@ public class MachineMapper {
         machine.setMachineId(machineDto.getMachineId());
         machine.setMachineName(machineDto.getMachineName());
         machine.setMachineType(machineDto.getMachineType());
-        machine.setMachineGroup(machineDto.getMachineGroup());
+        machine.setMachineWork(machineDto.getMachineWork());
         machine.setMachineOffice(machineDto.getMachineOffice());
         machine.setStatus(machineDto.getStatus());
         // machine.setCreatedDate(machineDto.getCreatedDate());
@@ -32,7 +32,7 @@ public class MachineMapper {
         machine.setMachineId(machineDto.getMachineId());
         machine.setMachineName(machineDto.getMachineName());
         machine.setMachineType(machineDto.getMachineType());
-        machine.setMachineGroup(machineDto.getMachineGroup());
+        machine.setMachineWork(machineDto.getMachineWork());
         machine.setMachineOffice(machineDto.getMachineOffice());
         machine.setStatus(machineDto.getStatus());
         // machine.setCreatedDate(machineDto.getCreatedDate());
@@ -45,7 +45,7 @@ public class MachineMapper {
         machineDto.setMachineId(machine.getMachineId());
         machineDto.setMachineName(machine.getMachineName());
         machineDto.setMachineType(machine.getMachineType());
-        machineDto.setMachineGroup(machine.getMachineGroup());
+        machineDto.setMachineWork(machine.getMachineWork());
         machineDto.setMachineOffice(machine.getMachineOffice());
         machineDto.setStatus(machine.getStatus());
         machineDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machine.getCreatedDate()));

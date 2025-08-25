@@ -13,4 +13,6 @@ public interface StaffKpiRepository extends JpaRepository<StaffKpi, Integer> {
 
     StaffKpi findByStaff_IdAndMonthAndYear(String Id, Integer month, Integer year);
 
+    List<StaffKpi> findByGroup_groupIdAndMonthAndYear(String groupId, Integer month, Integer year);
+
 }

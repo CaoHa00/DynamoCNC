@@ -12,7 +12,6 @@ import com.example.Dynamo_Backend.entities.Order;
 import com.example.Dynamo_Backend.mapper.OrderMapper;
 import com.example.Dynamo_Backend.repository.OrderRepository;
 import com.example.Dynamo_Backend.service.DrawingCodeService;
-import com.example.Dynamo_Backend.service.OrderDetailService;
 import com.example.Dynamo_Backend.service.OrderService;
 
 import lombok.AllArgsConstructor;
@@ -81,10 +80,12 @@ public class OrderImplementation implements OrderService {
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue;
                 OrderDto orderDto = new OrderDto();
-                Cell poNumberCell = row.getCell(0);
+                Cell poNumberCell = row.getCell(2);
+                if (poNumberCell == null)
+                    continue;
                 if (poNumberCell.getCellType() == CellType.NUMERIC) {
                     orderDto.setPoNumber(String.format("%.0f", poNumberCell.getNumericCellValue()));
                 } else {

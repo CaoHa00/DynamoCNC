@@ -12,4 +12,7 @@ public class TimePeriodInfo {
     private Integer week; // nullable if isMonth=true
     private Integer month;
     private Integer year;
+    private long day; // nullable if isMonth=true
+    private Long startDate;
+    private Long endDate;
 }
