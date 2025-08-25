@@ -43,6 +43,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         private CurrentStatusService currentStatusService;
         GroupRepository groupRepository;
         ProcessTimeSummaryService processTimeSummaryService;
+        ProcessTimeService processTimeService;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -612,90 +613,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 drawingCodeProcess.getMachine().getMachineId()));
                 machine.setStatus(0);
 
-                List<Log> logs = drawingCodeProcess.getLogs();
-                ProcessTime processTime = new ProcessTime();
-                logs.sort((log1, log2) -> Long.compare(log1.getTimeStamp(), log2.getTimeStamp()));
-                if (!logs.isEmpty() && machine.getMachineId() <= 9) {
-                        long spanTime = 0L;
-                        long runTime = 0L;
-                        long pgTime = 0L;
-                        long stopTime = 0L;
-                        long offsetTime = 0L;
+                // calculate processTime
+                processTimeService.calculateProcessTime(drawingCodeProcess);
 
-                        Long lastStart = null;
-                        String lastStatus = null;
-
-                        for (int i = 0; i < logs.size(); i++) {
-                                Log log = logs.get(i);
-                                String status = log.getStatus();
-                                Long time = log.getTimeStamp();
-
-                                if ("R1".equals(status) || "R2".equals(status)) {
-                                        lastStart = time;
-                                        lastStatus = status;
-                                } else if (("S1".equals(status) || "S2".equals(status)) && lastStart != null) {
-                                        long duration = time - lastStart;
-                                        runTime += duration;
-                                        if ("R1".equals(lastStatus))
-                                                pgTime += duration;
-                                        if ("R2".equals(lastStatus))
-                                                offsetTime += duration;
-                                        lastStart = null;
-                                        lastStatus = null;
-                                }
-                                if (("S1".equals(status) || "S2".equals(status)) && i + 1 < logs.size()) {
-                                        Log nextLog = logs.get(i + 1);
-                                        if ("R1".equals(nextLog.getStatus()) || "R2".equals(nextLog.getStatus())) {
-                                                stopTime += nextLog.getTimeStamp() - time;
-                                        }
-                                }
-                        }
-                        // phòng trường hợp log đầu không phải R, tính theo giờ máy
-                        for (int i = 0; i < logs.size() - 1; i++) {
-                                Log log = logs.get(i);
-                                if ("R1".equals(log.getStatus()) || "R2".equals(log.getStatus())) {
-                                        spanTime = logs.get(logs.size() - 1).getTimeStamp()
-                                                        - logs.get(i).getTimeStamp();
-                                        break;
-                                }
-                        }
-                        // tính theo giờ tablet
-                        // spanTime = doneTime - logs.get(0).getTimeStamp();
-
-                        int lastIndex = logs.size() - 1;
-                        if (!"S1".equals(logs.get(lastIndex).getStatus())
-                                        || !"S2".equals(logs.get(lastIndex).getStatus())) {
-                                runTime += doneTime - logs.get(lastIndex).getTimeStamp();
-                        }
-
-                        // convert ms to seconds
-                        // processTime.setSpanTime(spanTime / 1000f);
-                        // processTime.setRunTime(runTime / 1000f);
-                        // processTime.setPgTime(pgTime / 1000f);
-                        // processTime.setStopTime(stopTime / 1000f);
-                        // processTime.setOffsetTime(offsetTime / 1000f);
-                        // processTime.setDrawingCodeProcess(drawingCodeProcess);
-                        // processTimeRepository.save(processTime);
-
-                        // convert ms to hours
-                        processTime.setSpanTime(spanTime / 3600000f); // ms to hours
-                        processTime.setRunTime(runTime / 3600000f);
-                        processTime.setPgTime(pgTime / 3600000f);
-                        processTime.setStopTime(stopTime / 3600000f);
-                        processTime.setOffsetTime(offsetTime / 3600000f);
-                        processTime.setDrawingCodeProcess(drawingCodeProcess);
-                        processTimeRepository.save(processTime);
-                } else {
-                        float spanTime = (float) (drawingCodeProcess.getEndTime() - drawingCodeProcess.getStartTime())
-                                        / 3600000f;
-                        processTime.setSpanTime(spanTime);
-                        processTime.setRunTime(0f);
-                        processTime.setPgTime(0f);
-                        processTime.setStopTime(0f);
-                        processTime.setOffsetTime(0f);
-                        processTime.setDrawingCodeProcess(drawingCodeProcess);
-                        processTimeRepository.save(processTime);
-                }
                 processTimeSummaryService
                                 .sumTimesByOrderDetailId(drawingCodeProcess.getOrderDetail().getOrderDetailId());
 

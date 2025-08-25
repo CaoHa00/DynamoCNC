@@ -8,4 +8,6 @@ import com.example.Dynamo_Backend.entities.OperateHistory;
 
 public interface OperateHistoryRepository extends JpaRepository<OperateHistory, String> {
     List<OperateHistory> findByDrawingCodeProcess_processId(String processId);
+
+    List<OperateHistory> findByStaff_Id(String staffId);
 }
