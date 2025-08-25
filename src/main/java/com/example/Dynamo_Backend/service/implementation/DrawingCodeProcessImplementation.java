@@ -648,7 +648,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
         @Override
         public List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned) {
-                List<DrawingCodeProcess> all = drawingCodeProcessRepository.findByIsPlan(planned);
+                List<DrawingCodeProcess> all = drawingCodeProcessRepository.findByIsPlanAndProcessStatusNot(planned, 3);
                 return all.stream().map(process -> {
                         OrderDetailDto orderDetailDto = OrderDetailMapper.mapOrderCodeDto(process.getOrderDetail());
                         Machine machine = process.getMachine();

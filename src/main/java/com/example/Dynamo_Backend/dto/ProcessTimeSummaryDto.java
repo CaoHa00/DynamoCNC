@@ -15,5 +15,5 @@ public class ProcessTimeSummaryDto {
     private Float runTime;
     private Float stopTime;
     private Float offsetTime;
-    private String orderCode;
+    // private String orderCode;
 }

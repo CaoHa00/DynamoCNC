@@ -22,5 +22,6 @@ public class OrderDetailResponseDto {
     private String updatedDate;
     private Float pgTimeGoal;
     private String managerGroupId;
+    private String managerGroupName;
     private ProcessTimeSummaryDto processTimeSummaryDto;
 }

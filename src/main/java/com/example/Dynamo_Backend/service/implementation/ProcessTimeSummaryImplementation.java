@@ -31,7 +31,7 @@ public class ProcessTimeSummaryImplementation implements ProcessTimeSummaryServi
     public ProcessTimeSummaryDto getByOrderDetailId(String orderDetailId) {
         ProcessTimeSummary summary = repository.findByOrderDetail_OrderDetailId(orderDetailId).orElse(null);
         if (summary == null) {
-            return new ProcessTimeSummaryDto(0, 0, 0, 0f, 0f, 0f, 0f, 0f, 0f, null);
+            return new ProcessTimeSummaryDto(0, 0, 0, 0f, 0f, 0f, 0f, 0f, 0f);
         }
         return ProcessTimeSummaryMapper.toDto(summary);
     }

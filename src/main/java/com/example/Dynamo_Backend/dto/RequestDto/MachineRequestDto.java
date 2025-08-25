@@ -11,7 +11,7 @@ public class MachineRequestDto {
     private Integer machineId;
     private String machineName;
     private String machineType;
-    private String machineGroup;
+    private String machineWork;
     private String machineOffice;
     private int status;
     private Integer year;
