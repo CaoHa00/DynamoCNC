@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -93,11 +94,25 @@ public class GroupKpiImplementation implements GroupKpiService {
             Sheet sheet = workbook.getSheetAt(0);
             List<GroupKpi> groupKpiList = new ArrayList<>();
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue;
+
+                boolean missing = false;
+                for (int i = 2; i <= 7; i++) {
+                    if (row.getCell(i) == null) {
+                        missing = true;
+                        break;
+                    }
+                }
+                if (missing)
+                    continue;
+
                 GroupKpi groupKpi = new GroupKpi();
 
-                Cell dateCell = row.getCell(0);
+                Cell dateCell = row.getCell(2);
+                if (dateCell == null || dateCell.getCellType() == CellType.BLANK) {
+                    continue;
+                }
                 LocalDate localDate;
                 if (dateCell.getCellType() == CellType.NUMERIC) {
                     localDate = dateCell.getLocalDateTimeCellValue().toLocalDate();
@@ -120,15 +135,17 @@ public class GroupKpiImplementation implements GroupKpiService {
                 groupKpi.setMonth(month);
                 groupKpi.setWeek(week);
                 groupKpi.setIsMonth(0);
-                groupKpi.setOffice(row.getCell(1).getStringCellValue());
-                Group group = groupRepository.findByGroupName(row.getCell(2).getStringCellValue())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Group is not found when add group KPI by excel:"
-                                        + row.getCell(2).getStringCellValue()));
-                groupKpi.setGroup(group);
-                groupKpi.setWorkingHourGoal((int) row.getCell(3).getNumericCellValue());
-                groupKpi.setWorkingHourDifference((int) row.getCell(4).getNumericCellValue());
-                groupKpi.setWorkingHour((int) row.getCell(5).getNumericCellValue());
+                groupKpi.setOffice(row.getCell(3).getStringCellValue());
+                String groupName = row.getCell(4).getStringCellValue();
+                Optional<Group> groupOpt = groupRepository.findByGroupName(groupName);
+                if (groupOpt.isEmpty()) {
+                    // Optionally log: System.out.println("Group not found: " + groupName);
+                    continue; // Skip this row if group not found
+                }
+                groupKpi.setGroup(groupOpt.get());
+                groupKpi.setWorkingHourGoal((int) row.getCell(5).getNumericCellValue());
+                groupKpi.setWorkingHourDifference((int) row.getCell(6).getNumericCellValue());
+                groupKpi.setWorkingHour((int) row.getCell(7).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);
@@ -151,22 +168,35 @@ public class GroupKpiImplementation implements GroupKpiService {
             Sheet sheet = workbook.getSheetAt(0);
             List<GroupKpi> groupKpiList = new ArrayList<>();
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue;
+
+                boolean missing = false;
+                for (int i = 2; i <= 8; i++) {
+                    if (row.getCell(i) == null) {
+                        missing = true;
+                        break;
+                    }
+                }
+                if (missing)
+                    continue;
+
                 GroupKpi groupKpi = new GroupKpi();
-                groupKpi.setYear((int) row.getCell(0).getNumericCellValue());
-                groupKpi.setMonth((int) row.getCell(1).getNumericCellValue());
+                groupKpi.setYear((int) row.getCell(2).getNumericCellValue());
+                groupKpi.setMonth((int) row.getCell(3).getNumericCellValue());
                 groupKpi.setWeek(0);
                 groupKpi.setIsMonth(1);
-                groupKpi.setOffice(row.getCell(2).getStringCellValue());
-                Group group = groupRepository.findByGroupName(row.getCell(3).getStringCellValue())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Group is not found when add group KPI by excel:"
-                                        + row.getCell(3).getStringCellValue()));
-                groupKpi.setGroup(group);
-                groupKpi.setWorkingHourGoal((int) row.getCell(4).getNumericCellValue());
-                groupKpi.setWorkingHourDifference((int) row.getCell(5).getNumericCellValue());
-                groupKpi.setWorkingHour((int) row.getCell(6).getNumericCellValue());
+                groupKpi.setOffice(row.getCell(4).getStringCellValue());
+                String groupName = row.getCell(5).getStringCellValue();
+                Optional<Group> groupOpt = groupRepository.findByGroupName(groupName);
+                if (groupOpt.isEmpty()) {
+                    // Optionally log: System.out.println("Group not found: " + groupName);
+                    continue; // Skip this row if group not found
+                }
+                groupKpi.setGroup(groupOpt.get());
+                groupKpi.setWorkingHourGoal((int) row.getCell(6).getNumericCellValue());
+                groupKpi.setWorkingHourDifference((int) row.getCell(7).getNumericCellValue());
+                groupKpi.setWorkingHour((int) row.getCell(8).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);

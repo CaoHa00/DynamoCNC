@@ -114,11 +114,21 @@ public class GroupImplementation implements GroupService {
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue; // Skip header row
                 Group group = new Group();
-                group.setGroupType(row.getCell(0).getStringCellValue());
-                group.setGroupName(row.getCell(1).getStringCellValue());
+                Cell typeCell = row.getCell(2);
+                Cell nameCell = row.getCell(3);
+                if (nameCell == null || nameCell.getCellType() == CellType.BLANK || typeCell == null
+                        || typeCell.getCellType() == CellType.BLANK)
+                    continue;
+                String groupName = nameCell.getStringCellValue().trim();
+                String groupType = typeCell.getStringCellValue().trim();
+                if (groupName.isEmpty())
+                    continue;
+
+                group.setGroupType(groupType);
+                group.setGroupName(groupName);
                 long createdTimestamp = System.currentTimeMillis();
                 group.setCreatedDate(createdTimestamp);
                 group.setUpdatedDate(createdTimestamp);

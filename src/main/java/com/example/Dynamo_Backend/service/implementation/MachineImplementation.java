@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
+import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
 import com.example.Dynamo_Backend.repository.GroupRepository;
@@ -113,29 +115,52 @@ public class MachineImplementation implements MachineService {
             InputStream inputStream = file.getInputStream();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
-            List<Machine> machineList = new ArrayList<>();
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0)
+                if (row.getRowNum() < 6)
                     continue;
-                Machine machineDto = new Machine();
-                String idCell = row.getCell(0).getStringCellValue();
-                String machineId = idCell.substring(idCell.length() - 3, idCell.length() - 1);
-                machineDto.setMachineId(Integer.parseInt(machineId));
-                machineDto.setMachineName(row.getCell(1).getStringCellValue());
-                machineDto.setMachineType(row.getCell(3).getStringCellValue());
-                machineDto.setMachineGroup(row.getCell(4).getStringCellValue());
-                machineDto.setMachineOffice(row.getCell(5).getStringCellValue());
+                boolean missing = false;
+                for (int i = 2; i <= 8; i++) {
+                    if (row.getCell(i) == null) {
+                        missing = true;
+                        break;
+                    }
+                }
+                if (missing)
+                    continue;
 
-                machineDto.setStatus(1);
+                Machine machine = new Machine();
+                machine.setMachineName(row.getCell(2).getStringCellValue());
+                machine.setMachineType(row.getCell(3).getStringCellValue());
+                machine.setMachineGroup(row.getCell(4).getStringCellValue());
+                machine.setMachineOffice(row.getCell(5).getStringCellValue());
+                machine.setStatus(1);
+                Long createdTimestamp = System.currentTimeMillis();
+                machine.setCreatedDate(createdTimestamp);
+                machine.setUpdatedDate(createdTimestamp);
+                Machine newMachine = machineRepository.save(machine);
 
-                machineList.add(machineDto);
+                MachineKpi machineKpi = new MachineKpi();
+                // set current month
+                LocalDate now = LocalDate.now();
+                machineKpi.setMonth(now.getMonthValue());
+                machineKpi.setYear(now.getYear());
+                machineKpi.setMachine(newMachine);
+                String groupIdCell = row.getCell(6).getStringCellValue();
+                Group group = groupRepository.findByGroupName(groupIdCell)
+                        .orElseThrow(() -> new BusinessException(
+                                "Group not found when import file excel with id: " + groupIdCell));
+                machineKpi.setGroup(group);
+                machineKpi.setMachineMiningTarget((float) row.getCell(7).getNumericCellValue());
+                machineKpi.setOee((float) row.getCell(8).getNumericCellValue());
+                machineKpi.setCreatedDate(createdTimestamp);
+                machineKpi.setUpdatedDate(createdTimestamp);
+                machineKpiRepository.save(machineKpi);
             }
-            machineRepository.saveAll(machineList);
             workbook.close();
             inputStream.close();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import machines from Excel file: " + e.getMessage());
+            throw new BusinessException("Failed to import machines from Excel file: " + e.getMessage());
         }
     }
 

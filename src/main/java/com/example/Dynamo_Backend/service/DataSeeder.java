@@ -2,35 +2,8 @@ package com.example.Dynamo_Backend.service;
 
 import org.springframework.stereotype.Component;
 
-import com.example.Dynamo_Backend.entities.Admin;
-import com.example.Dynamo_Backend.entities.DrawingCode;
-import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.entities.Group;
-import com.example.Dynamo_Backend.entities.GroupKpi;
-
-import com.example.Dynamo_Backend.entities.Machine;
-import com.example.Dynamo_Backend.entities.MachineKpi;
-import com.example.Dynamo_Backend.entities.Order;
-import com.example.Dynamo_Backend.entities.OrderDetail;
-import com.example.Dynamo_Backend.entities.Plan;
-import com.example.Dynamo_Backend.entities.ProcessTime;
-import com.example.Dynamo_Backend.entities.Staff;
-import com.example.Dynamo_Backend.entities.StaffKpi;
-import com.example.Dynamo_Backend.repository.AdminRepository;
-import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
-import com.example.Dynamo_Backend.repository.DrawingCodeRepository;
-import com.example.Dynamo_Backend.repository.GroupKpiRepository;
-import com.example.Dynamo_Backend.repository.GroupRepository;
-import com.example.Dynamo_Backend.repository.MachineKpiRepository;
-import com.example.Dynamo_Backend.repository.MachineRepository;
-import com.example.Dynamo_Backend.repository.OrderDetailRepository;
-import com.example.Dynamo_Backend.repository.OrderRepository;
-import com.example.Dynamo_Backend.repository.PlanRepository;
-
-import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
-import com.example.Dynamo_Backend.repository.ReportRepository;
-import com.example.Dynamo_Backend.repository.StaffKpiRepository;
-import com.example.Dynamo_Backend.repository.StaffRepository;
+import com.example.Dynamo_Backend.entities.*;
+import com.example.Dynamo_Backend.repository.*;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +26,7 @@ public class DataSeeder {
         private final AdminRepository adminRepository;
         private final ReportRepository reportRepository;
         private final ProcessTimeRepository processTimeRepository;
+        private final OperateHistoryRepository operateHistoryRepository;
 
         long createdTimestamp = System.currentTimeMillis();
 
@@ -570,6 +544,42 @@ public class DataSeeder {
                         processTime.setStopTime(0f);
 
                         processTimeRepository.save(processTime);
+
+                        OperateHistory operateHistory1 = new OperateHistory();
+                        operateHistory1.setStaff(staff4);
+                        operateHistory1.setDrawingCodeProcess(process); // The process you created above
+                        operateHistory1.setStartTime(1753056000000L); // 2025-07-21 00:00:00
+                        operateHistory1.setStopTime(1753063200000L); // 2025-07-21 04:00:00
+                        operateHistory1.setManufacturingPoint(10);
+                        operateHistory1.setInProgress(0);
+                        operateHistoryRepository.save(operateHistory1);
+
+                        DrawingCodeProcess processJuly18 = new DrawingCodeProcess();
+                        processJuly18.setMachine(machine3); // or any machine you want
+                        processJuly18.setStartTime(1752796800000L); // 2025-07-18 00:00:00
+                        processJuly18.setEndTime(1752825600000L); // 2025-07-18 08:00:00
+                        processJuly18.setIsPlan(0);
+                        processJuly18.setStatus(1);
+                        processJuly18.setProcessStatus(3);
+                        processJuly18.setPartNumber(2);
+                        processJuly18.setStepNumber(1);
+                        processJuly18.setManufacturingPoint(20);
+                        processJuly18.setPgTime(15L);
+                        processJuly18.setCreatedDate(createdTimestamp);
+                        processJuly18.setUpdatedDate(createdTimestamp);
+                        processJuly18.setProcessType("phụ");
+                        processJuly18.setOrderDetail(orderDetail); // or another orderDetail if you want
+                        processRepository.save(processJuly18);
+
+                        // Add corresponding OperateHistory for staff4 on 18-07-2025
+                        OperateHistory operateHistoryJuly18 = new OperateHistory();
+                        operateHistoryJuly18.setStaff(staff4);
+                        operateHistoryJuly18.setDrawingCodeProcess(processJuly18);
+                        operateHistoryJuly18.setStartTime(1752796800000L); // 2025-07-18 00:00:00
+                        operateHistoryJuly18.setStopTime(1752804000000L); // 2025-07-18 02:00:00
+                        operateHistoryJuly18.setManufacturingPoint(8);
+                        operateHistoryJuly18.setInProgress(0);
+                        operateHistoryRepository.save(operateHistoryJuly18);
 
                 }
         }

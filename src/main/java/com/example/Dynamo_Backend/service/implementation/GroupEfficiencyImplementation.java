@@ -38,8 +38,7 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         String endDate = requestDto.getEndDate().concat(" 23:59:59");
         requestDto.setStartDate(startDate);
         requestDto.setEndDate(endDate);
-        Long startTimestamp = DateTimeUtil.convertStringToTimestamp(startDate);
-        Long endTimestamp = DateTimeUtil.convertStringToTimestamp(endDate);
+
         TimePeriodInfo timePeriodInfo = getRangeTypeAndWeek(requestDto);
         List<MachineKpi> kpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
                 requestDto.getGroupId(),
@@ -62,9 +61,10 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         for (MachineKpi kpi : kpiList) {
             List<DrawingCodeProcess> processes = kpi.getMachine().getDrawingCodeProcesses();
             for (DrawingCodeProcess process : processes) {
-                if (process.getStartTime() >= startTimestamp && process.getEndTime() <= endTimestamp) {
-                    // if (process.getStartTime() <= endTimestamp && process.getEndTime() >=
-                    // startTimestamp){
+                // if (process.getStartTime() >= timePeriodInfo.getStartDate()
+                // && process.getEndTime() <= timePeriodInfo.getEndDate()) {
+                if (process.getStartTime() <= timePeriodInfo.getEndDate() &&
+                        process.getEndTime() >= timePeriodInfo.getStartDate()) {
                     ProcessTime processTime = process.getProcessTime();
                     if (processTime == null)
                         continue;
@@ -117,14 +117,18 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
         long days = ChronoUnit.DAYS.between(start, end) + 1;
+        Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
+        Long endTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getEndDate());
         if (days < 1 || days > 31) {
             throw new BusinessException("Invalid date range");
         }
         if (days <= 7 && start.getMonth() == end.getMonth()) {
             int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
-            return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear());
+            return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
+                    endTimestamp);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
-            return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear());
+            return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
+                    endTimestamp);
         } else {
             throw new BusinessException("Invalid date range");
         }
