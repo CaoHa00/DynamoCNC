@@ -13,6 +13,7 @@ import com.example.Dynamo_Backend.dto.RequestDto.RegisterRequest;
 import com.example.Dynamo_Backend.dto.ResponseDto.AdminResponseDto;
 import com.example.Dynamo_Backend.entities.Admin;
 import com.example.Dynamo_Backend.entities.Role;
+import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.AdminMapper;
 import com.example.Dynamo_Backend.repository.AdminRepository;
 import com.example.Dynamo_Backend.repository.RoleRepository;
@@ -32,7 +33,7 @@ public class AdminImplement implements AdminService {
     @Override
     public AdminResponseDto register(RegisterRequest requestDto) {
         if (adminRepository.existsByEmail(requestDto.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new BusinessException("Email already exists");
         }
 
         Admin admin = new Admin();

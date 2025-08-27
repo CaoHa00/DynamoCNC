@@ -10,6 +10,10 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
+    public Admin getAdmin() {
+        return this.admin;
+    }
+
     private final Admin admin;
 
     public CustomUserDetails(Admin admin) {

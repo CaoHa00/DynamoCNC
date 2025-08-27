@@ -1,20 +1,13 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
-import java.util.Set;
-
-import com.example.Dynamo_Backend.entities.Role;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
-public class LoginResponse {
+public class AuthResponseDto {
     private String token;
     private String refreshToken;
-    private String userId;
-    private String email;
-    private Set<Role> role;
 }
