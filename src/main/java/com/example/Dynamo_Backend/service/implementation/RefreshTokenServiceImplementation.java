@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.RequestDto.LoginRequest;
@@ -48,7 +49,7 @@ public class RefreshTokenServiceImplementation implements RefreshTokenService {
         List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
-        String newJwt = jwtUtil.generateToken(admin.getEmail(), authorities);
+        String newJwt = jwtUtil.generateToken(admin.getId(), admin.getEmail(), authorities);
         // Rotate refresh token for better security
         String newRefreshToken = UUID.randomUUID().toString();
         refreshToken.setToken(newRefreshToken);

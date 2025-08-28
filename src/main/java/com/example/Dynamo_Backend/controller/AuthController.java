@@ -40,7 +40,7 @@ public class AuthController {
             // Get authenticated CustomUserDetails principal
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Admin admin = userDetails.getAdmin();
-            String token = jwtUtil.generateToken(admin.getEmail(),
+            String token = jwtUtil.generateToken(admin.getId(), admin.getEmail(),
                     admin.getRoles().stream()
                             .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(
                                     role.getName()))
