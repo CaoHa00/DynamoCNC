@@ -35,11 +35,16 @@ public class AdminImplement implements AdminService {
         if (adminRepository.existsByEmail(requestDto.getEmail())) {
             throw new BusinessException("Email already exists");
         }
+        // Check username uniqueness
+        if (adminRepository.findByUsername(requestDto.getUsername()).isPresent()) {
+            throw new BusinessException("Username already exists");
+        }
 
         Admin admin = new Admin();
         long createdTimestamp = System.currentTimeMillis();
         admin.setCreatedDate(createdTimestamp);
         admin.setUpdatedDate(createdTimestamp);
+        admin.setUsername(requestDto.getUsername());
         admin.setEmail(requestDto.getEmail());
         admin.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 

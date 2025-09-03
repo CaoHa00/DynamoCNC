@@ -15,9 +15,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private AdminRepository adminRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Admin admin = adminRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Admin not found with email: " + email));
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        // Try to find by username first, then email
+        Admin admin = adminRepository.findByUsername(identifier)
+                .or(() -> adminRepository.findByEmail(identifier))
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("Admin not found with username or email: " + identifier));
         return new CustomUserDetails(admin);
     }
 }

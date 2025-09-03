@@ -61,7 +61,11 @@ public class RefreshTokenServiceImplementation implements RefreshTokenService {
     @Override
     public String generateRefreshToken(LoginRequest request) {
         RefreshToken refreshToken = new RefreshToken();
-        Admin admin = adminRepository.findByEmail(request.getEmail())
+        String identifier = (request.getUsername() != null && !request.getUsername().isEmpty())
+                ? request.getUsername()
+                : request.getEmail();
+        Admin admin = adminRepository.findByUsername(identifier)
+                .or(() -> adminRepository.findByEmail(identifier))
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
         String newRefreshToken = UUID.randomUUID().toString();
         refreshToken.setToken(newRefreshToken);

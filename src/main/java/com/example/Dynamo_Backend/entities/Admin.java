@@ -34,7 +34,10 @@ public class Admin {
     @Column(columnDefinition = "CHAR(36)")
     private String Id;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
     @Column(name = "password", nullable = false)
     private String password;

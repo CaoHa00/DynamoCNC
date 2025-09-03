@@ -35,8 +35,11 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
         try {
+            String identifier = (request.getUsername() != null && !request.getUsername().isEmpty())
+                    ? request.getUsername()
+                    : request.getEmail();
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(identifier, request.getPassword()));
             // Get authenticated CustomUserDetails principal
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Admin admin = userDetails.getAdmin();
