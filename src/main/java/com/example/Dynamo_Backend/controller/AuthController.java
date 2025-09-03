@@ -50,9 +50,11 @@ public class AuthController {
                             .collect(java.util.stream.Collectors.toList()));
             String userId = admin.getId();
             String email = admin.getEmail();
+            String username = admin.getUsername();
+            String fullname = admin.getFullname();
             Set<Role> roles = admin.getRoles();
             String refreshToken = refreshTokenService.generateRefreshToken(request);
-            return new LoginResponse(token, refreshToken, userId, email, roles);
+            return new LoginResponse(token, refreshToken, userId, email, username, fullname, roles);
         } catch (AuthenticationException e) {
             throw new RuntimeException("Invalid credentials");
         }

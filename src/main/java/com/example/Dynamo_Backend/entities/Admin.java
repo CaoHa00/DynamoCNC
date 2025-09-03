@@ -28,6 +28,8 @@ import jakarta.persistence.FetchType;
 @NoArgsConstructor
 @Table(name = "admin_")
 public class Admin {
+    @Column(name = "fullname", nullable = false)
+    private String fullname;
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")

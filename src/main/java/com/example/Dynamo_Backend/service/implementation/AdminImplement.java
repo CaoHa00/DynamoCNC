@@ -46,6 +46,7 @@ public class AdminImplement implements AdminService {
         admin.setUpdatedDate(createdTimestamp);
         admin.setUsername(requestDto.getUsername());
         admin.setEmail(requestDto.getEmail());
+        admin.setFullname(requestDto.getFullname());
         admin.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
         Set<Role> roles = new HashSet<>();
