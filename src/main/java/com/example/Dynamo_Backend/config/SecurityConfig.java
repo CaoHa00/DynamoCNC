@@ -26,7 +26,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/*", "/api/admin/register", "/api/password-reset/*").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/current-staff/**", "/api/current-status/**",
+                                "/api/drawing-code-process/**")
+                        .hasAnyRole("ADMIN", "USER")
+                        .anyRequest().hasRole("ADMIN"))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
