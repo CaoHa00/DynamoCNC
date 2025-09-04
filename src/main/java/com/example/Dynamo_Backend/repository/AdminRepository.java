@@ -9,5 +9,7 @@ import com.example.Dynamo_Backend.entities.Admin;
 public interface AdminRepository extends JpaRepository<Admin, String> {
     Optional<Admin> findByEmail(String email);
 
+    Optional<Admin> findByUsername(String username);
+
     boolean existsByEmail(String email);
 }
