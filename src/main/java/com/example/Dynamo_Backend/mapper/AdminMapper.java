@@ -17,6 +17,9 @@ public class AdminMapper {
         AdminResponseDto adminResponseDto = new AdminResponseDto();
         adminResponseDto.setEmail(admin.getEmail());
         adminResponseDto.setId(admin.getId());
+        adminResponseDto.setUsername(admin.getUsername());
+        adminResponseDto.setFullname(admin.getFullname());
+        adminResponseDto.setRole(admin.getRoles());
         adminResponseDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(admin.getCreatedDate()));
         adminResponseDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(admin.getUpdatedDate()));
 

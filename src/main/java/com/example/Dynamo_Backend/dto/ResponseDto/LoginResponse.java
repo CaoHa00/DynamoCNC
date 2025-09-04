@@ -8,15 +8,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
-public class AdminResponseDto {
-    private String Id;
+public class LoginResponse {
+    private String token;
+    private String refreshToken;
+    private String userId;
     private String email;
     private String username;
     private String fullname;
     private Set<Role> role;
-    private String createdDate;
-    private String updatedDate;
 }
