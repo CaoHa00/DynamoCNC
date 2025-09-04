@@ -30,7 +30,7 @@ public class DrawingCodeProcessMapper {
                 // drawingCodeProcess.setTotalStopTime(drawingCodeProcessDto.getTotalStopTime());
                 drawingCodeProcess.setStatus(drawingCodeProcessDto.getStatus());
                 drawingCodeProcess.setOperateHistories(drawingCodeProcessDto.getStaffHistories());
-                drawingCodeProcess.setLogs(drawingCodeProcessDto.getStatstistics());
+                // drawingCodeProcess.setLogs(drawingCodeProcessDto.getStatstistics());
                 drawingCodeProcess.setCreatedDate(0);
                 drawingCodeProcess.setUpdatedDate(0);
                 drawingCodeProcess.setStartTime(

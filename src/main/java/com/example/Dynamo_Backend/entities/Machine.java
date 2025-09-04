@@ -69,4 +69,8 @@ public class Machine {
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Plan> plans;
+
+    @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "stats-machine")
+    private List<Log> logs;
 }

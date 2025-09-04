@@ -55,7 +55,8 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                 .findByMachine_MachineId(machineIdInt);
         if (drawingCodeProcesses.size() > 0) {
             for (DrawingCodeProcess drawingCodeProcess : drawingCodeProcesses) {
-                if (drawingCodeProcess.getStartTime() > drawingCodeProcess.getEndTime()) {
+                if (drawingCodeProcess.getStartTime() != null && drawingCodeProcess.getEndTime() != null
+                        && drawingCodeProcess.getStartTime() > drawingCodeProcess.getEndTime()) {
                     currentStatus.setProcessId(drawingCodeProcess.getProcessId());
                     break;
                 }
@@ -74,15 +75,10 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setTime(arr[2]);
         }
-        if (currentStatus.getProcessId() != null) {
-            DrawingCodeProcess process = drawingCodeProcessRepository
-                    .findById(currentStatus.getProcessId())
-                    .orElseThrow(
-                            () -> new RuntimeException("Process is not found when find process for currentStatus"));
-
-            logService.addLog(currentStatus, process, currentStaff != null ? currentStaff.getStaff() : null);
-        }
-
+        Machine machine = machineRepository.findById(machineIdInt)
+                .orElseThrow(() -> new RuntimeException("Machine is not found when find machine for currentStatus"));
+        logService.addLog(currentStatus, machine,
+                currentStaff != null ? currentStaff.getStaff() : null);
         currentStatusRepository.save(currentStatus);
 
         List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
@@ -160,10 +156,11 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                 continue;
             }
             CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
-            if (currentStaff.getStaff() != null) {
+            if (currentStaff != null && currentStaff.getStaff() != null) {
                 currentStaff.getStaff().setStaffKpis(null);
             }
-            StaffDto staffDto = currentStaff.getStaff() != null ? StaffMapper.mapToStaffDto(currentStaff.getStaff())
+            StaffDto staffDto = (currentStaff != null && currentStaff.getStaff() != null)
+                    ? StaffMapper.mapToStaffDto(currentStaff.getStaff())
                     : null;
             DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null ? drawingCodeProcessRepository
                     .findById(currentStatus.getProcessId())

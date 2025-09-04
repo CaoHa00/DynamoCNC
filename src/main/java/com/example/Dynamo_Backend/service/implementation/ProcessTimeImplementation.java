@@ -11,6 +11,7 @@ import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.mapper.ProcessTimeMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
+import com.example.Dynamo_Backend.repository.LogRepository;
 import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
 
@@ -20,6 +21,8 @@ public class ProcessTimeImplementation implements ProcessTimeService {
     ProcessTimeRepository processTimeRepository;
     @Autowired
     DrawingCodeProcessRepository drawingCodeProcessRepository;
+    @Autowired
+    LogRepository logRepository;
 
     @Override
     public ProcessTimeDto addProcessTime(ProcessTimeDto processTimeDto) {
@@ -70,11 +73,14 @@ public class ProcessTimeImplementation implements ProcessTimeService {
 
     @Override
     public ProcessTime calculateProcessTime(DrawingCodeProcess drawingCodeProcess) {
-        List<Log> logs = drawingCodeProcess.getLogs();
+        List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(
+                drawingCodeProcess.getMachine().getMachineId(),
+                drawingCodeProcess.getStartTime(),
+                drawingCodeProcess.getEndTime());
         ProcessTime processTime = new ProcessTime();
         Long doneTime = drawingCodeProcess.getEndTime() != null ? drawingCodeProcess.getEndTime()
                 : System.currentTimeMillis();
-        logs.sort((log1, log2) -> Long.compare(log1.getTimeStamp(), log2.getTimeStamp()));
+
         if (!logs.isEmpty() && drawingCodeProcess.getMachine().getMachineId() <= 9) {
             long spanTime = 0L;
             long runTime = 0L;

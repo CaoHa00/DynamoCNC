@@ -11,7 +11,8 @@ public class LogDto {
     private String logId;
     private Long timeStamp;
     private String status;
-    private String drawingCodeProcessId;
-    private String Id;
+    // private String drawingCodeProcessId;
+    private Integer machineId;
+    private String staffId;
 
 }
