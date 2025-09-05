@@ -17,6 +17,7 @@ import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
+import com.example.Dynamo_Backend.repository.LogRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
@@ -35,6 +36,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
 
     @Autowired
     private ProcessTimeService processTimeService;
+
+    @Autowired
+    private LogRepository logRepository;
 
     @Override
     public MachineGroupStatisticDto getGroupStatistic(GroupEfficiencyRequestDto requestDto) {
@@ -85,12 +89,11 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     totalSpanTime += processTime.getSpanTime();
                     totalStopTime += processTime.getStopTime();
 
-                    List<Log> logs = process.getLogs();
+                    List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(
+                            machineKpi.getMachine().getMachineId(), process.getStartTime(), process.getEndTime());
                     if (logs == null || logs.isEmpty()) {
                         continue;
                     }
-                    logs.sort((l1, l2) -> Long.compare(l1.getTimeStamp(), l2.getTimeStamp()));
-
                     // Sum error time
                     for (int i = 0; i < logs.size() - 1; i++) {
                         Log current = logs.get(i);
@@ -134,7 +137,8 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     previousTotalRunTime += processTime.getRunTime();
                     previousTotalSpanTime += processTime.getSpanTime();
                     previousTotalStopTime += processTime.getStopTime();
-                    List<Log> logs = process.getLogs();
+                    List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(
+                            machineKpi.getMachine().getMachineId(), process.getStartTime(), process.getEndTime());
                     if (logs != null && !logs.isEmpty()) {
                         for (int i = 0; i < logs.size() - 1; i++) {
                             Log current = logs.get(i);
@@ -229,6 +233,95 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             overviewList.add(overviewDto);
         }
         return overviewList;
+    }
+
+    @Override
+    public TotalRunTimeResponse getTotalRunTime(GroupEfficiencyRequestDto requestDto) {
+        Float totalRunTimeMainProduct = 0f;
+        Float runTimeOfRerun = 0f;
+        Float runTimeOfLK = 0f;
+        Float runTimeOfElectric = 0f;
+        Float totalRunTimeOfPreparation = 0f;
+        Float totalPgTime = 0f;
+        Float totalOffsetTime = 0f;
+        Float totalStopTime = 0f;
+        Float totalErrorTime = 0f;
+
+        String startDate = requestDto.getStartDate().concat(" 00:00:00");
+        String endDate = requestDto.getEndDate().concat(" 23:59:59");
+        requestDto.setStartDate(startDate);
+        requestDto.setEndDate(endDate);
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+
+        List<MachineKpi> machineKpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+        if (machineKpiList.isEmpty()) {
+            return new TotalRunTimeResponse(totalRunTimeMainProduct, runTimeOfRerun, runTimeOfLK, runTimeOfElectric,
+                    totalRunTimeOfPreparation, totalPgTime, totalOffsetTime, totalStopTime, totalErrorTime);
+        }
+        for (MachineKpi machineKpi : machineKpiList) {
+
+            List<DrawingCodeProcess> drawingCodeProcesses = processRepository
+                    .findProcessesByMachineInRange(machineKpi.getMachine().getMachineId(),
+                            timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
+            if (drawingCodeProcesses != null && !drawingCodeProcesses.isEmpty()) {
+                for (DrawingCodeProcess process : drawingCodeProcesses) {
+                    ProcessTime processTime = process.getProcessTime();
+                    if (processTime == null) {
+                        processTime = processTimeService.calculateProcessTime(process);
+                    }
+                    if (process.getProcessType().equals("SP_Chính")) {
+                        totalRunTimeMainProduct += processTime.getRunTime();
+                    }
+                    if (process.getProcessType().contains("NG")) {
+                        runTimeOfRerun += processTime.getRunTime();
+                    }
+                    if (process.getProcessType().contains("LK")) {
+                        runTimeOfLK += processTime.getRunTime();
+                    }
+                    if (process.getProcessType().equals("Điện cực")) {
+                        runTimeOfElectric += processTime.getRunTime();
+                    }
+                    if (process.getProcessType().equals("Dự bị")) {
+                        totalRunTimeOfPreparation += processTime.getRunTime();
+                    }
+                }
+            }
+
+            List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(
+                    machineKpi.getMachine().getMachineId(), timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
+            if (logs == null || logs.isEmpty()) {
+                continue;
+            }
+            for (int i = 0; i < logs.size(); i++) {
+                Log log = logs.get(i);
+                String status = log.getStatus();
+
+                if (i + 1 >= logs.size())
+                    break;
+                Log next = logs.get(i + 1);
+                if (log.getStatus().contains("E")) {
+                    totalErrorTime += (next.getTimeStamp() - log.getTimeStamp());
+                }
+                switch (status) {
+                    case "R1":
+                        totalPgTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    case "R2":
+                        totalOffsetTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    default:
+                        totalStopTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                }
+            }
+            totalErrorTime /= 3600000f;
+            totalPgTime /= 3600000f;
+            totalOffsetTime /= 3600000f;
+            totalStopTime /= 3600000f;
+        }
+        return new TotalRunTimeResponse(totalRunTimeMainProduct, runTimeOfRerun, runTimeOfLK, runTimeOfElectric,
+                totalRunTimeOfPreparation, totalPgTime, totalOffsetTime, totalStopTime, totalErrorTime);
     }
 
 }

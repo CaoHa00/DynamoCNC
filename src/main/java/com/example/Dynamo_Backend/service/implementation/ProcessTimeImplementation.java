@@ -11,6 +11,7 @@ import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.mapper.ProcessTimeMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
+import com.example.Dynamo_Backend.repository.LogRepository;
 import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
 
@@ -20,6 +21,8 @@ public class ProcessTimeImplementation implements ProcessTimeService {
     ProcessTimeRepository processTimeRepository;
     @Autowired
     DrawingCodeProcessRepository drawingCodeProcessRepository;
+    @Autowired
+    LogRepository logRepository;
 
     @Override
     public ProcessTimeDto addProcessTime(ProcessTimeDto processTimeDto) {
@@ -70,11 +73,14 @@ public class ProcessTimeImplementation implements ProcessTimeService {
 
     @Override
     public ProcessTime calculateProcessTime(DrawingCodeProcess drawingCodeProcess) {
-        List<Log> logs = drawingCodeProcess.getLogs();
+        List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(
+                drawingCodeProcess.getMachine().getMachineId(),
+                drawingCodeProcess.getStartTime(),
+                drawingCodeProcess.getEndTime());
         ProcessTime processTime = new ProcessTime();
         Long doneTime = drawingCodeProcess.getEndTime() != null ? drawingCodeProcess.getEndTime()
                 : System.currentTimeMillis();
-        logs.sort((log1, log2) -> Long.compare(log1.getTimeStamp(), log2.getTimeStamp()));
+
         if (!logs.isEmpty() && drawingCodeProcess.getMachine().getMachineId() <= 9) {
             long spanTime = 0L;
             long runTime = 0L;
@@ -82,49 +88,39 @@ public class ProcessTimeImplementation implements ProcessTimeService {
             long stopTime = 0L;
             long offsetTime = 0L;
 
-            Long lastStart = null;
-            String lastStatus = null;
-
             for (int i = 0; i < logs.size(); i++) {
                 Log log = logs.get(i);
                 String status = log.getStatus();
-                Long time = log.getTimeStamp();
 
-                if ("R1".equals(status) || "R2".equals(status)) {
-                    lastStart = time;
-                    lastStatus = status;
-                } else if (("S1".equals(status) || "S2".equals(status)) && lastStart != null) {
-                    long duration = time - lastStart;
-                    runTime += duration;
-                    if ("R1".equals(lastStatus))
-                        pgTime += duration;
-                    if ("R2".equals(lastStatus))
-                        offsetTime += duration;
-                    lastStart = null;
-                    lastStatus = null;
-                }
-                if (("S1".equals(status) || "S2".equals(status)) && i + 1 < logs.size()) {
-                    Log nextLog = logs.get(i + 1);
-                    if ("R1".equals(nextLog.getStatus()) || "R2".equals(nextLog.getStatus())) {
-                        stopTime += nextLog.getTimeStamp() - time;
-                    }
+                if (i + 1 >= logs.size())
+                    break;
+                Log next = logs.get(i + 1);
+                switch (status) {
+                    case "R1":
+                        pgTime += (next.getTimeStamp() - log.getTimeStamp());
+                        runTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    case "R2":
+                        offsetTime += (next.getTimeStamp() - log.getTimeStamp());
+                        runTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    default:
+                        stopTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
                 }
             }
             // phòng trường hợp log đầu không phải R, tính theo giờ máy
-            for (int i = 0; i < logs.size() - 1; i++) {
-                Log log = logs.get(i);
-                if ("R1".equals(log.getStatus()) || "R2".equals(log.getStatus())) {
-                    spanTime = logs.get(logs.size() - 1).getTimeStamp()
-                            - logs.get(i).getTimeStamp();
-                    break;
-                }
-            }
+            // for (int i = 0; i < logs.size() - 1; i++) {
+            // Log log = logs.get(i);
+            // if ("R1".equals(log.getStatus()) || "R2".equals(log.getStatus())) {
+            // spanTime = logs.get(logs.size() - 1).getTimeStamp()
+            // - logs.get(i).getTimeStamp();
+            // break;
+            // }
+            // }
 
-            int lastIndex = logs.size() - 1;
-            if (!"S1".equals(logs.get(lastIndex).getStatus())
-                    || !"S2".equals(logs.get(lastIndex).getStatus())) {
-                runTime += doneTime - logs.get(lastIndex).getTimeStamp();
-            }
+            spanTime = logs.get(logs.size() - 1).getTimeStamp()
+                    - logs.get(0).getTimeStamp();
 
             // convert ms to hours
             processTime.setSpanTime(spanTime / 3600000f); // ms to hours

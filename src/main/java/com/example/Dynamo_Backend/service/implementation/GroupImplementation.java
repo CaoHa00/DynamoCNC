@@ -153,6 +153,8 @@ public class GroupImplementation implements GroupService {
                 .map(machine -> {
                     CurrentStatus status = currentStatusRepository
                             .findByMachineId(machine.getMachineId());
+                    if (status == null)
+                        return "Other";
                     String rawStatus = status.getStatus();
                     if ("R1".equals(rawStatus) || "R2".equals(rawStatus)) {
                         return "Run";
