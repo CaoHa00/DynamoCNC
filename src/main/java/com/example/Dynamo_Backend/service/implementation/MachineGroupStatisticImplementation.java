@@ -260,6 +260,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     totalRunTimeOfPreparation, totalPgTime, totalOffsetTime, totalStopTime, totalErrorTime);
         }
         for (MachineKpi machineKpi : machineKpiList) {
+
             List<DrawingCodeProcess> drawingCodeProcesses = processRepository
                     .findProcessesByMachineInRange(machineKpi.getMachine().getMachineId(),
                             timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
@@ -269,59 +270,49 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     if (processTime == null) {
                         processTime = processTimeService.calculateProcessTime(process);
                     }
-                    if (process.getOrderDetail().getOrderType().equals("SP_Chính")) {
+                    if (process.getProcessType().equals("SP_Chính")) {
                         totalRunTimeMainProduct += processTime.getRunTime();
                     }
-                    if (process.getOrderDetail().getOrderType().contains("NG")) {
+                    if (process.getProcessType().contains("NG")) {
                         runTimeOfRerun += processTime.getRunTime();
                     }
-                    if (process.getOrderDetail().getOrderType().contains("LK")) {
+                    if (process.getProcessType().contains("LK")) {
                         runTimeOfLK += processTime.getRunTime();
                     }
-                    if (process.getOrderDetail().getOrderType().equals("Điện cực")) {
+                    if (process.getProcessType().equals("Điện cực")) {
                         runTimeOfElectric += processTime.getRunTime();
                     }
-                    if (process.getOrderDetail().getOrderType().equals("Dự bị")) {
+                    if (process.getProcessType().equals("Dự bị")) {
                         totalRunTimeOfPreparation += processTime.getRunTime();
                     }
-
                 }
             }
+
             List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(
                     machineKpi.getMachine().getMachineId(), timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
             if (logs == null || logs.isEmpty()) {
                 continue;
             }
-            Long lastStart = null;
-            String lastStatus = null;
             for (int i = 0; i < logs.size(); i++) {
                 Log log = logs.get(i);
                 String status = log.getStatus();
-                Long time = log.getTimeStamp();
 
-                if ("R1".equals(status) || "R2".equals(status)) {
-                    lastStart = time;
-                    lastStatus = status;
-                } else if (("S1".equals(status) || "S2".equals(status)) && lastStart != null) {
-                    long duration = time - lastStart;
-                    if ("R1".equals(lastStatus))
-                        totalPgTime += duration;
-                    if ("R2".equals(lastStatus))
-                        totalOffsetTime += duration;
-                    lastStart = null;
-                    lastStatus = null;
-                }
-                if (("S1".equals(status) || "S2".equals(status)) && i + 1 < logs.size()) {
-                    Log nextLog = logs.get(i + 1);
-                    if ("R1".equals(nextLog.getStatus()) || "R2".equals(nextLog.getStatus())) {
-                        totalStopTime += nextLog.getTimeStamp() - time;
-                    }
-                }
                 if (i + 1 >= logs.size())
                     break;
                 Log next = logs.get(i + 1);
                 if (log.getStatus().contains("E")) {
                     totalErrorTime += (next.getTimeStamp() - log.getTimeStamp());
+                }
+                switch (status) {
+                    case "R1":
+                        totalPgTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    case "R2":
+                        totalOffsetTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    default:
+                        totalStopTime += (next.getTimeStamp() - log.getTimeStamp());
+                        break;
                 }
             }
             totalErrorTime /= 3600000f;
