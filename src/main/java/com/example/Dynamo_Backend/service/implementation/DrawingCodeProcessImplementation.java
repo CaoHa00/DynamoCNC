@@ -239,7 +239,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         // get all process by machineId for **tablet**
         @Override
         public Map<String, Object> getDrawingCodeProcessByMachineId(Integer machineId) {
-                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findAll();
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachineOrPlanMachine(machineId);
                 List<DrawingCodeProcessResponseDto> todoList = new ArrayList<>();
                 DrawingCodeProcessResponseDto inProgress = null;
                 Map<String, Object> result = new HashMap<>();
@@ -247,6 +247,19 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         if (process.getPlan() != null) {
                                 if (process.getProcessStatus() == 1
                                                 && process.getPlan().getMachine().getMachineId().equals(machineId)) {
+                                        OrderDetailDto orderDetailDto = OrderDetailMapper
+                                                        .mapToOrderDetailDto(process.getOrderDetail());
+                                        PlanDto planDto = (process.getPlan() != null)
+                                                        ? PlanMapper.mapToPlanDto(process.getPlan())
+                                                        : null;
+
+                                        todoList.add(DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
+                                                        null, planDto, null));
+                                }
+                        }
+                        if (process.getIsPlan() == 0) {
+                                if (process.getProcessStatus() == 1
+                                                && process.getMachine().getMachineId().equals(machineId)) {
                                         OrderDetailDto orderDetailDto = OrderDetailMapper
                                                         .mapToOrderDetailDto(process.getOrderDetail());
                                         PlanDto planDto = (process.getPlan() != null)

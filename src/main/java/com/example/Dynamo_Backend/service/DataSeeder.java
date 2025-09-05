@@ -57,28 +57,28 @@ public class DataSeeder {
 
                         Group group1 = new Group();
                         group1.setGroupName("Group 1");
-                        group1.setGroupType("staff");
+
                         group1.setCreatedDate(createdTimestamp);
                         group1.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group1);
 
                         Group group2 = new Group();
                         group2.setGroupName("Group 2");
-                        group2.setGroupType("staff");
+
                         group2.setCreatedDate(createdTimestamp);
                         group2.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group2);
 
                         Group group3 = new Group();
                         group3.setGroupName("Group 3");
-                        group3.setGroupType("staff");
+
                         group3.setCreatedDate(createdTimestamp);
                         group3.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group3);
 
                         Group group4 = new Group();
                         group4.setGroupName("Group 4");
-                        group4.setGroupType("staff");
+
                         group4.setCreatedDate(createdTimestamp);
                         group4.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group4);
