@@ -93,9 +93,9 @@ public class DrawingCodeProcess {
     @JsonManagedReference(value = "history-process")
     private List<OperateHistory> operateHistories;
 
-    @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "stats-process")
-    private List<Log> logs;
+    // @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
+    // @JsonManagedReference(value = "stats-process")
+    // private List<Log> logs;
 
     @OneToOne(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
     @JsonManagedReference
