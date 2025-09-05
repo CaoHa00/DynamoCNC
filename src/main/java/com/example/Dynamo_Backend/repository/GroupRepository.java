@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.example.Dynamo_Backend.entities.Group;
 
 public interface GroupRepository extends JpaRepository<Group, String> {
-        List<Group> findByGroupType(String groupType);
+        // List<Group> findByGroupType(String groupType);
 
         Optional<Group> findByGroupName(String groupName);
 
