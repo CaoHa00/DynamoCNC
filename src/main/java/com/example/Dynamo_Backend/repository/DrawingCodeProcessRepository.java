@@ -15,6 +15,13 @@ public interface DrawingCodeProcessRepository extends JpaRepository<DrawingCodeP
 
     List<DrawingCodeProcess> findByProcessStatus(Integer processStatus);
 
+    @Query("SELECT p FROM DrawingCodeProcess p " +
+            "LEFT JOIN p.plan pl " +
+            "LEFT JOIN p.machine m " +
+            "WHERE (m.machineId = :machineId OR pl.machine.machineId = :machineId)")
+    List<DrawingCodeProcess> findByMachineOrPlanMachine(@Param("machineId") Integer machineId);
+
     @Query("SELECT p FROM DrawingCodeProcess p WHERE p.startTime <= :endTime AND p.endTime >= :startTime")
     List<DrawingCodeProcess> findProcessesInRange(@Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
 }
