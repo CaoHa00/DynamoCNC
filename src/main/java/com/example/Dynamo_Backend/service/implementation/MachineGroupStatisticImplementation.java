@@ -14,7 +14,6 @@ import com.example.Dynamo_Backend.dto.ResponseDto.*;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Log;
-import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
@@ -44,6 +43,8 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
     @Autowired
     private LogRepository logRepository;
 
+    // ??truong hop log cuoi cung nen tinh nhu nao: se co khoang trong giua log cuoi
+    // cung va thoi gian ket thuc
     public MachineGroupStatisticDto calculateTotalTime(TimePeriodInfo timePeriodInfo, String groupId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new BusinessException("Group not found when get machine group statistic"));
@@ -86,73 +87,47 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                         process.getEndTime() < timePeriodInfo.getStartDate()) {
                     continue;
                 }
-                // totalSpanTime += (process.getEndTime() - process.getStartTime());
+                ProcessTime processTime = process.getProcessTime() == null
+                        ? processTimeService.calculateProcessTime(process)
+                        : process.getProcessTime();
+                totalSpanTime += processTime.getSpanTime();
                 List<Log> logsInProcess = logs.stream()
                         .filter(log -> log.getTimeStamp() >= process.getStartTime()
                                 && log.getTimeStamp() <= process.getEndTime())
                         .collect(Collectors.toList());
                 logsByProcess.put(process.getProcessId(), logsInProcess);
             }
+            boolean isLast = false;
+            for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
+                Log log = logsByMachine.get(machineId).get(i);
+                String status = log.getStatus();
 
-            // Find logs outside any process
-            List<Log> logsOutsideProcess = logs.stream()
-                    .filter(log -> processes.stream().noneMatch(
-                            process -> process.getStartTime() != null && process.getEndTime() != null &&
-                                    log.getTimeStamp() >= process.getStartTime()
-                                    && log.getTimeStamp() <= process.getEndTime()))
-                    .collect(Collectors.toList());
-            if (!logsOutsideProcess.isEmpty()) {
-                for (int i = 0; i < logsOutsideProcess.size(); i++) {
-                    Log log = logsOutsideProcess.get(i);
-                    String status = log.getStatus();
-
-                    if (i + 1 >= logsOutsideProcess.size())
-                        break;
-                    Log next = logsOutsideProcess.get(i + 1);
-                    if (log.getStatus().contains("E")) {
-                        totalErrorTime += (next.getTimeStamp() - log.getTimeStamp());
-                    }
-                    switch (status) {
-                        case "R1":
-                            totalPgTime += (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                        case "R2":
-                            totalOffsetTime += (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                        default:
-                            totalStopTime += (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                    }
+                isLast = (i + 1 >= logsByMachine.get(machineId).size());
+                Log next = isLast ? null : logsByMachine.get(machineId).get(i + 1);
+                if (log.getStatus().contains("E")) {
+                    totalErrorTime += isLast
+                            ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis()) - log.getTimeStamp())
+                            : (next.getTimeStamp() - log.getTimeStamp());
                 }
-            }
-
-            for (Map.Entry<String, List<Log>> entry : logsByProcess.entrySet()) {
-                List<Log> processLogs = entry.getValue();
-                if (!processLogs.isEmpty()) {
-                    totalSpanTime += processLogs.get(processLogs.size() - 1).getTimeStamp()
-                            - processLogs.get(0).getTimeStamp();
-                    for (int i = 0; i < processLogs.size(); i++) {
-                        Log log = processLogs.get(i);
-                        String status = log.getStatus();
-
-                        if (i + 1 >= processLogs.size())
-                            break;
-                        Log next = processLogs.get(i + 1);
-                        if (log.getStatus().contains("E")) {
-                            totalErrorTime += (next.getTimeStamp() - log.getTimeStamp());
-                        }
-                        switch (status) {
-                            case "R1":
-                                totalPgTime += (next.getTimeStamp() - log.getTimeStamp());
-                                break;
-                            case "R2":
-                                totalOffsetTime += (next.getTimeStamp() - log.getTimeStamp());
-                                break;
-                            default:
-                                totalStopTime += (next.getTimeStamp() - log.getTimeStamp());
-                                break;
-                        }
-                    }
+                switch (status) {
+                    case "R1":
+                        totalPgTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    case "R2":
+                        totalOffsetTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    default:
+                        totalStopTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
                 }
             }
         }
@@ -263,11 +238,6 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         List<MachineGroupOverviewDto> overviewList = new ArrayList<>();
 
         for (Integer machineId : logsByMachine.keySet()) {
-            List<Log> logs = logsByMachine.get(machineId);
-            MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
-            overviewDto.setMachineId(machineId);
-            overviewDto.setMachineName(logs.get(0).getMachine().getMachineName());
-            List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
             Float totalRunTime = 0f;
             Float totalStopTime = 0f;
             Float totalPgTime = 0f;
@@ -275,6 +245,12 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             Float totalSpanTime = 0f;
             Float totalErrorTime = 0f;
             Float pgTimeExpected = 0f;
+
+            List<Log> logs = logsByMachine.get(machineId);
+            List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
+            MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
+            overviewDto.setMachineId(machineId);
+            overviewDto.setMachineName(logs.get(0).getMachine().getMachineName());
             overviewDto.setNumberOfProcesses(processes.size());
             // Group logs by process
             Map<String, List<Log>> logsByProcess = new java.util.HashMap<>();
@@ -286,78 +262,50 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                         process.getEndTime() < timePeriodInfo.getStartDate()) {
                     continue;
                 }
-
-                pgTimeExpected += process.getPgTime() != null ? process.getPgTime() : 0;
-                // totalSpanTime += (process.getEndTime() - process.getStartTime());
-
+                ProcessTime processTime = process.getProcessTime() == null
+                        ? processTimeService.calculateProcessTime(process)
+                        : process.getProcessTime();
+                totalSpanTime += processTime.getSpanTime();
                 List<Log> logsInProcess = logs.stream()
                         .filter(log -> log.getTimeStamp() >= process.getStartTime()
                                 && log.getTimeStamp() <= process.getEndTime())
                         .collect(Collectors.toList());
                 logsByProcess.put(process.getProcessId(), logsInProcess);
             }
+            boolean isLast = false;
+            for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
+                Log log = logsByMachine.get(machineId).get(i);
+                String status = log.getStatus();
 
-            // Find logs outside any process
-            List<Log> logsOutsideProcess = logs.stream()
-                    .filter(log -> processes.stream().noneMatch(
-                            process -> process.getStartTime() != null && process.getEndTime() != null &&
-                                    log.getTimeStamp() >= process.getStartTime()
-                                    && log.getTimeStamp() <= process.getEndTime()))
-                    .collect(Collectors.toList());
-            if (!logsOutsideProcess.isEmpty()) {
-                for (int i = 0; i < logsOutsideProcess.size(); i++) {
-                    Log log = logsOutsideProcess.get(i);
-                    String status = log.getStatus();
-
-                    if (i + 1 >= logsOutsideProcess.size())
+                isLast = (i + 1 >= logsByMachine.get(machineId).size());
+                Log next = isLast ? null : logsByMachine.get(machineId).get(i + 1);
+                if (log.getStatus().contains("E")) {
+                    totalErrorTime += isLast
+                            ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis()) - log.getTimeStamp())
+                            : (next.getTimeStamp() - log.getTimeStamp());
+                }
+                switch (status) {
+                    case "R1":
+                        totalPgTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
                         break;
-                    Log next = logsOutsideProcess.get(i + 1);
-                    if (log.getStatus().contains("E")) {
-                        totalErrorTime += (next.getTimeStamp() - log.getTimeStamp());
-                    }
-                    switch (status) {
-                        case "R1":
-                            totalPgTime += (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                        case "R2":
-                            totalOffsetTime += (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                        default:
-                            totalStopTime += (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                    }
+                    case "R2":
+                        totalOffsetTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    default:
+                        totalStopTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
                 }
             }
 
-            for (Map.Entry<String, List<Log>> entry : logsByProcess.entrySet()) {
-                List<Log> processLogs = entry.getValue();
-                if (!processLogs.isEmpty()) {
-                    totalSpanTime += processLogs.get(processLogs.size() - 1).getTimeStamp()
-                            - processLogs.get(0).getTimeStamp();
-                    for (int i = 0; i < processLogs.size(); i++) {
-                        Log log = processLogs.get(i);
-                        String status = log.getStatus();
-
-                        if (i + 1 >= processLogs.size())
-                            break;
-                        Log next = processLogs.get(i + 1);
-                        if (log.getStatus().contains("E")) {
-                            totalErrorTime += (next.getTimeStamp() - log.getTimeStamp());
-                        }
-                        switch (status) {
-                            case "R1":
-                                totalPgTime += (next.getTimeStamp() - log.getTimeStamp());
-                                break;
-                            case "R2":
-                                totalOffsetTime += (next.getTimeStamp() - log.getTimeStamp());
-                                break;
-                            default:
-                                totalStopTime += (next.getTimeStamp() - log.getTimeStamp());
-                                break;
-                        }
-                    }
-                }
-            }
             totalRunTime = totalPgTime + totalOffsetTime;
             overviewDto.setRunTime(totalRunTime / 3600000f);
             overviewDto.setStopTime(totalStopTime / 3600000f);
