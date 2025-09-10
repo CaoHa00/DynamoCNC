@@ -25,7 +25,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/*", "/api/admin/register", "/api/password-reset/*").permitAll()
+                        // .requestMatchers("/api/auth/*", "/api/admin/register",
+                        // "/api/password-reset/*").permitAll()
+                        .requestMatchers("/api/**", "/ws/**").permitAll()
                         .requestMatchers("/api/current-staff/**", "/api/current-status/**",
                                 "/api/drawing-code-process/**")
                         .hasAnyRole("ADMIN", "USER")
