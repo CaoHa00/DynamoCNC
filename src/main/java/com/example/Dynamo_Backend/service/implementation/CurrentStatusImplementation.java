@@ -17,6 +17,7 @@ import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.OperateHistory;
 import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;

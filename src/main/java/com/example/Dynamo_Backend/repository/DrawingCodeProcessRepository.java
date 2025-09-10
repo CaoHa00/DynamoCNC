@@ -24,4 +24,37 @@ public interface DrawingCodeProcessRepository extends JpaRepository<DrawingCodeP
     @Query("SELECT p FROM DrawingCodeProcess p WHERE p.startTime <= :endTime AND p.endTime >= :startTime")
     List<DrawingCodeProcess> findProcessesInRange(@Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
+    @Query("""
+                SELECT oh.drawingCodeProcess
+                FROM OperateHistory oh
+                WHERE (:staffId IS NULL OR oh.staff.id = :staffId)
+                  AND (:start IS NULL OR :stop IS NULL OR (oh.startTime BETWEEN :start AND :stop))
+            """)
+    List<DrawingCodeProcess> findProcessesByStaffAndTimeRange(
+            @Param("staffId") String staffId,
+            @Param("start") Long start,
+            @Param("stop") Long stop);
+
+    @Query("""
+                SELECT dcp
+                FROM DrawingCodeProcess dcp
+                WHERE (:machineId IS NULL OR dcp.machine.machineId = :machineId)
+                  AND (:start IS NULL OR :stop IS NULL OR (dcp.startTime BETWEEN :start AND :stop))
+                  AND dcp.processStatus = 3
+            """)
+    List<DrawingCodeProcess> findCompletedProcessesByMachineAndTime(
+            @Param("machineId") Integer machineId,
+            @Param("start") Long start,
+            @Param("stop") Long stop);
+
+    @Query("""
+            SELECT dcp
+            FROM DrawingCodeProcess dcp
+            WHERE dcp.processStatus = :status
+              AND (:start IS NULL OR :stop IS NULL OR (dcp.startTime BETWEEN :start AND :stop))
+            """)
+    List<DrawingCodeProcess> findByStatusAndTimeRange(
+            @Param("status") Integer status,
+            @Param("start") Long start,
+            @Param("stop") Long stop);
 }

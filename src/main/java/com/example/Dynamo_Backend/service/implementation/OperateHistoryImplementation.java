@@ -92,7 +92,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                 }
                         }
                 }
-                return new OperateHistoryDto(null, 0, null, null, 0, null, null);
+                return new OperateHistoryDto(null, 0, (long) 0, null, null, 0, null, null);
         }
 
         @Override
