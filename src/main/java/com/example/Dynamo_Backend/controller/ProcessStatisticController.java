@@ -19,14 +19,14 @@ import lombok.AllArgsConstructor;
 public class ProcessStatisticController {
     private final ProcessStatisticService processStatisticService;
 
-    @GetMapping("/overview")
+    @PostMapping("/overview")
     public ResponseEntity<List<ProcessOverviewDto>> getGroupOverview(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         List<ProcessOverviewDto> overview = processStatisticService.getProcessOverview(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(overview);
     }
 
-    @GetMapping("/statistic")
+    @PostMapping("/statistic")
     public ResponseEntity<DrawingCodeProcessStatistic> getGroupStatistic(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         DrawingCodeProcessStatistic statistic = processStatisticService.getStatisticsForProcess(requestDto);
