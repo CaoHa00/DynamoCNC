@@ -13,7 +13,6 @@ public class GroupMapper {
                 Group group = new Group();
                 group.setGroupId(groupDto.getGroupId());
                 group.setGroupName(groupDto.getGroupName());
-
                 return group;
         }
 
@@ -21,7 +20,6 @@ public class GroupMapper {
                 GroupDto dto = new GroupDto();
                 dto.setGroupId(group.getGroupId());
                 dto.setGroupName(group.getGroupName());
-
                 dto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(group.getCreatedDate()));
                 dto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(group.getCreatedDate()));
 

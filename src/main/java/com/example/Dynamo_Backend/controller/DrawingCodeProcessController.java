@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
+import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 
 import lombok.AllArgsConstructor;
@@ -31,12 +32,6 @@ public class DrawingCodeProcessController {
     @GetMapping
     public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAlldrawingCodes() {
         List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getAllTodoProcesses();
-        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
-    }
-
-    @GetMapping("/completed")
-    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllCompleteddrawingCodes() {
-        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getCompletedProcess();
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
@@ -120,6 +115,50 @@ public class DrawingCodeProcessController {
         Map<String, Object> drawingCodeProcess = drawingCodeProcessService
                 .getDrawingCodeProcessByMachineId(Id);
         return ResponseEntity.ok(drawingCodeProcess);
+    }
+
+    @GetMapping("/staff")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getProcessesByStaffAndTime(
+            @RequestParam(name = "staff_id", required = false) String staffId,
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> drawingCodeProcess = drawingCodeProcessService.getProcessesByOperator(
+                staffId,
+                start, stop);
+        return ResponseEntity.ok(drawingCodeProcess);
+    }
+
+    @GetMapping("/machine")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getProcessesByMachineAndTime(
+            @RequestParam(name = "machine_id", required = false) Integer machineId,
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> drawingCodeProcess = drawingCodeProcessService.getProcessByMachine(
+                machineId,
+                start, stop);
+        return ResponseEntity.ok(drawingCodeProcess);
+    }
+
+    @GetMapping("/completed")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getCompletedProcess(
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> processes = drawingCodeProcessService.getCompletedProcess(3, start,
+                stop);
+        return ResponseEntity.status(HttpStatus.OK).body(processes);
     }
 
 }

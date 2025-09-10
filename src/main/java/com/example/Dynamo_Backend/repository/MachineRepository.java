@@ -26,4 +26,5 @@ public interface MachineRepository extends JpaRepository<Machine, Integer> {
             @Param("groupId") String groupId,
             @Param("year") int year,
             @Param("month") int month);
+
 }
