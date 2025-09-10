@@ -87,40 +87,35 @@ public class ProcessTimeImplementation implements ProcessTimeService {
             long pgTime = 0L;
             long stopTime = 0L;
             long offsetTime = 0L;
+            boolean isLast = false;
 
             for (int i = 0; i < logs.size(); i++) {
                 Log log = logs.get(i);
                 String status = log.getStatus();
 
-                if (i + 1 >= logs.size())
-                    break;
-                Log next = logs.get(i + 1);
+                isLast = (i + 1 >= logs.size());
+                Log next = isLast ? null : logs.get(i + 1);
                 switch (status) {
                     case "R1":
-                        pgTime += (next.getTimeStamp() - log.getTimeStamp());
-                        runTime += (next.getTimeStamp() - log.getTimeStamp());
+                        pgTime += isLast ? (doneTime - log.getTimeStamp()) : (next.getTimeStamp() - log.getTimeStamp());
+                        runTime += isLast ? (doneTime - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
                         break;
                     case "R2":
-                        offsetTime += (next.getTimeStamp() - log.getTimeStamp());
-                        runTime += (next.getTimeStamp() - log.getTimeStamp());
+                        offsetTime += isLast ? (doneTime - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        runTime += isLast ? (doneTime - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
                         break;
                     default:
-                        stopTime += (next.getTimeStamp() - log.getTimeStamp());
+                        stopTime += isLast ? (doneTime - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
                         break;
                 }
             }
-            // phòng trường hợp log đầu không phải R, tính theo giờ máy
-            // for (int i = 0; i < logs.size() - 1; i++) {
-            // Log log = logs.get(i);
-            // if ("R1".equals(log.getStatus()) || "R2".equals(log.getStatus())) {
-            // spanTime = logs.get(logs.size() - 1).getTimeStamp()
-            // - logs.get(i).getTimeStamp();
-            // break;
-            // }
-            // }
 
-            spanTime = logs.get(logs.size() - 1).getTimeStamp()
-                    - logs.get(0).getTimeStamp();
+            spanTime = (!logs.get(logs.size() - 1).getStatus().contains("R") ? logs.get(logs.size() - 1).getTimeStamp()
+                    : drawingCodeProcess.getEndTime()) - logs.get(0).getTimeStamp();
 
             // convert ms to hours
             processTime.setSpanTime(spanTime / 3600000f); // ms to hours

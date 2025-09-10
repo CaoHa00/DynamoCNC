@@ -94,14 +94,15 @@ public class MQTTConfig {
                                         {
                                             put("type", groupDto.getGroupName().concat("-status"));
                                             put("data", statusList);
+                                            put("countStatus", statusCount);
                                         }
                                     });
                             MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
 
-                            String statusCountJson = objectMapper.writeValueAsString(
-                                    Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",
-                                            statusCount));
-                            MyWebSocketHandler.sendGroupStatusToClients(statusCountJson);
+                            // String statusCountJson = objectMapper.writeValueAsString(
+                            // Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",
+                            // statusCount));
+                            // MyWebSocketHandler.sendGroupStatusToClients(statusCountJson);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

@@ -10,6 +10,7 @@ import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineGroupOverviewDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineGroupStatisticDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.TotalRunTimeResponse;
+import com.example.Dynamo_Backend.repository.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
 
 import lombok.AllArgsConstructor;
@@ -38,6 +39,13 @@ public class MachineGroupStatisticController {
     public ResponseEntity<TotalRunTimeResponse> getGroupTotalRunTime(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         TotalRunTimeResponse response = groupStatisticService.getTotalRunTime(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/top-5")
+    public ResponseEntity<List<MachineRunTimeDto>> getTop5(
+            @RequestBody GroupEfficiencyRequestDto requestDto) {
+        List<MachineRunTimeDto> response = groupStatisticService.getTop5GroupOverview(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
