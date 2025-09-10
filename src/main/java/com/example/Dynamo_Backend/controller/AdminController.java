@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Dynamo_Backend.dto.RequestDto.AdminRequestDto;
+import com.example.Dynamo_Backend.dto.RequestDto.RegisterRequest;
 import com.example.Dynamo_Backend.dto.ResponseDto.AdminResponseDto;
 import com.example.Dynamo_Backend.service.AdminService;
 
@@ -32,8 +33,8 @@ public class AdminController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AdminResponseDto> register(@RequestBody AdminRequestDto adminRequestDto) {
-        AdminResponseDto adminResponseDto = adminService.register(adminRequestDto);
+    public ResponseEntity<AdminResponseDto> register(@RequestBody RegisterRequest requestDto) {
+        AdminResponseDto adminResponseDto = adminService.register(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(adminResponseDto);
     }
 

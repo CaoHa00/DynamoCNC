@@ -41,6 +41,7 @@ public interface MachineRepository extends JpaRepository<Machine, Integer> {
        AND k.month = latest.month
       WHERE k.group_id = :groupId
       """, nativeQuery = true)
+
   List<Machine> findMachinesByGroupIdLatestOrCurrent(
       @Param("groupId") String groupId,
       @Param("year") int year,

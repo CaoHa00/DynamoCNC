@@ -4,9 +4,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import com.example.Dynamo_Backend.dto.LogDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
-import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.Log;
+import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.mapper.LogMapper;
 import com.example.Dynamo_Backend.repository.LogRepository;
 import com.example.Dynamo_Backend.service.StaffService;
@@ -21,9 +21,10 @@ public class LogImplementation implements LogService {
         LogRepository logRepository;
 
         @Override
-        public void addLog(CurrentStatus currentStatus, DrawingCodeProcess process, Staff staff) {
+        public void addLog(CurrentStatus currentStatus, Machine machine, Staff staff) {
                 Log log = new Log();
-                log.setDrawingCodeProcess(process);
+                // log.setDrawingCodeProcess(process);
+                log.setMachine(machine);
                 log.setStaff(staff);
                 log.setStatus(currentStatus.getStatus());
                 log.setTimeStamp(System.currentTimeMillis());
