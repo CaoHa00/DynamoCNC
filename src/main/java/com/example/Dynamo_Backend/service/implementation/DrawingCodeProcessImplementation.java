@@ -209,18 +209,15 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 DrawingCodeProcessResponseDto inProgress = null;
                 Map<String, Object> result = new HashMap<>();
                 for (DrawingCodeProcess process : processes) {
-                        if (process.getPlan() != null) {
-                                if (process.getProcessStatus() == 1
-                                                && process.getPlan().getMachine().getMachineId().equals(machineId)) {
-                                        OrderDetailDto orderDetailDto = OrderDetailMapper
-                                                        .mapToOrderDetailDto(process.getOrderDetail());
-                                        PlanDto planDto = (process.getPlan() != null)
-                                                        ? PlanMapper.mapToPlanDto(process.getPlan())
-                                                        : null;
+                        if (process.getProcessStatus() == 1) {
+                                OrderDetailDto orderDetailDto = OrderDetailMapper
+                                                .mapToOrderDetailDto(process.getOrderDetail());
+                                PlanDto planDto = (process.getPlan() != null)
+                                                ? PlanMapper.mapToPlanDto(process.getPlan())
+                                                : null;
 
-                                        todoList.add(DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
-                                                        null, planDto, null));
-                                }
+                                todoList.add(DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
+                                                null, planDto, null));
                         }
                         if (process.getIsPlan() == 0) {
                                 if (process.getProcessStatus() == 1

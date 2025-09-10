@@ -64,4 +64,14 @@ public interface DrawingCodeProcessRepository extends JpaRepository<DrawingCodeP
         List<DrawingCodeProcess> findProcessesByMachineInRange(@Param("machineId") Integer machineId,
                         @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
+    // find DrawingCodeProcess by machineId and in range
+    @Query("SELECT p FROM DrawingCodeProcess p WHERE p.machine.machineId = :machineId AND p.startTime <= :endTime AND p.endTime >= :startTime")
+    List<DrawingCodeProcess> findProcessesByMachineInRange(@Param("machineId") Integer machineId,
+            @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
+    // find DrawingCodeProcess by managerGroup of orderDetail and in range
+    @Query("SELECT p FROM DrawingCodeProcess p WHERE p.orderDetail.managerGroup.groupId = :groupId AND p.startTime <= :endTime AND p.endTime >= :startTime")
+    List<DrawingCodeProcess> findProcessesByManagerGroupInRange(@Param("groupId") String groupId,
+            @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
 }

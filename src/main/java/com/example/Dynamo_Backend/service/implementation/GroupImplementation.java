@@ -126,7 +126,6 @@ public class GroupImplementation implements GroupService {
                         || typeCell.getCellType() == CellType.BLANK)
                     continue;
                 String groupName = nameCell.getStringCellValue().trim();
-                String groupType = typeCell.getStringCellValue().trim();
                 if (groupName.isEmpty())
                     continue;
 
