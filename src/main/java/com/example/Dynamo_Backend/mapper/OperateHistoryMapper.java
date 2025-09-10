@@ -9,6 +9,7 @@ public class OperateHistoryMapper {
         return new OperateHistoryDto(
                 operateHistory.getOperateHistoryId(),
                 operateHistory.getManufacturingPoint(),
+                operateHistory.getPgTime(),
                 DateTimeUtil.convertTimestampToString(operateHistory.getStartTime()),
                 DateTimeUtil.convertTimestampToString(operateHistory.getStopTime()),
                 operateHistory.getInProgress(),

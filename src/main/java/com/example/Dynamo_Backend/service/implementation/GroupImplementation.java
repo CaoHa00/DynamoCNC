@@ -103,7 +103,7 @@ public class GroupImplementation implements GroupService {
 
     @Override
     public List<GroupDto> getGroupByGroupType(String groupType) {
-        List<Group> groups = groupRepository.findByGroupType(groupType);
+        List<Group> groups = groupRepository.findAll();
         return groups.stream().map(GroupMapper::mapToGroupDto).toList();
     }
 
@@ -117,18 +117,20 @@ public class GroupImplementation implements GroupService {
                 if (row.getRowNum() < 6)
                     continue; // Skip header row
                 Group group = new Group();
+
+                group.setGroupName(row.getCell(1).getStringCellValue());
+
                 Cell typeCell = row.getCell(2);
                 Cell nameCell = row.getCell(3);
                 if (nameCell == null || nameCell.getCellType() == CellType.BLANK || typeCell == null
                         || typeCell.getCellType() == CellType.BLANK)
                     continue;
                 String groupName = nameCell.getStringCellValue().trim();
-                String groupType = typeCell.getStringCellValue().trim();
                 if (groupName.isEmpty())
                     continue;
 
-                group.setGroupType(groupType);
                 group.setGroupName(groupName);
+
                 long createdTimestamp = System.currentTimeMillis();
                 group.setCreatedDate(createdTimestamp);
                 group.setUpdatedDate(createdTimestamp);
@@ -153,6 +155,8 @@ public class GroupImplementation implements GroupService {
                 .map(machine -> {
                     CurrentStatus status = currentStatusRepository
                             .findByMachineId(machine.getMachineId());
+                    if (status == null)
+                        return "Other";
                     String rawStatus = status.getStatus();
                     if ("R1".equals(rawStatus) || "R2".equals(rawStatus)) {
                         return "Run";

@@ -37,12 +37,13 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                 String[] arr = payload.split("-");
                 String machineId = arr[0];
                 String status = arr[1];
+                int machineIdInt = Integer.parseInt(machineId) + 1;
                 DrawingCodeProcessDto drawingCodeProcessDto = drawingCodeProcessService
-                                .getProcessDtoByMachineId(Integer.parseInt(machineId));
+                                .getProcessDtoByMachineId(machineIdInt);
                 OperateHistory operateHistory = null;
                 long currentTimestamp = System.currentTimeMillis();
                 CurrentStaff currentStaff = currentStaffRepository
-                                .findByMachine_MachineId(Integer.parseInt(machineId));
+                                .findByMachine_MachineId(machineIdInt);
                 if (currentStaff != null) {
                         // nếu máy chạy thì cập nhật
                         if (status.contains("R")) {
@@ -92,7 +93,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                 }
                         }
                 }
-                return new OperateHistoryDto(null, 0, null, null, 0, null, null);
+                return new OperateHistoryDto(null, 0, (long) 0, null, null, 0, null, null);
         }
 
         @Override

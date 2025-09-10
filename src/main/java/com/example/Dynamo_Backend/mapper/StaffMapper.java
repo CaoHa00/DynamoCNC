@@ -37,6 +37,13 @@ public class StaffMapper {
 
         }
 
+        public static StaffDto mapStaffNameDto(Staff staff) {
+                if (staff == null) {
+                        return null;
+                }
+                return new StaffDto(staff.getStaffName());
+        }
+
         public static StaffDto mapToStaffDto(Staff staff) {
                 StaffDto staffDto = new StaffDto();
                 staffDto.setId(staff.getId());
@@ -88,4 +95,5 @@ public class StaffMapper {
 
                 return staffDto;
         }
+
 }

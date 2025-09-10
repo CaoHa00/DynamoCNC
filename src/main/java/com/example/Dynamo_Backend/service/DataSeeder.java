@@ -44,6 +44,8 @@ public class DataSeeder {
                         Admin admin = new Admin();
                         admin.setEmail("phuonganh@gmail.com");
                         admin.setPassword("123456");
+                        // admin.setFullname("Nguyễn Thị Phương Anh");
+                        // admin.setUsername("admin@123");
                         admin.setCreatedDate(createdTimestamp);
                         admin.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin);
@@ -51,34 +53,36 @@ public class DataSeeder {
                         Admin admin1 = new Admin();
                         admin1.setEmail("phuongem@gmail.com");
                         admin1.setPassword("123456");
+                        // admin1.setFullname("Nguyễn Thị Phương Em");
+                        // admin1.setUsername("admin@1234");
                         admin1.setCreatedDate(createdTimestamp);
                         admin1.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin1);
 
                         Group group1 = new Group();
                         group1.setGroupName("Group 1");
-                        group1.setGroupType("staff");
+
                         group1.setCreatedDate(createdTimestamp);
                         group1.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group1);
 
                         Group group2 = new Group();
                         group2.setGroupName("Group 2");
-                        group2.setGroupType("staff");
+
                         group2.setCreatedDate(createdTimestamp);
                         group2.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group2);
 
                         Group group3 = new Group();
                         group3.setGroupName("Group 3");
-                        group3.setGroupType("staff");
+
                         group3.setCreatedDate(createdTimestamp);
                         group3.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group3);
 
                         Group group4 = new Group();
                         group4.setGroupName("Group 4");
-                        group4.setGroupType("staff");
+
                         group4.setCreatedDate(createdTimestamp);
                         group4.setUpdatedDate(createdTimestamp);
                         groupRepository.save(group4);
@@ -551,6 +555,7 @@ public class DataSeeder {
                         operateHistory1.setStartTime(1753056000000L); // 2025-07-21 00:00:00
                         operateHistory1.setStopTime(1753063200000L); // 2025-07-21 04:00:00
                         operateHistory1.setManufacturingPoint(10);
+                        operateHistory1.setPgTime(180L);
                         operateHistory1.setInProgress(0);
                         operateHistoryRepository.save(operateHistory1);
 
@@ -578,6 +583,7 @@ public class DataSeeder {
                         operateHistoryJuly18.setStartTime(1752796800000L); // 2025-07-18 00:00:00
                         operateHistoryJuly18.setStopTime(1752804000000L); // 2025-07-18 02:00:00
                         operateHistoryJuly18.setManufacturingPoint(8);
+                        operateHistoryJuly18.setPgTime(180L);
                         operateHistoryJuly18.setInProgress(0);
                         operateHistoryRepository.save(operateHistoryJuly18);
 

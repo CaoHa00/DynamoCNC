@@ -61,7 +61,8 @@ public class LogMapper {
                 stats.getLogId(),
                 stats.getTimeStamp(),
                 status,
-                stats.getDrawingCodeProcess().getProcessId(),
+                // stats.getDrawingCodeProcess().getProcessId(),
+                stats.getMachine().getMachineId(),
                 stats.getStaff().getId());
     }
 

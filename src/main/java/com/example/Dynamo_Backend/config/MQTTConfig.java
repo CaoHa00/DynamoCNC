@@ -44,11 +44,11 @@ public class MQTTConfig {
         MqttConnectOptions options = new MqttConnectOptions();
 
         // options.setServerURIs(new String[] { "tcp://10.60.253.11:1883" });
-        options.setServerURIs(new String[] { "tcp://10.70.166.119:1883" });
+        // options.setServerURIs(new String[] { "tcp://10.60.192.39:1883" });
+        options.setServerURIs(new String[] { "tcp://127.0.0.1:1883" });
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);
         factory.setConnectionOptions(options);
-
         return factory;
     }
 
@@ -94,14 +94,15 @@ public class MQTTConfig {
                                         {
                                             put("type", groupDto.getGroupName().concat("-status"));
                                             put("data", statusList);
+                                            put("countStatus", statusCount);
                                         }
                                     });
                             MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
 
-                            String statusCountJson = objectMapper.writeValueAsString(
-                                    Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",
-                                            statusCount));
-                            MyWebSocketHandler.sendGroupStatusToClients(statusCountJson);
+                            // String statusCountJson = objectMapper.writeValueAsString(
+                            // Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",
+                            // statusCount));
+                            // MyWebSocketHandler.sendGroupStatusToClients(statusCountJson);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

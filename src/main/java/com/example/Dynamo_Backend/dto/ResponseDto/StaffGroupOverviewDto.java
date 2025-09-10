@@ -14,5 +14,8 @@ public class StaffGroupOverviewDto {
     private Float totalWorkingHour;
     private Integer totalManufacturingPoint;
     private Integer totalOperationNumber;// số nguyên công
+    private Float oleGoal;
+    private Float ole;
+    private Float kpiGoal;
     private Float kpi;
 }

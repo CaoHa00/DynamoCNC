@@ -30,6 +30,9 @@ public class OperateHistory {
     @Column(name = "manufacturing_point", nullable = false)
     private Integer manufacturingPoint;
 
+    @Column(name = "pg_time", nullable = false)
+    private Long pgTime;
+
     @Column(name = "start_time", nullable = false)
     private Long startTime;
 

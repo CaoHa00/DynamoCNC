@@ -38,6 +38,10 @@ public interface DrawingCodeProcessService {
         DrawingCodeProcessResponseDto updateProcessByAdmin(String drawingCodeProcessId,
                         DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
-        List<DrawingCodeProcessResponseDto> getCompletedProcess();
+        List<DrawingCodeProcessResponseDto> getCompletedProcess(Integer status, Long start, Long stop);
+
+        List<DrawingCodeProcessResponseDto> getProcessesByOperator(String staffId, Long start, Long stop);
+
+        List<DrawingCodeProcessResponseDto> getProcessByMachine(Integer machineId, Long start, Long stop);
 
 }

@@ -16,4 +16,5 @@ public interface OperateHistoryService {
     void deleteOperateHistory(String Id);
 
     List<OperateHistoryDto> getAllOperateHistory();
+
 }

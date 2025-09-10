@@ -31,14 +31,19 @@ public class Log {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "process_id", nullable = true)
-    @JsonBackReference(value = "stats-process")
-    private DrawingCodeProcess drawingCodeProcess;
+    // @ManyToOne
+    // @JoinColumn(name = "process_id", nullable = true)
+    // @JsonBackReference(value = "stats-process")
+    // private DrawingCodeProcess drawingCodeProcess;
 
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = true)
     @JsonBackReference(value = "stats-staff")
     private Staff staff;
+
+    @ManyToOne
+    @JoinColumn(name = "machine_id", nullable = true)
+    @JsonBackReference(value = "stats-machine")
+    private Machine machine;
 
 }
