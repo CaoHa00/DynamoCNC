@@ -143,9 +143,9 @@ public class GroupKpiImplementation implements GroupKpiService {
                     continue; // Skip this row if group not found
                 }
                 groupKpi.setGroup(groupOpt.get());
-                groupKpi.setWorkingHourGoal((int) row.getCell(5).getNumericCellValue());
-                groupKpi.setWorkingHourDifference((int) row.getCell(6).getNumericCellValue());
-                groupKpi.setWorkingHour((int) row.getCell(7).getNumericCellValue());
+                groupKpi.setWorkingHourGoal((float) row.getCell(5).getNumericCellValue());
+                groupKpi.setWorkingHourDifference((float) row.getCell(6).getNumericCellValue());
+                groupKpi.setWorkingHour((float) row.getCell(7).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);
@@ -194,9 +194,9 @@ public class GroupKpiImplementation implements GroupKpiService {
                     continue; // Skip this row if group not found
                 }
                 groupKpi.setGroup(groupOpt.get());
-                groupKpi.setWorkingHourGoal((int) row.getCell(6).getNumericCellValue());
-                groupKpi.setWorkingHourDifference((int) row.getCell(7).getNumericCellValue());
-                groupKpi.setWorkingHour((int) row.getCell(8).getNumericCellValue());
+                groupKpi.setWorkingHourGoal((float) row.getCell(6).getNumericCellValue());
+                groupKpi.setWorkingHourDifference((float) row.getCell(7).getNumericCellValue());
+                groupKpi.setWorkingHour((float) row.getCell(8).getNumericCellValue());
                 long createdTimestamp = System.currentTimeMillis();
                 groupKpi.setCreatedDate(createdTimestamp);
                 groupKpi.setUpdatedDate(createdTimestamp);

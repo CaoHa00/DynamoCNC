@@ -14,9 +14,9 @@ public class GroupKpiDto {
     private Integer week;
     private Integer isMonth;
     private String office;
-    private Integer workingHourGoal;
-    private Integer workingHourDifference;
-    private Integer workingHour;
+    private Float workingHourGoal;
+    private Float workingHourDifference;
+    private Float workingHour;
     private String groupId;
     private String createdDate;
     private String updatedDate;

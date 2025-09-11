@@ -32,11 +32,11 @@ public class GroupKpi {
     @Column(name = "office", nullable = false)
     private String office;
     @Column(name = "working_hour_goal", nullable = false)
-    private Integer workingHourGoal;
+    private Float workingHourGoal;
     @Column(name = "working_hour_difference", nullable = false)
-    private Integer workingHourDifference;
+    private Float workingHourDifference;
     @Column(name = "working_hour", nullable = false)
-    private Integer workingHour;
+    private Float workingHour;
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
     @JsonBackReference

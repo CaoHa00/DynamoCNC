@@ -514,12 +514,12 @@ public class DataSeeder {
                         groupKpi.setWeek(4); // week number
                         groupKpi.setMonth(7); // July
                         groupKpi.setYear(2025);
-                        groupKpi.setWorkingHourGoal(40);
-                        groupKpi.setWorkingHourDifference(0);
+                        groupKpi.setWorkingHourGoal(40.0f);
+                        groupKpi.setWorkingHourDifference(0.0f);
                         groupKpi.setCreatedDate(createdTimestamp);
                         groupKpi.setUpdatedDate(createdTimestamp);
                         groupKpi.setOffice("D-11");
-                        groupKpi.setWorkingHour(40); // or any float value
+                        groupKpi.setWorkingHour(40.0f);
                         groupKpiRepository.save(groupKpi);
 
                         DrawingCodeProcess process = new DrawingCodeProcess();

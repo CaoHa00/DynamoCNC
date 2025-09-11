@@ -17,7 +17,7 @@ public class GroupEfficiencyController {
 
     private final GroupEfficiencyService groupEfficiencyService;
 
-    @GetMapping
+    @PostMapping
     public ResponseEntity<GroupEfficiencyResponseDto> getGroupEfficiency(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         GroupEfficiencyResponseDto efficiency = groupEfficiencyService.getGroupEfficiency(requestDto);
