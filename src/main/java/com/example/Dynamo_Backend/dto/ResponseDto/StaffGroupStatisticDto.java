@@ -10,8 +10,14 @@ import lombok.NoArgsConstructor;
 public class StaffGroupStatisticDto {
     private String groupId;
     private String groupName;
-    private String workingHours;
-    private Integer manufacturingPoints;
+    private Integer staffCount;
+    private Float workingHours;
     private Float workingRate;
+    private Integer manufacturingPoints;
     private Float mpRate;
+    private Integer processCount;
+    private Float processRate;
+    private Float totalKpi;
+    private Float kpiRate;
+
 }

@@ -18,14 +18,14 @@ public class OrderDetailStatisticController {
 
     private final OrderDetailStatisticService orderDetailStatisticService;
 
-    @GetMapping("/statistic")
+    @PostMapping("/statistic")
     public ResponseEntity<OrderDetailStatisticDto> getOrderDetailStatistics(
             @RequestBody GroupEfficiencyRequestDto request) {
         OrderDetailStatisticDto statistics = orderDetailStatisticService.getOrderDetailStatistics(request);
         return ResponseEntity.status(HttpStatus.OK).body(statistics);
     }
 
-    @GetMapping("/overview")
+    @PostMapping("/overview")
     public ResponseEntity<List<OrderCodeOverviewDto>> getOrderDetailOverviews(
             @RequestBody GroupEfficiencyRequestDto request) {
         List<OrderCodeOverviewDto> overviews = orderDetailStatisticService.getOrderCodeOverview(request);

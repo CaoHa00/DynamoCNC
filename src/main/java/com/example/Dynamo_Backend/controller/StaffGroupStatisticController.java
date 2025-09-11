@@ -19,14 +19,14 @@ import lombok.AllArgsConstructor;
 public class StaffGroupStatisticController {
     private final GroupStatisticService groupStatisticService;
 
-    @GetMapping("/overview")
+    @PostMapping("/overview")
     public ResponseEntity<List<StaffGroupOverviewDto>> getGroupOverview(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         List<StaffGroupOverviewDto> overview = groupStatisticService.getGroupOverview(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(overview);
     }
 
-    @GetMapping("/statistic")
+    @PostMapping("/statistic")
     public ResponseEntity<StaffGroupStatisticDto> getGroupStatistic(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         StaffGroupStatisticDto statistic = groupStatisticService.getGroupStatistic(requestDto);

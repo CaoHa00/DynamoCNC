@@ -21,28 +21,28 @@ import lombok.AllArgsConstructor;
 public class MachineGroupStatisticController {
     private final MachineGroupStatisticService groupStatisticService;
 
-    @GetMapping("/overview")
+    @PostMapping("/overview")
     public ResponseEntity<List<MachineGroupOverviewDto>> getGroupOverview(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         List<MachineGroupOverviewDto> overview = groupStatisticService.getGroupOverview(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(overview);
     }
 
-    @GetMapping("/statistic")
+    @PostMapping("/statistic")
     public ResponseEntity<MachineGroupStatisticDto> getGroupStatistic(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         MachineGroupStatisticDto statistic = groupStatisticService.getGroupStatistic(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(statistic);
     }
 
-    @GetMapping("/totalTime")
+    @PostMapping("/totalTime")
     public ResponseEntity<TotalRunTimeResponse> getGroupTotalRunTime(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         TotalRunTimeResponse response = groupStatisticService.getTotalRunTime(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/top-5")
+    @PostMapping("/top-5")
     public ResponseEntity<List<MachineRunTimeDto>> getTop5(
             @RequestBody GroupEfficiencyRequestDto requestDto) {
         List<MachineRunTimeDto> response = groupStatisticService.getTop5GroupOverview(requestDto);
