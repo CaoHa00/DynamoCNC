@@ -44,8 +44,8 @@ public class DataSeeder {
                         Admin admin = new Admin();
                         admin.setEmail("phuonganh@gmail.com");
                         admin.setPassword("123456");
-                        // admin.setFullname("Nguyễn Thị Phương Anh");
-                        // admin.setUsername("admin@123");
+                        admin.setFullname("Nguyễn Thị Phương Anh");
+                        admin.setUsername("admin@123");
                         admin.setCreatedDate(createdTimestamp);
                         admin.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin);
@@ -53,8 +53,8 @@ public class DataSeeder {
                         Admin admin1 = new Admin();
                         admin1.setEmail("phuongem@gmail.com");
                         admin1.setPassword("123456");
-                        // admin1.setFullname("Nguyễn Thị Phương Em");
-                        // admin1.setUsername("admin@1234");
+                        admin1.setFullname("Nguyễn Thị Phương Em");
+                        admin1.setUsername("admin@1234");
                         admin1.setCreatedDate(createdTimestamp);
                         admin1.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin1);
@@ -403,7 +403,7 @@ public class DataSeeder {
                         drawingCodeProcess.setManufacturingPoint(10);
                         drawingCodeProcess.setPartNumber(1);
                         drawingCodeProcess.setStepNumber(1);
-                        drawingCodeProcess.setPgTime((long) 180);
+                        drawingCodeProcess.setPgTime(180f);
                         drawingCodeProcess.setMachine(machine5);
                         drawingCodeProcess.setIsPlan(1);
                         drawingCodeProcess.setStatus(1);
@@ -418,7 +418,7 @@ public class DataSeeder {
                         drawingCodeProcess2.setManufacturingPoint(15);
                         drawingCodeProcess2.setPartNumber(2);
                         drawingCodeProcess2.setStepNumber(1);
-                        drawingCodeProcess2.setPgTime(200L);
+                        drawingCodeProcess2.setPgTime(200f);
                         drawingCodeProcess2.setIsPlan(1);
                         drawingCodeProcess2.setStatus(1);
                         drawingCodeProcess2.setProcessStatus(1);
@@ -432,7 +432,7 @@ public class DataSeeder {
                         drawingCodeProcess3.setManufacturingPoint(12);
                         drawingCodeProcess3.setPartNumber(3);
                         drawingCodeProcess3.setStepNumber(2);
-                        drawingCodeProcess3.setPgTime(150L);
+                        drawingCodeProcess3.setPgTime(150f);
                         drawingCodeProcess3.setIsPlan(0); // Not planned yet
                         drawingCodeProcess3.setMachine(machine2);
                         drawingCodeProcess3.setStatus(1); // Not started
@@ -447,7 +447,7 @@ public class DataSeeder {
                         drawingCodeProcess4.setManufacturingPoint(8);
                         drawingCodeProcess4.setPartNumber(4);
                         drawingCodeProcess4.setStepNumber(3);
-                        drawingCodeProcess4.setPgTime(100L);
+                        drawingCodeProcess4.setPgTime(100f);
                         drawingCodeProcess4.setIsPlan(1);
                         drawingCodeProcess4.setStatus(1);
                         drawingCodeProcess4.setProcessStatus(1);
@@ -532,7 +532,7 @@ public class DataSeeder {
                         process.setPartNumber(1);
                         process.setStepNumber(1);
                         process.setManufacturingPoint(40);
-                        process.setPgTime(30L);
+                        process.setPgTime(30f);
                         process.setCreatedDate(createdTimestamp);
                         process.setUpdatedDate(createdTimestamp);
                         process.setProcessType("chính");
@@ -555,7 +555,7 @@ public class DataSeeder {
                         operateHistory1.setStartTime(1753056000000L); // 2025-07-21 00:00:00
                         operateHistory1.setStopTime(1753063200000L); // 2025-07-21 04:00:00
                         operateHistory1.setManufacturingPoint(10);
-                        operateHistory1.setPgTime(180L);
+                        operateHistory1.setPgTime(180f);
                         operateHistory1.setInProgress(0);
                         operateHistoryRepository.save(operateHistory1);
 
@@ -569,7 +569,7 @@ public class DataSeeder {
                         processJuly18.setPartNumber(2);
                         processJuly18.setStepNumber(1);
                         processJuly18.setManufacturingPoint(20);
-                        processJuly18.setPgTime(15L);
+                        processJuly18.setPgTime(15f);
                         processJuly18.setCreatedDate(createdTimestamp);
                         processJuly18.setUpdatedDate(createdTimestamp);
                         processJuly18.setProcessType("phụ");
@@ -583,7 +583,7 @@ public class DataSeeder {
                         operateHistoryJuly18.setStartTime(1752796800000L); // 2025-07-18 00:00:00
                         operateHistoryJuly18.setStopTime(1752804000000L); // 2025-07-18 02:00:00
                         operateHistoryJuly18.setManufacturingPoint(8);
-                        operateHistoryJuly18.setPgTime(180L);
+                        operateHistoryJuly18.setPgTime(180f);
                         operateHistoryJuly18.setInProgress(0);
                         operateHistoryRepository.save(operateHistoryJuly18);
 
