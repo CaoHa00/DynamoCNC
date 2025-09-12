@@ -340,7 +340,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 if (machine.getMachineId() > 9) {
                         OperateHistory operateHistory = new OperateHistory(null,
-                                        process.getManufacturingPoint(), process.getPgTime(),
+                                        process.getManufacturingPoint(), 0f,
                                         timestampNow, 0L, 1, staff, process);
                         operateHistoryRepository.save(operateHistory);
                 }

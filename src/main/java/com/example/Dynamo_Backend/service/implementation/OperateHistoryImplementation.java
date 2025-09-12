@@ -67,6 +67,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                                                                         drawingCodeProcessDto));
                                         operateHistory.setStartTime(currentTimestamp);
                                         operateHistory.setStopTime((long) 0);
+                                        operateHistory.setPgTime(0f);
                                         operateHistory.setInProgress(1);
                                         OperateHistory saveOperateHistory = operateHistoryRepository
                                                         .save(operateHistory);
@@ -86,6 +87,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                                 operateHistory.setStartTime(currentTimestamp);
                                                 operateHistory.setStopTime((long) 0);
                                                 operateHistory.setInProgress(0);
+                                                operateHistory.setPgTime(0f);
                                                 OperateHistory saveOperateHistory = operateHistoryRepository
                                                                 .save(operateHistory);
                                                 return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
@@ -93,7 +95,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                 }
                         }
                 }
-                return new OperateHistoryDto(null, 0, (long) 0, null, null, 0, null, null);
+                return new OperateHistoryDto(null, 0, 0f, null, null, 0, null, null);
         }
 
         @Override
