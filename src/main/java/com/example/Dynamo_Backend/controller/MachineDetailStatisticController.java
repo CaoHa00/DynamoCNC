@@ -1,0 +1,33 @@
+package com.example.Dynamo_Backend.controller;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.example.Dynamo_Backend.dto.RequestDto.MachineStatisticRequestDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.*;
+import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
+
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+@RestController
+@RequestMapping("api/machine-detail")
+public class MachineDetailStatisticController {
+    private final MachineDetailStatisticService machineDetailStatisticService;
+
+    @PostMapping("/statistics")
+    public ResponseEntity<MachineDetailStatisticDto> getMachineDetailStatistic(
+            @RequestBody MachineStatisticRequestDto requestDto) {
+        MachineDetailStatisticDto statisticDto = machineDetailStatisticService.getMachineDetailStatistic(requestDto);
+        return ResponseEntity.ok(statisticDto);
+    }
+
+    @PostMapping("/history")
+    public ResponseEntity<List<HistoryProcessDto>> getMachineHistoryProcess(
+            @RequestBody MachineStatisticRequestDto requestDto) {
+        List<HistoryProcessDto> historyProcessDtos = machineDetailStatisticService.getMachineHistoryProcess(requestDto);
+        return ResponseEntity.ok(historyProcessDtos);
+    }
+}

@@ -1,0 +1,175 @@
+package com.example.Dynamo_Backend.service.implementation;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.Dynamo_Backend.dto.TimePeriodInfo;
+import com.example.Dynamo_Backend.dto.RequestDto.MachineStatisticRequestDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.MachineDetailStatisticDto;
+import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
+import com.example.Dynamo_Backend.entities.Log;
+import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.Staff;
+import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.repository.LogRepository;
+import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
+import com.example.Dynamo_Backend.util.TimeRange;
+
+@Service
+public class MachineDetailStatisticImplementation implements MachineDetailStatisticService {
+    @Autowired
+    private MachineRepository machineRepository;
+
+    @Autowired
+    private LogRepository logRepository;
+
+    public MachineDetailStatisticDto calculateMachineTime(Integer machineId, TimePeriodInfo timePeriodInfo) {
+        Machine machine = machineRepository.findById(machineId)
+                .orElseThrow(() -> new BusinessException(
+                        "Machine not found when get detail statistic with ID: " + machineId));
+        // get logs in time range
+        List<Log> logs = machine.getLogs().stream()
+                .filter(log -> log.getTimeStamp() >= timePeriodInfo.getStartDate()
+                        && log.getTimeStamp() <= timePeriodInfo.getEndDate())
+                .toList();
+
+        // logs.sort((log1, log2) -> Long.compare(log1.getTimeStamp(),
+        // log2.getTimeStamp()));
+
+        Float totalRunTime = 0f;
+        Float totalStopTime = 0f;
+        Float totalPgTime = 0f;
+        Float totalErrorTime = 0f;
+        Float totalOffsetTime = 0f;
+        Integer numberOfProcesses = machine.getDrawingCodeProcesses().stream()
+                .filter(process -> process.getStartTime() <= timePeriodInfo.getEndDate()
+                        && process.getEndTime() >= timePeriodInfo.getStartDate())
+                .toList().size();
+        boolean isLast = false;
+        for (int i = 0; i < logs.size(); i++) {
+            Log log = logs.get(i);
+            String status = log.getStatus();
+
+            isLast = (i + 1 >= logs.size());
+            Log next = isLast ? null : logs.get(i + 1);
+            if (log.getStatus().contains("E")) {
+                totalErrorTime += isLast
+                        ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis()) - log.getTimeStamp())
+                        : (next.getTimeStamp() - log.getTimeStamp());
+            } else {
+                switch (status) {
+                    case "R1":
+                        totalPgTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    case "R2":
+                        totalOffsetTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    default:
+                        totalStopTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                }
+            }
+        }
+        totalRunTime = totalPgTime + totalOffsetTime;
+        return new MachineDetailStatisticDto(machineId, machine.getMachineName(), totalRunTime, 0f, totalStopTime, 0f,
+                totalPgTime, 0f,
+                totalErrorTime, 0f,
+                numberOfProcesses, 0f, totalOffsetTime);
+    }
+
+    @Override
+    public MachineDetailStatisticDto getMachineDetailStatistic(MachineStatisticRequestDto requestDto) {
+        String startDate = requestDto.getStartDate().concat(" 00:00:00");
+        String endDate = requestDto.getEndDate().concat(" 23:59:59");
+        requestDto.setStartDate(startDate);
+        requestDto.setEndDate(endDate);
+
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+        TimePeriodInfo previousTimePeriodInfo = TimeRange.getPreviousTimeRange(timePeriodInfo);
+
+        MachineDetailStatisticDto current = calculateMachineTime(requestDto.getMachineId(), timePeriodInfo);
+        MachineDetailStatisticDto previous = calculateMachineTime(requestDto.getMachineId(), previousTimePeriodInfo);
+
+        if (previous.getTotalRunTime() != 0) {
+            current.setRunTimeRate(
+                    (current.getTotalRunTime() - previous.getTotalRunTime()) / previous.getTotalRunTime() * 100);
+        }
+        if (previous.getTotalStopTime() != 0) {
+            current.setStopTimeRate(
+                    (current.getTotalStopTime() - previous.getTotalStopTime()) / previous.getTotalStopTime() * 100);
+        }
+        if (previous.getTotalPgTime() != 0) {
+            current.setPgTimeRate(
+                    (current.getTotalPgTime() - previous.getTotalPgTime()) / previous.getTotalPgTime() * 100);
+        }
+        if (previous.getTotalErrorTime() != 0) {
+            current.setErrorTimeRate(
+                    (current.getTotalErrorTime() - previous.getTotalErrorTime()) / previous.getTotalErrorTime() * 100);
+        }
+        if (previous.getNumberOfProcesses() != 0) {
+            current.setProcessRate((current.getNumberOfProcesses() - previous.getNumberOfProcesses())
+                    / (float) previous.getNumberOfProcesses() * 100);
+        }
+        return current;
+    }
+
+    @Override
+    public List<HistoryProcessDto> getMachineHistoryProcess(MachineStatisticRequestDto requestDto) {
+        String startDate = requestDto.getStartDate().concat(" 00:00:00");
+        String endDate = requestDto.getEndDate().concat(" 23:59:59");
+        requestDto.setStartDate(startDate);
+        requestDto.setEndDate(endDate);
+
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+        Machine machine = machineRepository.findById(requestDto.getMachineId())
+                .orElseThrow(() -> new BusinessException(
+                        "Machine not found when get detail history with ID: " + requestDto.getMachineId()));
+        List<DrawingCodeProcess> processes = machine.getDrawingCodeProcesses().stream()
+                .filter(process -> process.getStartTime() <= timePeriodInfo.getEndDate()
+                        && process.getEndTime() >= timePeriodInfo.getStartDate())
+                .toList();
+
+        List<HistoryProcessDto> historyProcessDtos = new ArrayList<>();
+        for (DrawingCodeProcess process : processes) {
+            String status = "";
+            if (process.getProcessStatus() == 3) {
+                status = "Completed";
+            } else {
+                Log lastLog = logRepository.findTopByMachineIdAndTimeStampBeforeOrderByTimeStampDesc(
+                        requestDto.getMachineId(), process.getEndTime()).stream().findFirst().orElse(null);
+                if (lastLog != null) {
+                    status = lastLog.getStatus();
+                }
+            }
+            Staff staff = process.getOperateHistories().get(process.getOperateHistories().size() - 1).getStaff();
+            HistoryProcessDto history = new HistoryProcessDto(
+                    process.getOrderDetail().getOrderCode(),
+                    process.getPartNumber(),
+                    process.getStepNumber(),
+                    DateTimeUtil.convertTimestampToString(process.getStartTime()),
+                    DateTimeUtil.convertTimestampToString(process.getEndTime()),
+                    staff.getStaffId(),
+                    staff.getStaffName(),
+                    status);
+            historyProcessDtos.add(history);
+        }
+        return historyProcessDtos;
+    }
+
+}
