@@ -44,8 +44,8 @@ public class DataSeeder {
                         Admin admin = new Admin();
                         admin.setEmail("phuonganh@gmail.com");
                         admin.setPassword("123456");
-                        // admin.setFullname("Nguyễn Thị Phương Anh");
-                        // admin.setUsername("admin@123");
+                        admin.setFullname("Nguyễn Thị Phương Anh");
+                        admin.setUsername("admin@123");
                         admin.setCreatedDate(createdTimestamp);
                         admin.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin);
@@ -53,8 +53,8 @@ public class DataSeeder {
                         Admin admin1 = new Admin();
                         admin1.setEmail("phuongem@gmail.com");
                         admin1.setPassword("123456");
-                        // admin1.setFullname("Nguyễn Thị Phương Em");
-                        // admin1.setUsername("admin@1234");
+                        admin1.setFullname("Nguyễn Thị Phương Em");
+                        admin1.setUsername("admin@1234");
                         admin1.setCreatedDate(createdTimestamp);
                         admin1.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin1);

@@ -30,19 +30,23 @@ public class OperateHistoryController {
         return ResponseEntity.status(HttpStatus.OK).body(OperateHistorys);
     }
 
-    @PostMapping
-    public ResponseEntity<OperateHistoryDto> addOperateHistory(@RequestBody OperateHistoryDto operateHistoryDto) {
-        OperateHistoryDto operateHistory = operateHistoryService.addOperateHistory(operateHistoryDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(operateHistory);
+    // @PostMapping
+    // public ResponseEntity<OperateHistoryDto> addOperateHistory(@RequestBody
+    // OperateHistoryDto operateHistoryDto) {
+    // OperateHistoryDto operateHistory =
+    // operateHistoryService.addOperateHistory(operateHistoryDto);
+    // return ResponseEntity.status(HttpStatus.CREATED).body(operateHistory);
 
-    }
+    // }
 
-    @PutMapping("/{operateHistory_id}")
-    public ResponseEntity<OperateHistoryDto> updateOperateHistory(@PathVariable("operateHistory_id") String Id,
-            @RequestBody OperateHistoryDto operateHistoryDto) {
-        OperateHistoryDto updateOperateHistorys = operateHistoryService.updateOperateHistory(Id, operateHistoryDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(updateOperateHistorys);
-    }
+    // @PutMapping("/{operateHistory_id}")
+    // public ResponseEntity<OperateHistoryDto>
+    // updateOperateHistory(@PathVariable("operateHistory_id") String Id,
+    // @RequestBody OperateHistoryDto operateHistoryDto) {
+    // OperateHistoryDto updateOperateHistorys =
+    // operateHistoryService.updateOperateHistory(Id, operateHistoryDto);
+    // return ResponseEntity.status(HttpStatus.CREATED).body(updateOperateHistorys);
+    // }
 
     @DeleteMapping("/{operateHistory_id}")
     public ResponseEntity<Void> deleteOperateHistory(@PathVariable("operateHistory_id") String Id) {
