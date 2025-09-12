@@ -22,7 +22,7 @@ public class DrawingCodeProcessResponseDto {
     private Integer manufacturingPoint;
     private String processType;
     private Integer processStatus;
-    private Long pgTime;
+    private Float pgTime;
     private String startTime;
     private String endTime;
     private String createdDate;
