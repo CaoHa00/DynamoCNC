@@ -132,6 +132,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         for (StaffKpi staffKpi : staffKpiList) {
             float totalWorkingHours = 0f;
             int totalManufactoringPoints = 0;
+            Float totalPgTime = 0f;
             Set<String> uniqueProcesses = new HashSet<>();
 
             List<OperateHistory> operateHistories = operateHistoryRepository
@@ -141,12 +142,18 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                     if (operateHistory.getStopTime() >= timePeriodInfo.getStartDate()
                             && operateHistory.getStopTime() <= timePeriodInfo.getEndDate()) {
                         totalManufactoringPoints += operateHistory.getManufacturingPoint();
+                        totalPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
                         totalWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime()) / 3600000f;
                         uniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
                     }
                 }
             }
             totalWorkingHoursGroup += totalWorkingHours;
+            Float kpi = 0f;
+            if (totalPgTime != 0f) {
+                kpi = totalManufactoringPoints * 6 / totalPgTime;
+            }
+
             overviewDtos.add(new StaffGroupOverviewDto(
                     staffKpi.getStaff().getId(),
                     staffKpi.getStaff().getStaffId(),
@@ -154,7 +161,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                     totalWorkingHours,
                     totalManufactoringPoints,
                     uniqueProcesses.size(), staffKpi.getOleGoal(), 0f,
-                    staffKpi.getKpi(), 0f));
+                    staffKpi.getKpi(), kpi));
         }
         for (StaffGroupOverviewDto dto : overviewDtos) {
             if (totalWorkingHoursGroup != 0) {
