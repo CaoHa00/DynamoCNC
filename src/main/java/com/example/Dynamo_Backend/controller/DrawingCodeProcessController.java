@@ -76,6 +76,16 @@ public class DrawingCodeProcessController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/tablet/{drawingCodeProcess_id}")
+    public ResponseEntity<DrawingCodeProcessResponseDto> updateDataFromTablet(
+            @PathVariable("drawingCodeProcess_id") String Id,
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateProcessByOperator(
+                Id,
+                drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
+    }
+
     @PutMapping("/{drawingCodeProcess_id}")
     public ResponseEntity<DrawingCodeProcessResponseDto> updateDrawingCodeProcess(
             @PathVariable("drawingCodeProcess_id") String Id,

@@ -44,6 +44,11 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         GroupRepository groupRepository;
         ProcessTimeSummaryService processTimeSummaryService;
         ProcessTimeService processTimeService;
+        CurrentStaffRepository currentStaffRepository;
+        CurrentStatusRepository currentStatusRepository;
+        OperateHistoryService operateHistoryService;
+
+        TempProcessRepository tempProcessRepository;
 
         // this api is for manager to add process(planned or not)
         @Override
@@ -213,7 +218,6 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 for (DrawingCodeProcess process : processes) {
                         if (process.getProcessStatus() == 1) {
                                 if (process.getIsPlan() == 0 || process.getIsPlan() == 1) {
-
                                         orderDetailDto = OrderDetailMapper
                                                         .mapToOrderDetailDto(process.getOrderDetail());
                                         planDto = (process.getPlan() != null)
@@ -230,9 +234,13 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 planDto = (process.getPlan() != null)
                                                 ? PlanMapper.mapToPlanDto(process.getPlan())
                                                 : null;
+                                TempProcess tempProcess = tempProcessRepository.findByProcessId(process.getProcessId());
 
                                 inProgress = DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
                                                 null, planDto, null);
+                                inProgress.setManufacturingPoint(tempProcess.getPoint());
+                                inProgress.setPgTime(tempProcess.getPgTime());
+
                         }
 
                         result.put("todo", todoList);
@@ -329,6 +337,17 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 process.setEndTime((long) 0);
 
                 drawingCodeProcessRepository.save(process);
+
+                TempProcess tempProcess = tempProcessRepository.findByMachineId(machineId);
+                if (tempProcess == null) {
+                        tempProcess = new TempProcess();
+                }
+                tempProcess.setMachineId(machineId);
+                tempProcess.setProcessId(drawingCodeProcessId);
+                tempProcess.setPgTime(process.getPgTime());
+                tempProcess.setPoint(process.getManufacturingPoint());
+
+                tempProcessRepository.save(tempProcess);
 
                 Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new RuntimeException(
                                 "Staff is not found:" + staffId));
@@ -490,6 +509,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         }
 
         public boolean sendMessageToMqtt(DrawingCodeProcess savedrawingCodeProcess, Machine machine, Staff staff) {
+
+                TempProcess tempProcess = tempProcessRepository.findByProcessId(savedrawingCodeProcess.getProcessId());
                 String sendMachine = "";
                 if (machine.getMachineId() < 10) {
                         sendMachine = "0" + (machine.getMachineId() - 1);
@@ -516,8 +537,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 + savedrawingCodeProcess.getOrderDetail().getOrderCode() + "*"
                                 + savedrawingCodeProcess.getPartNumber() + "*"
                                 + savedrawingCodeProcess.getStepNumber() + "*"
-                                + savedrawingCodeProcess.getManufacturingPoint() + "*"
-                                + savedrawingCodeProcess.getPgTime();
+                                + tempProcess.getPoint() + "*"
+                                + tempProcess.getPgTime();
                 Message<String> message = MessageBuilder
                                 .withPayload(payload)
                                 .setHeader("mqtt_topic", "myTopic")
@@ -684,5 +705,100 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, staffDtos, planDto,
                                         processTimeDto);
                 }).toList();
+        }
+
+        @Override
+        public DrawingCodeProcessResponseDto updateProcessByOperator(String drawingCodeProcessId,
+                        DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+                long timestampNow = System.currentTimeMillis();
+                DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "DrawingCodeProcess is not found:" + drawingCodeProcessId));
+                Machine machine = machineRepository.findById(process.getMachine().getMachineId())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Machine is not found:" + process.getMachine().getMachineId()));
+
+                CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
+                System.out.println(currentStatus.getStatus());
+                if (currentStatus.getStatus().equals("0")) {
+                        process.setManufacturingPoint(drawingCodeProcessDto.getManufacturingPoint());
+                        process.setPgTime(drawingCodeProcessDto.getPgTime());
+                        drawingCodeProcessRepository.save(process);
+                }
+
+                Staff staff = staffRepository.findByStaffId(drawingCodeProcessDto.getStaffId())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Staff is not found:"
+                                                                + drawingCodeProcessDto.getStaffId()));
+                TempProcess tempProcess = tempProcessRepository.findByProcessId(drawingCodeProcessId);
+                CurrentStaff currentStaff = currentStaffRepository
+                                .findByMachine_MachineId(machine.getMachineId());
+                System.out.println(staff.getId());
+                System.out.println(currentStaff.getStaff().getId());
+                if (!staff.getId().equals(currentStaff.getStaff().getId())) {
+                        tempProcess.setPgTime(drawingCodeProcessDto.getPgTime());
+                        tempProcess.setPoint(drawingCodeProcessDto.getManufacturingPoint());
+                        tempProcess.setMachineId(machine.getMachineId());
+                        tempProcessRepository.save(tempProcess);
+                }
+                // cập nhật staff đang làm
+                CurrentStaffDto currentStaffDto = new CurrentStaffDto(null, staff.getId(), staff.getStaffId(),
+                                machine.getMachineId(),
+                                DateTimeUtil.convertTimestampToStringDate(timestampNow));
+                currentStaffService.addCurrentStaff(currentStaffDto);
+
+                if (machine.getMachineId() > 9) {
+                        OperateHistory operateHistory = new OperateHistory(null,
+                                        process.getManufacturingPoint(), process.getPgTime(),
+                                        timestampNow, 0L, 1, staff, process);
+                        operateHistoryRepository.save(operateHistory);
+                }
+
+                boolean sent = sendMessageToMqtt(process, machine, staff);
+
+                // Get group by machine id in current year and month,if there is no current one,
+                // get the nearest previous - Find in machine kpi
+                int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+                int currentYear = LocalDate.now().getYear();
+                Group group = groupRepository
+                                .findLatestByMachineId(process.getMachine().getMachineId(), currentMonth, currentYear)
+                                .orElse(null);
+
+                List<CurrentStatusResponseDto> statusList = currentStatusService
+                                .getCurrentStatusByGroupId(group.getGroupId());
+                try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String jsonMessage = objectMapper.writeValueAsString(
+                                        new java.util.HashMap<String, Object>() {
+                                                {
+                                                        put("type", group.getGroupName()
+                                                                        .concat("-status"));
+                                                        put("data", statusList);
+                                                }
+                                        });
+                        MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
+                if (sent) {
+                        System.out.println("Message sent successfully: ");
+                } else {
+                        System.err.println("Failed to send message: ");
+                }
+
+                DrawingCodeProcessResponseDto response = DrawingCodeProcessMapper.toDto(
+                                OrderDetailMapper.mapToOrderDetailDto(process.getOrderDetail()),
+                                MachineMapper.mapToMachineDto(process.getMachine()),
+                                process, // use the original process (unchanged)
+                                null, null, null);
+                response.setPgTime(tempProcess.getPgTime());
+                response.setManufacturingPoint(tempProcess.getPoint());
+
+                if (currentStatus.getStatus().contains("R")) {
+                        String payload = "0" + (currentStatus.getMachineId() - 1) + "-" + currentStatus.getStatus();
+                        operateHistoryService.addOperateHistory(payload);
+
+                }
+                return response;
         }
 }

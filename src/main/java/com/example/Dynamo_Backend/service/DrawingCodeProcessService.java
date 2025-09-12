@@ -13,6 +13,9 @@ public interface DrawingCodeProcessService {
         DrawingCodeProcessResponseDto updateDrawingCodeProcess(String drawingCodeProcessId,
                         DrawingCodeProcessResquestDto drawingCodeProcessDto);
 
+        DrawingCodeProcessResponseDto updateProcessByOperator(String drawingCodeProcessId,
+                        DrawingCodeProcessResquestDto drawingCodeProcessDto);
+
         DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId);
 
         Map<String, Object> getDrawingCodeProcessByMachineId(Integer machineId);
