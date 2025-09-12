@@ -26,7 +26,6 @@ public class LogImplementation implements LogService {
         @Override
         public void addLog(CurrentStatus currentStatus, Machine machine, Staff staff) {
                 Log log = new Log();
-                // log.setDrawingCodeProcess(process);
                 log.setMachine(machine);
                 log.setStaff(staff);
                 log.setStatus(currentStatus.getStatus());
@@ -36,11 +35,13 @@ public class LogImplementation implements LogService {
                 OperateHistory operateHistory = operateHistoryRepository
                                 .findInProgressByMachineId(machine.getMachineId()).stream().findFirst().orElse(null);
                 if (operateHistory != null) {
-                        List<Log> lastLog = logRepository.findTopByMachineIdAndTimeStampBeforeOrderByTimeStampDesc(
-                                        machine.getMachineId(),
-                                        log.getTimeStamp());
-                        if (lastLog != null && lastLog.size() > 1 && lastLog.get(1).getStatus().equals("R1")) {
-                                long timeDiff = log.getTimeStamp() - lastLog.get(1).getTimeStamp();
+                        Log lastLog = logRepository
+                                        .findTopByMachineIdAndTimeStampBeforeOrderByTimeStampDesc(
+                                                        machine.getMachineId(),
+                                                        log.getTimeStamp())
+                                        .stream().findFirst().orElse(null);
+                        if (lastLog != null && "R1".equals(lastLog.getStatus())) {
+                                long timeDiff = log.getTimeStamp() - lastLog.getTimeStamp();
                                 float hours = timeDiff / (1000f * 60f * 60f);
                                 operateHistory.setPgTime(
                                                 operateHistory.getPgTime() != null ? operateHistory.getPgTime() + hours
