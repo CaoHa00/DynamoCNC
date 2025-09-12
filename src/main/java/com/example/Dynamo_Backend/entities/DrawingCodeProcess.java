@@ -50,7 +50,7 @@ public class DrawingCodeProcess {
     // private Long totalStopTime;
 
     @Column(name = "pg_time", nullable = false)
-    private Long pgTime;
+    private Float pgTime;
 
     // @Column(name = "offset_run_time", nullable = false)
     // private Long offsetRunTime;

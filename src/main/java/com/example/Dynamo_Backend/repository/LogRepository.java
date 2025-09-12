@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,4 +43,8 @@ public interface LogRepository extends JpaRepository<Log, String> {
 
         List<Log> findByMachine_machineIdInAndTimeStampBetweenOrderByTimeStampAsc(
                         List<Integer> machineIds, Long startTime, Long endTime);
+
+        @Query("SELECT l FROM Log l WHERE l.machine.machineId = :machineId AND l.timeStamp < :timestamp ORDER BY l.timeStamp DESC")
+        List<Log> findTopByMachineIdAndTimeStampBeforeOrderByTimeStampDesc(@Param("machineId") Integer machineId,
+                        @Param("timestamp") Long timestamp);
 }

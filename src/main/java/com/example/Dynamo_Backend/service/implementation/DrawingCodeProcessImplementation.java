@@ -212,25 +212,26 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachineOrPlanMachine(machineId);
                 List<DrawingCodeProcessResponseDto> todoList = new ArrayList<>();
                 DrawingCodeProcessResponseDto inProgress = null;
+                OrderDetailDto orderDetailDto;
+                PlanDto planDto;
                 Map<String, Object> result = new HashMap<>();
                 for (DrawingCodeProcess process : processes) {
                         if (process.getProcessStatus() == 1) {
                                 if (process.getIsPlan() == 0 || process.getIsPlan() == 1) {
-                                        OrderDetailDto orderDetailDto = OrderDetailMapper
+                                        orderDetailDto = OrderDetailMapper
                                                         .mapToOrderDetailDto(process.getOrderDetail());
-                                        PlanDto planDto = (process.getPlan() != null)
+                                        planDto = (process.getPlan() != null)
                                                         ? PlanMapper.mapToPlanDto(process.getPlan())
                                                         : null;
-
                                         todoList.add(DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
                                                         null, planDto, null));
                                 }
                         }
                         if (process.getProcessStatus() == 2
                                         && process.getMachine().getMachineId().equals(machineId)) {
-                                OrderDetailDto orderDetailDto = OrderDetailMapper
+                                orderDetailDto = OrderDetailMapper
                                                 .mapToOrderDetailDto(process.getOrderDetail());
-                                PlanDto planDto = (process.getPlan() != null)
+                                planDto = (process.getPlan() != null)
                                                 ? PlanMapper.mapToPlanDto(process.getPlan())
                                                 : null;
                                 TempProcess tempProcess = tempProcessRepository.findByProcessId(process.getProcessId());
@@ -358,7 +359,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 if (machine.getMachineId() > 9) {
                         OperateHistory operateHistory = new OperateHistory(null,
-                                        process.getManufacturingPoint(), process.getPgTime(),
+                                        process.getManufacturingPoint(), 0f,
                                         timestampNow, 0L, 1, staff, process);
                         operateHistoryRepository.save(operateHistory);
                 }
