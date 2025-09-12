@@ -87,7 +87,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
 
                                                 TempProcess tempProcess = tempProcessRepository
                                                                 .findByProcessId(drawingCodeProcessDto.getProcessId());
-                                                Long pgTime = operateHistory.getPgTime()
+                                                Float pgTime = operateHistory.getPgTime()
                                                                 - tempProcess.getPgTime();
                                                 Integer point = operateHistory.getManufacturingPoint()
                                                                 - tempProcess.getPoint();

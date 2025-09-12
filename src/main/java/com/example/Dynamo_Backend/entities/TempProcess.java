@@ -24,7 +24,7 @@ public class TempProcess {
     @Column(name = "machine_id", nullable = false)
     private Integer machineId;
     @Column(name = "pg_time", nullable = false)
-    private Long pgTime;
+    private Float pgTime;
     @Column(name = "manufacturing_point", nullable = false)
     private Integer point;
 }

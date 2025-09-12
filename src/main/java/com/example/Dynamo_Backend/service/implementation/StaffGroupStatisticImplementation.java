@@ -175,6 +175,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         }
 
         List<StaffGroupOverviewDto> overviewDtos = new ArrayList<>();
+        float totalWorkingHoursGroup = 0f;
 
         for (StaffKpi staffKpi : staffKpiList) {
             float totalWorkingHours = 0f;
@@ -196,7 +197,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                         uniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
                     }
                 }
-            } 
+            }
             totalWorkingHoursGroup += totalWorkingHours;
             Float kpi = 0f;
             if (totalPgTime != 0f) {
@@ -211,7 +212,8 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                     staffKpi.getManufacturingPoint(),
                     totalManufactoringPoints,
                     uniqueProcesses.size(), staffKpi.getOleGoal(), 0f,
-                    staffKpi.getKpi(), kpi));
+                    staffKpi.getKpi(), 0f, staffKpi.getMachineTimeGoal(), totalMachineTime,
+                    staffKpi.getPgTimeGoal(), 0f));
         }
         for (StaffGroupOverviewDto dto : overviewDtos) {
             if (groupKpi.getWorkingHour() != 0) {
