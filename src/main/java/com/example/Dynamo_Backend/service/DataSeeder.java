@@ -44,8 +44,8 @@ public class DataSeeder {
                         Admin admin = new Admin();
                         admin.setEmail("phuonganh@gmail.com");
                         admin.setPassword("123456");
-                        // admin.setFullname("Nguyễn Thị Phương Anh");
-                        // admin.setUsername("admin@123");
+                        admin.setFullname("Nguyễn Thị Phương Anh");
+                        admin.setUsername("admin@123");
                         admin.setCreatedDate(createdTimestamp);
                         admin.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin);
@@ -53,8 +53,8 @@ public class DataSeeder {
                         Admin admin1 = new Admin();
                         admin1.setEmail("phuongem@gmail.com");
                         admin1.setPassword("123456");
-                        // admin1.setFullname("Nguyễn Thị Phương Em");
-                        // admin1.setUsername("admin@1234");
+                        admin1.setFullname("Nguyễn Thị Phương Em");
+                        admin1.setUsername("admin@1234");
                         admin1.setCreatedDate(createdTimestamp);
                         admin1.setUpdatedDate(createdTimestamp);
                         adminRepository.save(admin1);
@@ -514,12 +514,12 @@ public class DataSeeder {
                         groupKpi.setWeek(4); // week number
                         groupKpi.setMonth(7); // July
                         groupKpi.setYear(2025);
-                        groupKpi.setWorkingHourGoal(40);
-                        groupKpi.setWorkingHourDifference(0);
+                        groupKpi.setWorkingHourGoal(40.0f);
+                        groupKpi.setWorkingHourDifference(0.0f);
                         groupKpi.setCreatedDate(createdTimestamp);
                         groupKpi.setUpdatedDate(createdTimestamp);
                         groupKpi.setOffice("D-11");
-                        groupKpi.setWorkingHour(40); // or any float value
+                        groupKpi.setWorkingHour(40.0f);
                         groupKpiRepository.save(groupKpi);
 
                         DrawingCodeProcess process = new DrawingCodeProcess();

@@ -108,26 +108,27 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     totalErrorTime += isLast
                             ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis()) - log.getTimeStamp())
                             : (next.getTimeStamp() - log.getTimeStamp());
-                }
-                switch (status) {
-                    case "R1":
-                        totalPgTime += isLast
-                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                        - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    case "R2":
-                        totalOffsetTime += isLast
-                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                        - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    default:
-                        totalStopTime += isLast
-                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                        - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
+                } else {
+                    switch (status) {
+                        case "R1":
+                            totalPgTime += isLast
+                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                            - log.getTimeStamp())
+                                    : (next.getTimeStamp() - log.getTimeStamp());
+                            break;
+                        case "R2":
+                            totalOffsetTime += isLast
+                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                            - log.getTimeStamp())
+                                    : (next.getTimeStamp() - log.getTimeStamp());
+                            break;
+                        default:
+                            totalStopTime += isLast
+                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                            - log.getTimeStamp())
+                                    : (next.getTimeStamp() - log.getTimeStamp());
+                            break;
+                    }
                 }
             }
         }
@@ -245,33 +246,35 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             Float totalSpanTime = 0f;
             Float totalErrorTime = 0f;
             Float pgTimeExpected = 0f;
+            Integer doneProcesssCount = 0;
 
             List<Log> logs = logsByMachine.get(machineId);
             List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
             MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
             overviewDto.setMachineId(machineId);
             overviewDto.setMachineName(logs.get(0).getMachine().getMachineName());
-            overviewDto.setNumberOfProcesses(processes.size());
-            // Group logs by process
-            Map<String, List<Log>> logsByProcess = new java.util.HashMap<>();
-            for (DrawingCodeProcess process : processes) {
-                if (process.getStartTime() == null || process.getEndTime() == null)
-                    continue;
-                // Only consider processes in the time range
-                if (process.getStartTime() > timePeriodInfo.getEndDate() ||
-                        process.getEndTime() < timePeriodInfo.getStartDate()) {
-                    continue;
+
+            if (!processes.isEmpty()) {
+                for (DrawingCodeProcess process : processes) {
+                    if (process.getStartTime() == null || process.getEndTime() == null)
+                        continue;
+                    // Only consider processes in the time range
+                    if (process.getStartTime() > timePeriodInfo.getEndDate() ||
+                            process.getEndTime() < timePeriodInfo.getStartDate()) {
+                        continue;
+                    }
+                    if (process.getProcessStatus() == 3) {
+                        doneProcesssCount++;
+                    }
+                    ProcessTime processTime = process.getProcessTime() == null
+                            ? processTimeService.calculateProcessTime(process)
+                            : process.getProcessTime();
+                    totalSpanTime += processTime.getSpanTime();
+                    pgTimeExpected += process.getPgTime();
                 }
-                ProcessTime processTime = process.getProcessTime() == null
-                        ? processTimeService.calculateProcessTime(process)
-                        : process.getProcessTime();
-                totalSpanTime += processTime.getSpanTime();
-                List<Log> logsInProcess = logs.stream()
-                        .filter(log -> log.getTimeStamp() >= process.getStartTime()
-                                && log.getTimeStamp() <= process.getEndTime())
-                        .collect(Collectors.toList());
-                logsByProcess.put(process.getProcessId(), logsInProcess);
             }
+            overviewDto.setNumberOfProcesses(doneProcesssCount);
+
             boolean isLast = false;
             for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
                 Log log = logsByMachine.get(machineId).get(i);
