@@ -1,5 +1,9 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
+import java.util.List;
+
+import com.example.Dynamo_Backend.dto.MachineKpiDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,4 +26,6 @@ public class MachineGroupStatisticDto {
     private Float pgTimeRate;
     private Float offsetTimeRate;
     private Float spanTimeRate;
+
+    private List<MachineKpiDto> machines;
 }

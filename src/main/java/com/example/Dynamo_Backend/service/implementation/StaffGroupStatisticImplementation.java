@@ -18,6 +18,7 @@ import com.example.Dynamo_Backend.entities.OperateHistory;
 import com.example.Dynamo_Backend.entities.Report;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
@@ -54,7 +55,8 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                 group.getGroupId(), timePeriod.getMonth(), timePeriod.getYear());
 
         if (staffKpiList.isEmpty()) {
-            return new StaffGroupStatisticDto(null, null, 0, 0f, 0f, 0, 0f, 0, 0f, 0f, 0f);
+            return new StaffGroupStatisticDto(null, null, 0, 0f, 0f, 0, 0f, 0, 0f, 0f, 0f,
+                    staffKpiList.stream().map(StaffKpiMapper::mapToStaffDto).toList());
         }
         Integer processCount = 0;
         Float totalKpi = 0f;
@@ -90,7 +92,8 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                 group.getGroupId(), previousTime.getMonth(), previousTime.getYear());
         if (previousStaffKpiList.isEmpty()) {
             return new StaffGroupStatisticDto(group.getGroupId(), group.getGroupName(), 0,
-                    totalWorkingHours, 0f, totalManufactoringPoints, 0f, 0, 0f, 0f, 0f);
+                    totalWorkingHours, 0f, totalManufactoringPoints, 0f, 0, 0f, 0f, 0f,
+                    staffKpiList.stream().map(StaffKpiMapper::mapToStaffDto).toList());
         }
         for (StaffKpi staffKpi : previousStaffKpiList) {
             Set<String> uniqueProcesses = new HashSet<>();
@@ -135,7 +138,8 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         // String workingHoursString = String.format("%dh%02dm", hours, minutes);
         return new StaffGroupStatisticDto(group.getGroupId(), group.getGroupName(), staffCount,
                 totalWorkingHours, workingRate, totalManufactoringPoints, mpRate,
-                processCount, processRate, totalKpi, kpiRate);
+                processCount, processRate, totalKpi, kpiRate,
+                staffKpiList.stream().map(StaffKpiMapper::mapToStaffDto).toList());
     }
 
     @Override

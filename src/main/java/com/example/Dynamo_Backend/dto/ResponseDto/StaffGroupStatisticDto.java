@@ -1,5 +1,9 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
+import java.util.List;
+
+import com.example.Dynamo_Backend.dto.StaffKpiDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,5 +23,7 @@ public class StaffGroupStatisticDto {
     private Float processRate;
     private Float totalKpi;
     private Float kpiRate;
+
+    private List<StaffKpiDto> staff;
 
 }
