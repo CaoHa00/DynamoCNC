@@ -65,4 +65,13 @@ public class StaffKpiMapper {
         staffKpiDto.setStaffStatus(staffKpi.getStaff().getStatus());
         return staffKpiDto;
     }
+
+    public static StaffKpiDto mapToStaffDto(StaffKpi staffKpi) {
+        StaffKpiDto staffKpiDto = new StaffKpiDto();
+        staffKpiDto.setStaffId(staffKpi.getStaff().getId());
+        ;
+        staffKpiDto.setStaffName(staffKpi.getStaff().getStaffName());
+        return staffKpiDto;
+    }
+
 }

@@ -11,14 +11,18 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.GroupEfficiencyResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.GroupKpi;
+import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
+import com.example.Dynamo_Backend.mapper.MachineMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.service.GroupEfficiencyService;
@@ -44,6 +48,7 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
                 requestDto.getGroupId(),
                 timePeriodInfo.getMonth(),
                 timePeriodInfo.getYear());
+
         Integer numberOfMachine = kpiList.size();
         Float operationalEfficiency = 0f;
         Float pgEfficiency = 0f;

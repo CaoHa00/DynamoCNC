@@ -17,6 +17,7 @@ import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.LogRepository;
@@ -53,7 +54,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         if (machineKpiList.isEmpty()) {
             return new MachineGroupStatisticDto(group.getGroupId(), group.getGroupName(), 0f, 0f, 0f, 0f, 0f, 0f, 0f,
                     0f, 0f,
-                    0f, 0f, 0f);
+                    0f, 0f, 0f, machineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
         }
         Float totalRunTime = 0f;
         Float totalStopTime = 0f;
@@ -135,7 +136,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         totalRunTime = totalPgTime + totalOffsetTime;
         return new MachineGroupStatisticDto(groupId, "", totalRunTime, totalStopTime, totalPgTime,
                 totalOffsetTime, totalSpanTime, totalErrorTime, totalErrorTime, 0f, 0f,
-                0f, 0f, 0f);
+                0f, 0f, 0f, machineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
     }
 
     @Override
@@ -165,7 +166,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
                     currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
                     currentPeriodStats.getTotalSpanTime(), currentPeriodStats.getTotalErrorTime(), 0f, 0f, 0f, 0f, 0f,
-                    0f);
+                    0f, previousMachineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
         }
 
         if (previousPeriodStats.getTotalOffsetTime() != 0f) {
@@ -209,7 +210,8 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
                 currentPeriodStats.getTotalSpanTime(), currentPeriodStats.getTotalErrorTime(), totalErrorTimeRate,
                 totalRunTimeRate,
-                totalStopTimeRate, totalPgTimeRate, totalOffsetTimeRate, totalSpanTimeRate);
+                totalStopTimeRate, totalPgTimeRate, totalOffsetTimeRate, totalSpanTimeRate,
+                previousMachineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
     }
 
     @Override

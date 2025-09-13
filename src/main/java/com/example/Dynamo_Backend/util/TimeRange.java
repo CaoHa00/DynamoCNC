@@ -11,10 +11,33 @@ import java.util.Locale;
 
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
+import com.example.Dynamo_Backend.dto.RequestDto.MachineStatisticRequestDto;
 import com.example.Dynamo_Backend.exception.BusinessException;
 
 public class TimeRange {
     public static TimePeriodInfo getRangeTypeAndWeek(GroupEfficiencyRequestDto dto) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
+        LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
+        Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
+        Long endTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getEndDate());
+        long days = ChronoUnit.DAYS.between(start, end) + 1;
+        if (days < 1 || days > 31) {
+            throw new BusinessException("Invalid date range");
+        }
+        if (days <= 7) {
+            int weekOfMonth = end.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
+                    endTimestamp);
+        } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
+            return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
+                    endTimestamp);
+        } else {
+            throw new BusinessException("Invalid date range");
+        }
+    }
+
+    public static TimePeriodInfo getRangeTypeAndWeek(MachineStatisticRequestDto dto) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
