@@ -1,5 +1,10 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
+import java.util.List;
+
+import com.example.Dynamo_Backend.dto.MachineDto;
+import com.example.Dynamo_Backend.dto.MachineKpiDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

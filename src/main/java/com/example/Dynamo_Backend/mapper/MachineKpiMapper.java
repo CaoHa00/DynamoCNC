@@ -57,4 +57,12 @@ public class MachineKpiMapper {
 
         return machineKpiDto;
     }
+
+    public static MachineKpiDto mapToMachineDto(MachineKpi machineKpi) {
+        MachineKpiDto machineKpiDto = new MachineKpiDto();
+        machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());
+        machineKpiDto.setMachineName(machineKpi.getMachine().getMachineName());
+        return machineKpiDto;
+    }
+
 }

@@ -1,9 +1,12 @@
 package com.example.Dynamo_Backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -25,4 +28,9 @@ public class StaffKpiDto {
     private String groupId;
     private String groupName;
     private Integer staffStatus;
+
+    public StaffKpiDto(String staffId, String staffName) {
+        this.staffId = staffId;
+        this.staffName = staffName;
+    }
 }
