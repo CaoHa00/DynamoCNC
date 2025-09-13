@@ -27,6 +27,7 @@ public class DataSeeder {
         private final ReportRepository reportRepository;
         private final ProcessTimeRepository processTimeRepository;
         private final OperateHistoryRepository operateHistoryRepository;
+        private final LogRepository logRepository;
 
         long createdTimestamp = System.currentTimeMillis();
 
@@ -558,6 +559,31 @@ public class DataSeeder {
                         operateHistory1.setPgTime(180f);
                         operateHistory1.setInProgress(0);
                         operateHistoryRepository.save(operateHistory1);
+
+                        // Add more than 2 Log entries between operateHistory1's start and stop time
+                        // 1st Log at 2025-07-21 01:00:00
+                        Log log1 = new Log();
+                        log1.setMachine(machine3);
+                        log1.setStaff(staff4);
+                        log1.setStatus("R1");
+                        log1.setTimeStamp(1753059600000L); // 2025-07-21 01:00:00
+                        logRepository.save(log1);
+
+                        // 2nd Log at 2025-07-21 02:00:00
+                        Log log2 = new Log();
+                        log2.setMachine(machine3);
+                        log2.setStaff(staff4);
+                        log2.setStatus("R2");
+                        log2.setTimeStamp(1753063200000L); // 2025-07-21 02:00:00
+                        logRepository.save(log2);
+
+                        // 3rd Log at 2025-07-21 03:00:00
+                        Log log3 = new Log();
+                        log3.setMachine(machine3);
+                        log3.setStaff(staff4);
+                        log3.setStatus("S");
+                        log3.setTimeStamp(1753066800000L); // 2025-07-21 03:00:00
+                        logRepository.save(log3);
 
                         DrawingCodeProcess processJuly18 = new DrawingCodeProcess();
                         processJuly18.setMachine(machine3); // or any machine you want
