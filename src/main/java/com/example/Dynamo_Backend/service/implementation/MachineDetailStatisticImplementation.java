@@ -16,11 +16,14 @@ import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.LogRepository;
+import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
@@ -33,6 +36,9 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         private MachineRepository machineRepository;
 
         @Autowired
+        private MachineKpiRepository machineKpiRepository;
+
+        @Autowired
         private LogRepository logRepository;
 
         @Autowired
@@ -42,6 +48,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         GroupKpiRepository groupKpiRepository;
 
         public MachineDetailStatisticDto calculateMachineTime(Integer machineId, TimePeriodInfo timePeriodInfo) {
+
                 Machine machine = machineRepository.findById(machineId)
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail statistic with ID: " + machineId));
@@ -217,10 +224,37 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 Float otherProductPgTime = 0f;
                 GroupKpi groupKpi = null;
 
-                Machine machine = machineRepository.findById(requestDto.getMachineId())
-                                .orElseThrow(() -> new BusinessException(
-                                                "Machine not found when get detail statistic with ID: "
-                                                                + requestDto.getMachineId()));
+                Machine machine = null;
+                MachineKpi machineKpi;
+                List<MachineKpi> machines;
+
+                if (requestDto.getMachineId() == null) {
+                        machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                                        requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+
+                        machine = machineRepository.findById(machines.get(0).getMachine().getMachineId())
+                                        .orElseThrow(() -> new BusinessException(
+                                                        "Machine not found when get detail statistic with ID: "
+                                                                        + requestDto.getMachineId()));
+                } else {
+                        machine = machineRepository.findById(requestDto.getMachineId())
+                                        .orElseThrow(() -> new BusinessException(
+                                                        "Machine not found when get detail statistic with ID: "
+                                                                        + requestDto.getMachineId()));
+                        machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
+                                        machine.getMachineId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+                        machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                                        machineKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
+                                        timePeriodInfo.getYear());
+                }
+
+                // MachineKpi machineKpi =
+                // machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
+                // machine.getMachineId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+                // List<MachineKpi> machines =
+                // machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                // machineKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
+                // timePeriodInfo.getYear());
                 List<DrawingCodeProcess> processes = machine.getDrawingCodeProcesses();
                 for (DrawingCodeProcess process : processes) {
                         if (process.getStartTime() <= timePeriodInfo.getEndDate() &&
@@ -267,7 +301,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 }
 
                 return new MachineEfficiencyResponseDto(machine.getMachineId(), machine.getMachineName(),
-                                operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss);
+                                operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss,
+                                machines.stream().map(MachineKpiMapper::mapToMachineDto).toList());
         }
 
 }
