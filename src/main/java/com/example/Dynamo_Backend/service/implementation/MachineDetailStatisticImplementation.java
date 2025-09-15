@@ -46,7 +46,6 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
 
         private CurrentStatusRepository currentStatusRepository;
 
-
         @Autowired
         ProcessTimeService processTimeService;
 
@@ -238,19 +237,19 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 MachineKpi machineKpi;
                 List<MachineKpi> machines;
 
-                if (requestDto.getMachineId() == null) {
+                if (requestDto.getId() == null) {
                         machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
                                         requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
 
                         machine = machineRepository.findById(machines.get(0).getMachine().getMachineId())
                                         .orElseThrow(() -> new BusinessException(
                                                         "Machine not found when get detail statistic with ID: "
-                                                                        + requestDto.getMachineId()));
+                                                                        + requestDto.getId()));
                 } else {
-                        machine = machineRepository.findById(requestDto.getMachineId())
+                        machine = machineRepository.findById(requestDto.getId())
                                         .orElseThrow(() -> new BusinessException(
                                                         "Machine not found when get detail statistic with ID: "
-                                                                        + requestDto.getMachineId()));
+                                                                        + requestDto.getId()));
                         machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
                                         machine.getMachineId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
                         machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(

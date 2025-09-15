@@ -41,7 +41,7 @@ public class MachineDetailStatisticController {
 
     @PostMapping("/detail")
     public ResponseEntity<MachineEfficiencyResponseDto> getMachineEfficiencyByOtherGroup(
-            @RequestBody MachineStatisticRequestDto requestDto) {
+            @RequestBody StatisticRequestDto requestDto) {
         MachineEfficiencyResponseDto efficiency = machineDetailStatisticService.getMachineEfficiency(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(efficiency);
     }
