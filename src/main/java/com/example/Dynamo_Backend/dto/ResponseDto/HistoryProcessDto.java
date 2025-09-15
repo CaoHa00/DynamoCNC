@@ -11,8 +11,9 @@ public class HistoryProcessDto {
     private String orderCode;
     private Integer partNumber;
     private Integer stepNumber;
-    private String StartTime;
-    private String EndTime;
+    private String startTime;
+    private String endTime;
+    private String machineName;
     private Integer staffIdNumber;
     private String staffName;
     private String status;

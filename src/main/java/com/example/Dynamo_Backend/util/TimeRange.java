@@ -11,7 +11,7 @@ import java.util.Locale;
 
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
-import com.example.Dynamo_Backend.dto.RequestDto.MachineStatisticRequestDto;
+import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
 import com.example.Dynamo_Backend.exception.BusinessException;
 
 public class TimeRange {
@@ -37,7 +37,7 @@ public class TimeRange {
         }
     }
 
-    public static TimePeriodInfo getRangeTypeAndWeek(MachineStatisticRequestDto dto) {
+    public static TimePeriodInfo getRangeTypeAndWeek(StatisticRequestDto dto) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
