@@ -1,5 +1,9 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
+import java.util.List;
+
+import com.example.Dynamo_Backend.dto.MachineKpiDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,4 +20,6 @@ public class MachineEfficiencyResponseDto {
     private float oee;
     private float offsetLoss;
     private float otherLoss;
+
+    private List<MachineKpiDto> machines;
 }
