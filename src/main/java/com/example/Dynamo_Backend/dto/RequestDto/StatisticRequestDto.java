@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class MachineStatisticRequestDto {
+public class StatisticRequestDto {
     private String groupId;
-    private Integer machineId;
+    private Integer id;
     private String startDate;
     private String endDate;
 }

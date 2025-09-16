@@ -16,4 +16,7 @@ public interface MachineGroupStatisticService {
     TotalRunTimeResponse getTotalRunTime(GroupEfficiencyRequestDto requestDto);
 
     List<MachineRunTimeDto> getTop5GroupOverview(GroupEfficiencyRequestDto requestDto);
+
+    void exportExcel(GroupEfficiencyRequestDto requestDto);
+
 }

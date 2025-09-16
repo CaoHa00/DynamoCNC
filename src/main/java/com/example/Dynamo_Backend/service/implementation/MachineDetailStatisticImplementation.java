@@ -7,20 +7,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
-import com.example.Dynamo_Backend.dto.RequestDto.MachineStatisticRequestDto;
-import com.example.Dynamo_Backend.dto.ResponseDto.GroupEfficiencyResponseDto;
+import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineDetailStatisticDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineEfficiencyResponseDto;
+import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.LogRepository;
+import com.example.Dynamo_Backend.repository.MachineKpiRepository;
+
+import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
+import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
@@ -33,7 +39,12 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         private MachineRepository machineRepository;
 
         @Autowired
+        private MachineKpiRepository machineKpiRepository;
+
+        @Autowired
         private LogRepository logRepository;
+
+        private CurrentStatusRepository currentStatusRepository;
 
         @Autowired
         ProcessTimeService processTimeService;
@@ -42,6 +53,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         GroupKpiRepository groupKpiRepository;
 
         public MachineDetailStatisticDto calculateMachineTime(Integer machineId, TimePeriodInfo timePeriodInfo) {
+
                 Machine machine = machineRepository.findById(machineId)
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail statistic with ID: " + machineId));
@@ -110,7 +122,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         }
 
         @Override
-        public MachineDetailStatisticDto getMachineDetailStatistic(MachineStatisticRequestDto requestDto) {
+        public MachineDetailStatisticDto getMachineDetailStatistic(StatisticRequestDto requestDto) {
                 String startDate = requestDto.getStartDate().concat(" 00:00:00");
                 String endDate = requestDto.getEndDate().concat(" 23:59:59");
                 requestDto.setStartDate(startDate);
@@ -119,8 +131,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
                 TimePeriodInfo previousTimePeriodInfo = TimeRange.getPreviousTimeRange(timePeriodInfo);
 
-                MachineDetailStatisticDto current = calculateMachineTime(requestDto.getMachineId(), timePeriodInfo);
-                MachineDetailStatisticDto previous = calculateMachineTime(requestDto.getMachineId(),
+                MachineDetailStatisticDto current = calculateMachineTime(requestDto.getId(), timePeriodInfo);
+                MachineDetailStatisticDto previous = calculateMachineTime(requestDto.getId(),
                                 previousTimePeriodInfo);
 
                 if (previous.getTotalRunTime() != 0) {
@@ -151,17 +163,17 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         }
 
         @Override
-        public List<HistoryProcessDto> getMachineHistoryProcess(MachineStatisticRequestDto requestDto) {
+        public List<HistoryProcessDto> getMachineHistoryProcess(StatisticRequestDto requestDto) {
                 String startDate = requestDto.getStartDate().concat(" 00:00:00");
                 String endDate = requestDto.getEndDate().concat(" 23:59:59");
                 requestDto.setStartDate(startDate);
                 requestDto.setEndDate(endDate);
 
                 TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
-                Machine machine = machineRepository.findById(requestDto.getMachineId())
+                Machine machine = machineRepository.findById(requestDto.getId())
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail history with ID: "
-                                                                + requestDto.getMachineId()));
+                                                                + requestDto.getId()));
                 List<DrawingCodeProcess> processes = machine.getDrawingCodeProcesses().stream()
                                 .filter(process -> process.getStartTime() <= timePeriodInfo.getEndDate()
                                                 && process.getEndTime() >= timePeriodInfo.getStartDate())
@@ -172,22 +184,26 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                         String status = "";
                         if (process.getProcessStatus() == 3) {
                                 status = "Completed";
-                        } else {
-                                Log lastLog = logRepository.findTopByMachineIdAndTimeStampBeforeOrderByTimeStampDesc(
-                                                requestDto.getMachineId(), process.getEndTime()).stream().findFirst()
-                                                .orElse(null);
-                                if (lastLog != null) {
-                                        status = lastLog.getStatus();
+                        } else if (process.getProcessStatus() == 2) {
+                                CurrentStatus currentStatus = currentStatusRepository
+                                                .findByMachineId(process.getMachine().getMachineId());
+                                if (currentStatus != null) {
+                                        status = currentStatus.getStatus();
                                 }
                         }
                         Staff staff = process.getOperateHistories().get(process.getOperateHistories().size() - 1)
                                         .getStaff();
+                        String endTime = process.getEndTime() < process.getStartTime()
+                                        ? DateTimeUtil.convertTimestampToString(
+                                                        System.currentTimeMillis())
+                                        : DateTimeUtil.convertTimestampToString(process.getEndTime());
                         HistoryProcessDto history = new HistoryProcessDto(
                                         process.getOrderDetail().getOrderCode(),
                                         process.getPartNumber(),
                                         process.getStepNumber(),
                                         DateTimeUtil.convertTimestampToString(process.getStartTime()),
-                                        DateTimeUtil.convertTimestampToString(process.getEndTime()),
+                                        endTime,
+                                        machine.getMachineName(),
                                         staff.getStaffId(),
                                         staff.getStaffName(),
                                         status);
@@ -197,7 +213,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         }
 
         @Override
-        public MachineEfficiencyResponseDto getMachineEfficiency(MachineStatisticRequestDto requestDto) {
+        public MachineEfficiencyResponseDto getMachineEfficiency(StatisticRequestDto requestDto) {
                 String startDate = requestDto.getStartDate().concat(" 00:00:00"); // Should be "2025-07-21"
                 String endDate = requestDto.getEndDate().concat(" 23:59:59");
                 requestDto.setStartDate(startDate);
@@ -217,10 +233,38 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 Float otherProductPgTime = 0f;
                 GroupKpi groupKpi = null;
 
-                Machine machine = machineRepository.findById(requestDto.getMachineId())
-                                .orElseThrow(() -> new BusinessException(
-                                                "Machine not found when get detail statistic with ID: "
-                                                                + requestDto.getMachineId()));
+                Machine machine = null;
+                MachineKpi machineKpi;
+                List<MachineKpi> machines;
+
+                if (requestDto.getId() == null) {
+                        machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                                        requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+
+                        machine = machineRepository.findById(machines.get(0).getMachine().getMachineId())
+                                        .orElseThrow(() -> new BusinessException(
+                                                        "Machine not found when get detail statistic with ID: "
+                                                                        + requestDto.getId()));
+                } else {
+                        machine = machineRepository.findById(requestDto.getId())
+                                        .orElseThrow(() -> new BusinessException(
+                                                        "Machine not found when get detail statistic with ID: "
+                                                                        + requestDto.getId()));
+                        machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
+                                        machine.getMachineId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+                        machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                                        machineKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
+                                        timePeriodInfo.getYear());
+                }
+
+                // MachineKpi machineKpi =
+                // machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
+                // machine.getMachineId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+                // List<MachineKpi> machines =
+                // machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                // machineKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
+                // timePeriodInfo.getYear());
+
                 List<DrawingCodeProcess> processes = machine.getDrawingCodeProcesses();
                 for (DrawingCodeProcess process : processes) {
                         if (process.getStartTime() <= timePeriodInfo.getEndDate() &&
@@ -267,7 +311,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 }
 
                 return new MachineEfficiencyResponseDto(machine.getMachineId(), machine.getMachineName(),
-                                operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss);
+                                operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss,
+                                machines.stream().map(MachineKpiMapper::mapToMachineDto).toList());
         }
 
 }

@@ -431,4 +431,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         return top5MachineRunTime;
     }
 
+    @Override
+    public void exportExcel(GroupEfficiencyRequestDto requestDto) {
+
+    }
+
 }
