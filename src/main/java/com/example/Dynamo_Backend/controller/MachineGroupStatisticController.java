@@ -13,12 +13,14 @@ import com.example.Dynamo_Backend.dto.ResponseDto.TotalRunTimeResponse;
 import com.example.Dynamo_Backend.repository.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RequestMapping("/api/machine-group-statistic")
 @RestController
 public class MachineGroupStatisticController {
+
     private final MachineGroupStatisticService groupStatisticService;
 
     @PostMapping("/overview")
@@ -48,4 +50,17 @@ public class MachineGroupStatisticController {
         List<MachineRunTimeDto> response = groupStatisticService.getTop5GroupOverview(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @PostMapping("/export-excel")
+    public void exportExcel(@RequestBody GroupEfficiencyRequestDto requestDto,
+            HttpServletResponse response) {
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename");
+            groupStatisticService.exportExcelToResponse(requestDto, response);
+        } catch (Exception e) {
+            response.setStatus(500);
+        }
+    }
+
 }

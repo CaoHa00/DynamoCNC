@@ -94,7 +94,7 @@ public class ReportImplementation implements ReportService {
                                 Workbook workbook = new XSSFWorkbook(inputStream)) {
                         Sheet sheet = workbook.getSheetAt(0);
                         java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
-                                        .ofPattern("MM/dd/yyyy");
+                                        .ofPattern("dd/MM/yyyy");
                         for (Row row : sheet) {
                                 if (row.getRowNum() < 6)
                                         continue; // Skip header rows

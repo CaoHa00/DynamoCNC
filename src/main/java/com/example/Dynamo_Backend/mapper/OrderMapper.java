@@ -29,20 +29,20 @@ public class OrderMapper {
     public static OrderDto mapToOrderDto(Order order) {
         // String orderDate = Instant.ofEpochMilli(order.getOrderDate())
         // .atZone(ZoneId.systemDefault())
-        // .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        // .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         // String deliveryDate = "";
         // String completionDate = "";
         // if (order.getDeliveryDate() != null) {
         // deliveryDate = Instant.ofEpochMilli(order.getDeliveryDate())
         // .atZone(ZoneId.systemDefault())
-        // .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        // .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         // } else {
         // deliveryDate = "Chưa giao hàng";
         // }
         // if (order.getDeliveryDate() != null) {
         // completionDate = Instant.ofEpochMilli(order.getCompletionDate())
         // .atZone(ZoneId.systemDefault())
-        // .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        // .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         // } else {
         // completionDate = "Chưa hoàn thành";
         // }

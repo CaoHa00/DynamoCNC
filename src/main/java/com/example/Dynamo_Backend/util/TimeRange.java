@@ -16,7 +16,7 @@ import com.example.Dynamo_Backend.exception.BusinessException;
 
 public class TimeRange {
     public static TimePeriodInfo getRangeTypeAndWeek(GroupEfficiencyRequestDto dto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
         Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
@@ -26,7 +26,7 @@ public class TimeRange {
             throw new BusinessException("Invalid date range");
         }
         if (days <= 7) {
-            int weekOfMonth = end.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
                     endTimestamp);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
@@ -38,7 +38,7 @@ public class TimeRange {
     }
 
     public static TimePeriodInfo getRangeTypeAndWeek(StatisticRequestDto dto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
         Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
@@ -48,7 +48,7 @@ public class TimeRange {
             throw new BusinessException("Invalid date range");
         }
         if (days <= 7) {
-            int weekOfMonth = end.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
                     endTimestamp);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
