@@ -5,8 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.example.Dynamo_Backend.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.entities.Log;
-import com.example.Dynamo_Backend.repository.dto.MachineRunTimeDto;
 
 public interface LogRepository extends JpaRepository<Log, String> {
         @Query(value = "SELECT TOP 5 l.machine_id AS machineId, " +

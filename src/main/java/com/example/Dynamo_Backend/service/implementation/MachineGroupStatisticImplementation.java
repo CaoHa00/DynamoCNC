@@ -1,13 +1,18 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.*;
@@ -22,13 +27,17 @@ import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.LogRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
-import com.example.Dynamo_Backend.repository.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
 import com.example.Dynamo_Backend.util.TimeRange;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Service
 public class MachineGroupStatisticImplementation implements MachineGroupStatisticService {
+
+    @Autowired
+    private com.example.Dynamo_Backend.service.GroupEfficiencyService groupEfficiencyService;
     @Autowired
     private MachineKpiRepository machineKpiRepository;
 
@@ -44,8 +53,6 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
     @Autowired
     private LogRepository logRepository;
 
-    // ??truong hop log cuoi cung nen tinh nhu nao: se co khoang trong giua log cuoi
-    // cung va thoi gian ket thuc
     public MachineGroupStatisticDto calculateTotalTime(TimePeriodInfo timePeriodInfo, String groupId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new BusinessException("Group not found when get machine group statistic"));
@@ -75,11 +82,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 .collect(Collectors.groupingBy(log -> log.getMachine().getMachineId()));
 
         for (Integer machineId : logsByMachine.keySet()) {
-            List<Log> logs = logsByMachine.get(machineId);
             List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
 
             // Group logs by process
-            Map<String, List<Log>> logsByProcess = new java.util.HashMap<>();
             for (DrawingCodeProcess process : processes) {
                 if (process.getStartTime() == null || process.getEndTime() == null)
                     continue;
@@ -92,11 +97,6 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                         ? processTimeService.calculateProcessTime(process)
                         : process.getProcessTime();
                 totalSpanTime += processTime.getSpanTime();
-                List<Log> logsInProcess = logs.stream()
-                        .filter(log -> log.getTimeStamp() >= process.getStartTime()
-                                && log.getTimeStamp() <= process.getEndTime())
-                        .collect(Collectors.toList());
-                logsByProcess.put(process.getProcessId(), logsInProcess);
             }
             boolean isLast = false;
             for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
@@ -449,4 +449,145 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         return top5MachineRunTime;
     }
 
+    @Override
+    public void exportExcelToResponse(GroupEfficiencyRequestDto requestDto,
+            HttpServletResponse response) {
+        String fileName = "Data.xlsx";
+        String title = "";
+        String startDate = requestDto.getStartDate().concat(" 00:00:00");
+        String endDate = requestDto.getEndDate().concat(" 23:59:59");
+        requestDto.setStartDate(startDate);
+        requestDto.setEndDate(endDate);
+        Group group = groupRepository.findById(requestDto.getGroupId())
+                .orElseThrow(() -> new BusinessException("Group not found when export machine group statistic"));
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Thống kê nhóm máy");
+        int rowIdx = 5;
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter exportDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        Row headerRow = sheet.createRow(rowIdx++);
+        headerRow.createCell(0).setCellValue("Thời gian");
+        headerRow.createCell(1).setCellValue("Giờ chạy");
+        headerRow.createCell(2).setCellValue("Giờ chạy SP chính ");
+        headerRow.createCell(3).setCellValue("Giờ chạy NG_Chạy lại");
+        headerRow.createCell(4).setCellValue("Giờ chạy LK đồ gá");
+        headerRow.createCell(5).setCellValue("Giờ chạy điện cực");
+        headerRow.createCell(6).setCellValue("Giờ chạy dự bị");
+        headerRow.createCell(7).setCellValue("Giờ chạy PG ");
+        headerRow.createCell(8).setCellValue("Giờ chạy Offset ");
+        headerRow.createCell(9).setCellValue("Giờ chạy Dừng ");
+        headerRow.createCell(10).setCellValue("Giờ chạy Lỗi ");
+        headerRow.createCell(11).setCellValue("Hiệu suất vận hành");
+        headerRow.createCell(12).setCellValue("Hiệu suất PG");
+        headerRow.createCell(13).setCellValue("Hiệu suất Giá trị");
+        headerRow.createCell(14).setCellValue("OEE");
+        headerRow.createCell(15).setCellValue("Tổn thất Offset");
+        headerRow.createCell(16).setCellValue("Tổn thất khác");
+
+        if (timePeriodInfo.isMonth()) {
+            title = "Thống kê nhóm " + group.getGroupName() + " tháng " +
+                    timePeriodInfo.getMonth() + "-"
+                    + timePeriodInfo.getYear() + ".xlsx";
+            for (int week = 1; week <= 4; week++) {
+                TimePeriodInfo weekInfo = TimeRange.buildWeekTimePeriodInfo(timePeriodInfo, week);
+                if (weekInfo == null)
+                    continue;
+                GroupEfficiencyRequestDto weekDto = new GroupEfficiencyRequestDto();
+                weekDto.setGroupId(requestDto.getGroupId());
+                weekDto.setStartDate(Instant.ofEpochMilli(weekInfo.getStartDate())
+                        .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                weekDto.setEndDate(Instant.ofEpochMilli(weekInfo.getEndDate())
+                        .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                GroupEfficiencyRequestDto weekDtotemp = new GroupEfficiencyRequestDto();
+                weekDtotemp.setGroupId(requestDto.getGroupId());
+                weekDtotemp.setStartDate(Instant.ofEpochMilli(weekInfo.getStartDate())
+                        .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                weekDtotemp.setEndDate(Instant.ofEpochMilli(weekInfo.getEndDate())
+                        .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                TotalRunTimeResponse stats = getTotalRunTime(weekDto);
+                GroupEfficiencyResponseDto eff = groupEfficiencyService.getGroupEfficiency(weekDtotemp);
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue("Week " + week);
+                row.createCell(1).setCellValue(stats.getRunTimeOfMainProduct() + stats.getRunTimeOfRerun()
+                        + stats.getRunTimeOfLK() + stats.getRunTimeOfElectric()
+                        + stats.getTotalRunTimeOfPreparation());
+                row.createCell(2).setCellValue(stats.getRunTimeOfMainProduct());
+                row.createCell(3).setCellValue(stats.getRunTimeOfRerun());
+                row.createCell(4).setCellValue(stats.getRunTimeOfLK());
+                row.createCell(5).setCellValue(stats.getRunTimeOfElectric());
+                row.createCell(6).setCellValue(stats.getTotalRunTimeOfPreparation());
+                row.createCell(7).setCellValue(stats.getTotalPgTime());
+                row.createCell(8).setCellValue(stats.getTotalOffsetTime());
+                row.createCell(9).setCellValue(stats.getTotalStopTime());
+                row.createCell(10).setCellValue(stats.getTotalErrorTime());
+                row.createCell(11).setCellValue(eff.getOperationalEfficiency());
+                row.createCell(12).setCellValue(eff.getPgEfficiency());
+                row.createCell(13).setCellValue(eff.getValueEfficiency());
+                row.createCell(14).setCellValue(eff.getOee());
+                row.createCell(15).setCellValue(eff.getOffsetLoss());
+                row.createCell(16).setCellValue(eff.getOtherLoss());
+            }
+        } else if (timePeriodInfo.getDay() <= 7) {
+            title = "Thống kê nhóm " + group.getGroupName() + " "
+                    + Instant.ofEpochMilli(timePeriodInfo.getStartDate())
+                            .atZone(ZoneId.systemDefault()).toLocalDate().format(exportDateFormatter)
+                    + " - "
+                    + Instant.ofEpochMilli(timePeriodInfo.getEndDate())
+                            .atZone(ZoneId.systemDefault()).toLocalDate().format(exportDateFormatter)
+                    + ".xlsx";
+            long days = timePeriodInfo.getDay();
+            LocalDate start = Instant.ofEpochMilli(timePeriodInfo.getStartDate())
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+            for (int i = 0; i < days; i++) {
+                LocalDate day = start.plusDays(i);
+                GroupEfficiencyRequestDto dayDto = new GroupEfficiencyRequestDto();
+                dayDto.setGroupId(requestDto.getGroupId());
+                dayDto.setStartDate(day.format(dateFormatter));
+                dayDto.setEndDate(day.format(dateFormatter));
+                GroupEfficiencyRequestDto dayDtotemp = new GroupEfficiencyRequestDto();
+                dayDtotemp.setGroupId(requestDto.getGroupId());
+                dayDtotemp.setStartDate(day.format(dateFormatter));
+                dayDtotemp.setEndDate(day.format(dateFormatter));
+                TotalRunTimeResponse stats = getTotalRunTime(dayDto);
+                GroupEfficiencyResponseDto eff = groupEfficiencyService.getGroupEfficiency(dayDtotemp);
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(day.format(dateFormatter));
+                row.createCell(1).setCellValue(stats.getRunTimeOfMainProduct() + stats.getRunTimeOfRerun()
+                        + stats.getRunTimeOfLK() + stats.getRunTimeOfElectric()
+                        + stats.getTotalRunTimeOfPreparation());
+                row.createCell(2).setCellValue(stats.getRunTimeOfMainProduct());
+                row.createCell(3).setCellValue(stats.getRunTimeOfRerun());
+                row.createCell(4).setCellValue(stats.getRunTimeOfLK());
+                row.createCell(5).setCellValue(stats.getRunTimeOfElectric());
+                row.createCell(6).setCellValue(stats.getTotalRunTimeOfPreparation());
+                row.createCell(7).setCellValue(stats.getTotalPgTime());
+                row.createCell(8).setCellValue(stats.getTotalOffsetTime());
+                row.createCell(9).setCellValue(stats.getTotalStopTime());
+                row.createCell(10).setCellValue(stats.getTotalErrorTime());
+                row.createCell(11).setCellValue(eff.getOperationalEfficiency());
+                row.createCell(12).setCellValue(eff.getPgEfficiency());
+                row.createCell(13).setCellValue(eff.getValueEfficiency());
+                row.createCell(14).setCellValue(eff.getOee());
+                row.createCell(15).setCellValue(eff.getOffsetLoss());
+                row.createCell(16).setCellValue(eff.getOtherLoss());
+            }
+        }
+        Row titleRow = sheet.createRow(1);
+        titleRow.createCell(6).setCellValue(title.replace(".xlsx", ""));
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+            workbook.write(response.getOutputStream());
+            response.flushBuffer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                workbook.close();
+            } catch (Exception ignore) {
+            }
+        }
+    }
 }
