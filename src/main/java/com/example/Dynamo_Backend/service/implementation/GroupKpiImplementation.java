@@ -120,9 +120,9 @@ public class GroupKpiImplementation implements GroupKpiService {
                     String dateStr = dateCell.getStringCellValue().trim();
                     DateTimeFormatter formatter;
                     if (dateStr.contains("/")) {
-                        formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+                        formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     } else {
-                        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     }
                     localDate = LocalDate.parse(dateStr, formatter);
                 } else {

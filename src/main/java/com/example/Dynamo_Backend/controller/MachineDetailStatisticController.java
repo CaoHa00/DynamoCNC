@@ -10,6 +10,7 @@ import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.*;
 import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -44,5 +45,17 @@ public class MachineDetailStatisticController {
             @RequestBody StatisticRequestDto requestDto) {
         MachineEfficiencyResponseDto efficiency = machineDetailStatisticService.getMachineEfficiency(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(efficiency);
+    }
+
+    @PostMapping("/export-excel")
+    public void exportExcel(@RequestBody StatisticRequestDto requestDto,
+            HttpServletResponse response) {
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename");
+            machineDetailStatisticService.exportExcelToResponse(requestDto, response);
+        } catch (Exception e) {
+            response.setStatus(500);
+        }
     }
 }
