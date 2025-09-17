@@ -2,10 +2,8 @@ package com.example.Dynamo_Backend.service.implementation;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.*;
@@ -28,7 +27,6 @@ import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.LogRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
-import com.example.Dynamo_Backend.repository.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
 import com.example.Dynamo_Backend.util.TimeRange;
@@ -434,154 +432,6 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
     }
 
     @Override
-    public void exportExcel(GroupEfficiencyRequestDto requestDto) {
-        String fileName = "";
-        Group group = groupRepository.findById(requestDto.getGroupId())
-                .orElseThrow(() -> new BusinessException("Group not found when export machine group statistic"));
-        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Thống kê nhóm máy");
-        int rowIdx = 0;
-        Row headerRow = sheet.createRow(rowIdx++);
-        headerRow.createCell(0).setCellValue("Period");
-        headerRow.createCell(1).setCellValue("Total Run Time (h)");
-        headerRow.createCell(2).setCellValue("Total Run Time Main Product (h)");
-        headerRow.createCell(3).setCellValue("Run Time Of Rerun (h)");
-        headerRow.createCell(4).setCellValue("Run Time Of LK (h)");
-        headerRow.createCell(5).setCellValue("Run Time Of Electric (h)");
-        headerRow.createCell(6).setCellValue("Total Run Time Of Preparation (h)");
-        headerRow.createCell(7).setCellValue("Total Pg Time (h)");
-        headerRow.createCell(8).setCellValue("Total Offset Time (h)");
-        headerRow.createCell(9).setCellValue("Total Stop Time (h)");
-        headerRow.createCell(10).setCellValue("Total Error Time (h)");
-        headerRow.createCell(11).setCellValue("Operational Efficiency");
-        headerRow.createCell(12).setCellValue("PG Efficiency");
-        headerRow.createCell(13).setCellValue("Value Efficiency");
-        headerRow.createCell(14).setCellValue("OEE");
-        headerRow.createCell(15).setCellValue("Offset Loss");
-        headerRow.createCell(16).setCellValue("Other Loss");
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        if (timePeriodInfo.isMonth()) {
-            fileName = "Thống kê nhóm " + group.getGroupName() + " tháng " + timePeriodInfo.getMonth() + "-"
-                    + timePeriodInfo.getYear() + ".xlsx";
-            for (int week = 1; week <= 4; week++) {
-                TimePeriodInfo weekInfo = buildWeekTimePeriodInfo(timePeriodInfo, week);
-                if (weekInfo == null)
-                    continue;
-                GroupEfficiencyRequestDto weekDto = new GroupEfficiencyRequestDto();
-                weekDto.setGroupId(requestDto.getGroupId());
-                weekDto.setStartDate(Instant.ofEpochMilli(weekInfo.getStartDate()).atZone(ZoneId.systemDefault())
-                        .toLocalDate().format(dateFormatter));
-                weekDto.setEndDate(Instant.ofEpochMilli(weekInfo.getEndDate()).atZone(ZoneId.systemDefault())
-                        .toLocalDate().format(dateFormatter));
-                TotalRunTimeResponse stats = getTotalRunTime(weekDto);
-                com.example.Dynamo_Backend.dto.ResponseDto.GroupEfficiencyResponseDto eff = groupEfficiencyService
-                        .getGroupEfficiency(weekDto);
-                Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue("Week " + week);
-                row.createCell(1).setCellValue(stats.getRunTimeOfMainProduct() + stats.getRunTimeOfRerun()
-                        + stats.getRunTimeOfLK() + stats.getRunTimeOfElectric()
-                        + stats.getTotalRunTimeOfPreparation());
-                row.createCell(2).setCellValue(stats.getRunTimeOfMainProduct());
-                row.createCell(3).setCellValue(stats.getRunTimeOfRerun());
-                row.createCell(4).setCellValue(stats.getRunTimeOfLK());
-                row.createCell(5).setCellValue(stats.getRunTimeOfElectric());
-                row.createCell(6).setCellValue(stats.getTotalRunTimeOfPreparation());
-                row.createCell(7).setCellValue(stats.getTotalPgTime());
-                row.createCell(8).setCellValue(stats.getTotalOffsetTime());
-                row.createCell(9).setCellValue(stats.getTotalStopTime());
-                row.createCell(10).setCellValue(stats.getTotalErrorTime());
-                row.createCell(11).setCellValue(eff.getOperationalEfficiency());
-                row.createCell(12).setCellValue(eff.getPgEfficiency());
-                row.createCell(13).setCellValue(eff.getValueEfficiency());
-                row.createCell(14).setCellValue(eff.getOee());
-                row.createCell(15).setCellValue(eff.getOffsetLoss());
-                row.createCell(16).setCellValue(eff.getOtherLoss());
-            }
-        } else if (timePeriodInfo.getDay() <= 7) {
-            fileName = "Thống kê nhóm " + group.getGroupName() + " "
-                    + Instant.ofEpochMilli(timePeriodInfo.getStartDate())
-                            .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter)
-                    + " - "
-                    + Instant.ofEpochMilli(timePeriodInfo.getEndDate())
-                            .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter)
-                    + ".xlsx";
-            long days = timePeriodInfo.getDay();
-            LocalDate start = Instant.ofEpochMilli(timePeriodInfo.getStartDate())
-                    .atZone(ZoneId.systemDefault()).toLocalDate();
-            for (int i = 0; i < days; i++) {
-                LocalDate day = start.plusDays(i);
-                long startMillis = day.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                long endMillis = day.atTime(23, 59, 59).atZone(java.time.ZoneId.systemDefault()).toInstant()
-                        .toEpochMilli();
-                GroupEfficiencyRequestDto dayDto = new GroupEfficiencyRequestDto();
-                dayDto.setGroupId(requestDto.getGroupId());
-                dayDto.setStartDate(day.format(dateFormatter));
-                dayDto.setEndDate(day.format(dateFormatter));
-                TotalRunTimeResponse stats = getTotalRunTime(dayDto);
-                com.example.Dynamo_Backend.dto.ResponseDto.GroupEfficiencyResponseDto eff = groupEfficiencyService
-                        .getGroupEfficiency(dayDto);
-                Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(day.format(dateFormatter));
-                row.createCell(1).setCellValue(stats.getRunTimeOfMainProduct() + stats.getRunTimeOfRerun()
-                        + stats.getRunTimeOfLK() + stats.getRunTimeOfElectric()
-                        + stats.getTotalRunTimeOfPreparation());
-                row.createCell(2).setCellValue(stats.getRunTimeOfMainProduct());
-                row.createCell(3).setCellValue(stats.getRunTimeOfRerun());
-                row.createCell(4).setCellValue(stats.getRunTimeOfLK());
-                row.createCell(5).setCellValue(stats.getRunTimeOfElectric());
-                row.createCell(6).setCellValue(stats.getTotalRunTimeOfPreparation());
-                row.createCell(7).setCellValue(stats.getTotalPgTime());
-                row.createCell(8).setCellValue(stats.getTotalOffsetTime());
-                row.createCell(9).setCellValue(stats.getTotalStopTime());
-                row.createCell(10).setCellValue(stats.getTotalErrorTime());
-                row.createCell(11).setCellValue(eff.getOperationalEfficiency());
-                row.createCell(12).setCellValue(eff.getPgEfficiency());
-                row.createCell(13).setCellValue(eff.getValueEfficiency());
-                row.createCell(14).setCellValue(eff.getOee());
-                row.createCell(15).setCellValue(eff.getOffsetLoss());
-                row.createCell(16).setCellValue(eff.getOtherLoss());
-            }
-        }
-        try (java.io.FileOutputStream fileOut = new java.io.FileOutputStream(fileName)) {
-            workbook.write(fileOut);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                workbook.close();
-            } catch (Exception ignore) {
-            }
-        }
-        // In production, you may want to write to HttpServletResponse for download
-    }
-
-    // Helper to build TimePeriodInfo for a week in a month
-    private TimePeriodInfo buildWeekTimePeriodInfo(TimePeriodInfo monthInfo, int week) {
-        LocalDate firstDay = Instant.ofEpochMilli(monthInfo.getStartDate())
-                .atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate lastDay = Instant.ofEpochMilli(monthInfo.getEndDate())
-                .atZone(ZoneId.systemDefault()).toLocalDate();
-        WeekFields weekFields = WeekFields.of(Locale.getDefault());
-        LocalDate weekStart = null, weekEnd = null;
-        for (LocalDate d = firstDay; !d.isAfter(lastDay); d = d.plusDays(1)) {
-            int weekOfMonth = d.get(weekFields.weekOfMonth());
-            if (weekOfMonth == week) {
-                if (weekStart == null)
-                    weekStart = d;
-                weekEnd = d;
-            }
-        }
-        if (weekStart == null || weekEnd == null)
-            return null;
-        long startMillis = weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long endMillis = weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return new TimePeriodInfo(false, week, monthInfo.getMonth(), monthInfo.getYear(),
-                (long) (weekEnd.toEpochDay() - weekStart.toEpochDay() + 1), startMillis, endMillis);
-    }
-
-    @Override
     public void exportExcelToResponse(GroupEfficiencyRequestDto requestDto,
             HttpServletResponse response) {
         String fileName = "Data.xlsx";
@@ -623,7 +473,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     timePeriodInfo.getMonth() + "-"
                     + timePeriodInfo.getYear() + ".xlsx";
             for (int week = 1; week <= 4; week++) {
-                TimePeriodInfo weekInfo = buildWeekTimePeriodInfo(timePeriodInfo, week);
+                TimePeriodInfo weekInfo = TimeRange.buildWeekTimePeriodInfo(timePeriodInfo, week);
                 if (weekInfo == null)
                     continue;
                 GroupEfficiencyRequestDto weekDto = new GroupEfficiencyRequestDto();
@@ -632,8 +482,14 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                         .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
                 weekDto.setEndDate(Instant.ofEpochMilli(weekInfo.getEndDate())
                         .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                GroupEfficiencyRequestDto weekDtotemp = new GroupEfficiencyRequestDto();
+                weekDtotemp.setGroupId(requestDto.getGroupId());
+                weekDtotemp.setStartDate(Instant.ofEpochMilli(weekInfo.getStartDate())
+                        .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                weekDtotemp.setEndDate(Instant.ofEpochMilli(weekInfo.getEndDate())
+                        .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
                 TotalRunTimeResponse stats = getTotalRunTime(weekDto);
-                GroupEfficiencyResponseDto eff = groupEfficiencyService.getGroupEfficiency(weekDto);
+                GroupEfficiencyResponseDto eff = groupEfficiencyService.getGroupEfficiency(weekDtotemp);
                 Row row = sheet.createRow(rowIdx++);
                 row.createCell(0).setCellValue("Week " + week);
                 row.createCell(1).setCellValue(stats.getRunTimeOfMainProduct() + stats.getRunTimeOfRerun()

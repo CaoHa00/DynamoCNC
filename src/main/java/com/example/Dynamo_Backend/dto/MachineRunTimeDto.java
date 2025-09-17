@@ -1,4 +1,4 @@
-package com.example.Dynamo_Backend.repository.dto;
+package com.example.Dynamo_Backend.dto;
 
 public interface MachineRunTimeDto {
     Integer getMachineId();

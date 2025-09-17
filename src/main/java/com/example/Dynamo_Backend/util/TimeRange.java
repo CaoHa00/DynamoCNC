@@ -97,4 +97,27 @@ public class TimeRange {
                     previousStartTime, previousEndTime);
         }
     }
+
+    public static TimePeriodInfo buildWeekTimePeriodInfo(TimePeriodInfo monthInfo, int week) {
+        LocalDate firstDay = Instant.ofEpochMilli(monthInfo.getStartDate())
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate lastDay = Instant.ofEpochMilli(monthInfo.getEndDate())
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        LocalDate weekStart = null, weekEnd = null;
+        for (LocalDate d = firstDay; !d.isAfter(lastDay); d = d.plusDays(1)) {
+            int weekOfMonth = d.get(weekFields.weekOfMonth());
+            if (weekOfMonth == week) {
+                if (weekStart == null)
+                    weekStart = d;
+                weekEnd = d;
+            }
+        }
+        if (weekStart == null || weekEnd == null)
+            return null;
+        long startMillis = weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long endMillis = weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return new TimePeriodInfo(false, week, monthInfo.getMonth(), monthInfo.getYear(),
+                (long) (weekEnd.toEpochDay() - weekStart.toEpochDay() + 1), startMillis, endMillis);
+    }
 }
