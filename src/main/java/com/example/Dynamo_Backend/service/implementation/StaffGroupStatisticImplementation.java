@@ -1,10 +1,21 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -223,6 +234,60 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             }
         }
         return overviewDtos;
+    }
+
+    public void calculateDataByDay(GroupEfficiencyRequestDto requestDto) {
+        String startDate = requestDto.getStartDate().concat(" 00:00:00");
+        String endDate = requestDto.getEndDate().concat(" 23:59:59");
+        requestDto.setStartDate(startDate);
+        requestDto.setEndDate(endDate);
+        HashMap<String, String> exportData = new HashMap<>();
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+        int i = 0;
+        while (i < timePeriodInfo.getDay()) {
+            Float workingHours = 0f;
+            Integer manufacturingPoint = 0;
+            Integer process = 0;
+            Float stopHour = 0f;
+            Float pgTime = 0f;
+
+        }
+
+        List<StaffKpi> staffKpiList = staffKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+
+    }
+
+    @Override
+    public ByteArrayInputStream exportExcel(GroupEfficiencyRequestDto requestDto) throws IOException {
+        List<String[]> data = Arrays.asList(
+                new String[] { "ID", "Name", "Email" },
+                new String[] { "1", "Alice", "alice@example.com" },
+                new String[] { "2", "Bob", "bob@example.com" });
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Sheet sheet = workbook.createSheet("Data");
+
+            // Create header
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < data.get(0).length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(data.get(0)[i]);
+            }
+
+            // Fill rows
+            for (int i = 1; i < data.size(); i++) {
+                Row row = sheet.createRow(i);
+                for (int j = 0; j < data.get(i).length; j++) {
+                    row.createCell(j).setCellValue(data.get(i)[j]);
+                }
+            }
+
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        }
+
     }
 
 }

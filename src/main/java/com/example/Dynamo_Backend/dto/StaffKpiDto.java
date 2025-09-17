@@ -29,8 +29,8 @@ public class StaffKpiDto {
     private String groupName;
     private Integer staffStatus;
 
-    public StaffKpiDto(String staffId, String staffName) {
-        this.staffId = staffId;
+    public StaffKpiDto(Integer Id, String staffName) {
+        this.Id = Id;
         this.staffName = staffName;
     }
 }
