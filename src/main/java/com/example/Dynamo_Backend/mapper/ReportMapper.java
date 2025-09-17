@@ -25,7 +25,7 @@ public class ReportMapper {
 
     public static Report mapToReport(ReportDto reportDto) {
         Report report = new Report();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate localDate = LocalDate.parse(reportDto.getDateTime(), formatter);
         long timestamp = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         report.setDateTime(timestamp);

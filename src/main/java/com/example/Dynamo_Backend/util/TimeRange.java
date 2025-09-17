@@ -26,7 +26,7 @@ public class TimeRange {
             throw new BusinessException("Invalid date range");
         }
         if (days <= 7) {
-            int weekOfMonth = end.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
                     endTimestamp);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
@@ -48,7 +48,7 @@ public class TimeRange {
             throw new BusinessException("Invalid date range");
         }
         if (days <= 7) {
-            int weekOfMonth = end.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
                     endTimestamp);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
@@ -96,5 +96,28 @@ public class TimeRange {
             return new TimePeriodInfo(false, previousWeek, previousMonth, previousYear, dto.getDay(),
                     previousStartTime, previousEndTime);
         }
+    }
+
+    public static TimePeriodInfo buildWeekTimePeriodInfo(TimePeriodInfo monthInfo, int week) {
+        LocalDate firstDay = Instant.ofEpochMilli(monthInfo.getStartDate())
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate lastDay = Instant.ofEpochMilli(monthInfo.getEndDate())
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        LocalDate weekStart = null, weekEnd = null;
+        for (LocalDate d = firstDay; !d.isAfter(lastDay); d = d.plusDays(1)) {
+            int weekOfMonth = d.get(weekFields.weekOfMonth());
+            if (weekOfMonth == week) {
+                if (weekStart == null)
+                    weekStart = d;
+                weekEnd = d;
+            }
+        }
+        if (weekStart == null || weekEnd == null)
+            return null;
+        long startMillis = weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long endMillis = weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return new TimePeriodInfo(false, week, monthInfo.getMonth(), monthInfo.getYear(),
+                (long) (weekEnd.toEpochDay() - weekStart.toEpochDay() + 1), startMillis, endMillis);
     }
 }

@@ -15,10 +15,13 @@ import com.example.Dynamo_Backend.dto.ResponseDto.StaffDetailStatisticDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.StaffWorkingStatisticDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.GroupKpi;
+import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.OperateHistory;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
 import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.StaffDetailStatisticService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
@@ -170,10 +173,31 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
 
         TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
 
-        Staff staff = staffRepository.findByStaffId(requestDto.getId())
-                .orElseThrow(() -> new BusinessException("Staff not found when get staff detail statistic"));
-        StaffKpi staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(
-                staff.getId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+        Staff staff = null;
+        StaffKpi staffKpi = null;
+        List<StaffKpi> staffKpis;
+
+        if (requestDto.getId() == null) {
+            staffKpis = staffKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                    requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+
+            staff = staffRepository.findById(staffKpis.get(0).getStaff().getId())
+                    .orElseThrow(() -> new BusinessException(
+                            "Machine not found when get detail statistic with ID: "
+                                    + requestDto.getId()));
+        } else {
+
+            staff = staffRepository.findByStaffId(requestDto.getId())
+                    .orElseThrow(() -> new BusinessException(
+                            "Staff not found when get detail statistic with ID: "
+                                    + requestDto.getId()));
+            staffKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(
+                    staff.getId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+            staffKpis = staffKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                    staffKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
+                    timePeriodInfo.getYear());
+        }
+
         GroupKpi groupKpi;
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
@@ -224,7 +248,7 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
                     Math.round(ole * 100.0) / 100.0f,
                     0f,
                     Math.round(kpi * 100.0) / 100.0f,
-                    0f);
+                    0f, staffKpis.stream().map(StaffKpiMapper::mapToStaffDto).toList());
         }
         StaffWorkingStatisticDto staffWorkingStatisticDto = new StaffWorkingStatisticDto(
                 staff.getStaffId(),
@@ -238,7 +262,8 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
                 Math.round(ole * 100.0) / 100.0f,
                 Math.round(staffKpi.getOleGoal() * 100.0) / 100.0f,
                 Math.round(kpi * 100.0) / 100.0f,
-                Math.round(staffKpi.getKpi() * 100.0) / 100.0f);
+                Math.round(staffKpi.getKpi() * 100.0) / 100.0f,
+                staffKpis.stream().map(StaffKpiMapper::mapToStaffDto).toList());
         return staffWorkingStatisticDto;
     }
 }

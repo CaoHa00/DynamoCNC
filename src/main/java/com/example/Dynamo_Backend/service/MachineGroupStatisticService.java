@@ -2,11 +2,13 @@ package com.example.Dynamo_Backend.service;
 
 import java.util.List;
 
+import com.example.Dynamo_Backend.dto.MachineRunTimeDto;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineGroupOverviewDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineGroupStatisticDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.TotalRunTimeResponse;
-import com.example.Dynamo_Backend.repository.dto.MachineRunTimeDto;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface MachineGroupStatisticService {
     MachineGroupStatisticDto getGroupStatistic(GroupEfficiencyRequestDto requestDto);
@@ -17,6 +19,6 @@ public interface MachineGroupStatisticService {
 
     List<MachineRunTimeDto> getTop5GroupOverview(GroupEfficiencyRequestDto requestDto);
 
-    void exportExcel(GroupEfficiencyRequestDto requestDto);
+    void exportExcelToResponse(GroupEfficiencyRequestDto requestDto, HttpServletResponse response);
 
 }

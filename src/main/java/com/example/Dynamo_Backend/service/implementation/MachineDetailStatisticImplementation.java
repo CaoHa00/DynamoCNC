@@ -1,8 +1,16 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +30,16 @@ import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
-import com.example.Dynamo_Backend.repository.LogRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
-import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 import com.example.Dynamo_Backend.util.TimeRange;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class MachineDetailStatisticImplementation implements MachineDetailStatisticService {
@@ -42,8 +50,6 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         private MachineKpiRepository machineKpiRepository;
 
         @Autowired
-        private LogRepository logRepository;
-
         private CurrentStatusRepository currentStatusRepository;
 
         @Autowired
@@ -57,14 +63,11 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 Machine machine = machineRepository.findById(machineId)
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail statistic with ID: " + machineId));
-                // get logs in time range
+
                 List<Log> logs = machine.getLogs().stream()
                                 .filter(log -> log.getTimeStamp() >= timePeriodInfo.getStartDate()
                                                 && log.getTimeStamp() <= timePeriodInfo.getEndDate())
                                 .toList();
-
-                // logs.sort((log1, log2) -> Long.compare(log1.getTimeStamp(),
-                // log2.getTimeStamp()));
 
                 Float totalRunTime = 0f;
                 Float totalStopTime = 0f;
@@ -234,8 +237,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 GroupKpi groupKpi = null;
 
                 Machine machine = null;
-                MachineKpi machineKpi;
-                List<MachineKpi> machines;
+                MachineKpi machineKpi = null;
+                List<MachineKpi> machines = null;
 
                 if (requestDto.getId() == null) {
                         machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
@@ -252,9 +255,11 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                                                         + requestDto.getId()));
                         machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
                                         machine.getMachineId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
-                        machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
-                                        machineKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
-                                        timePeriodInfo.getYear());
+                        if (machineKpi != null) {
+                                machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                                                machineKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
+                                                timePeriodInfo.getYear());
+                        }
                 }
 
                 // MachineKpi machineKpi =
@@ -309,10 +314,138 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 if (operationalEfficiency > 0 && pgEfficiency > 0 && valueEfficiency > 0) {
                         oee = operationalEfficiency * pgEfficiency * valueEfficiency / 10000;
                 }
+                if (machines == null)
+                        machines = new ArrayList<>();
 
                 return new MachineEfficiencyResponseDto(machine.getMachineId(), machine.getMachineName(),
                                 operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss,
                                 machines.stream().map(MachineKpiMapper::mapToMachineDto).toList());
+        }
+
+        @Override
+        public void exportExcelToResponse(StatisticRequestDto requestDto, HttpServletResponse response) {
+                String fileName = "Data.xlsx";
+                String title = "";
+                String startDate = requestDto.getStartDate().concat(" 00:00:00");
+                String endDate = requestDto.getEndDate().concat(" 23:59:59");
+                requestDto.setStartDate(startDate);
+                requestDto.setEndDate(endDate);
+                Machine machine = machineRepository.findById(requestDto.getId())
+                                .orElseThrow(() -> new BusinessException(
+                                                "Machine not found when get detail statistic with ID: "
+                                                                + requestDto.getId()));
+                TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+                Workbook workbook = new XSSFWorkbook();
+                Sheet sheet = workbook.createSheet("Thống kê máy");
+                int rowIdx = 5;
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                DateTimeFormatter exportDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+                Row headerRow = sheet.createRow(rowIdx++);
+                headerRow.createCell(0).setCellValue("Thời gian");
+                headerRow.createCell(1).setCellValue("Giờ chạy");
+                headerRow.createCell(2).setCellValue("Giờ chạy PG ");
+                headerRow.createCell(3).setCellValue("Giờ chạy Offset ");
+                headerRow.createCell(4).setCellValue("Giờ Dừng ");
+                headerRow.createCell(5).setCellValue("Giờ Lỗi ");
+                headerRow.createCell(6).setCellValue("Hiệu suất vận hành");
+                headerRow.createCell(7).setCellValue("Hiệu suất PG");
+                headerRow.createCell(8).setCellValue("Hiệu suất Giá trị");
+                headerRow.createCell(9).setCellValue("OEE");
+                headerRow.createCell(10).setCellValue("Tổn thất Offset");
+                headerRow.createCell(11).setCellValue("Tổn thất khác");
+
+                if (timePeriodInfo.isMonth()) {
+                        title = "Thống kê máy " + machine.getMachineId() + " tháng " +
+                                        timePeriodInfo.getMonth() + "/"
+                                        + timePeriodInfo.getYear() + ".xlsx";
+                        for (int week = 1; week <= 4; week++) {
+                                TimePeriodInfo weekInfo = TimeRange.buildWeekTimePeriodInfo(timePeriodInfo, week);
+                                if (weekInfo == null)
+                                        continue;
+                                MachineDetailStatisticDto stats = calculateMachineTime(requestDto.getId(), weekInfo);
+                                StatisticRequestDto weekDto = requestDto;
+                                weekDto.setStartDate(Instant.ofEpochMilli(weekInfo.getStartDate())
+                                                .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                                weekDto.setEndDate(Instant.ofEpochMilli(weekInfo.getEndDate())
+                                                .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
+                                MachineEfficiencyResponseDto eff = getMachineEfficiency(weekDto);
+                                Row row = sheet.createRow(rowIdx++);
+                                row.createCell(0).setCellValue("Tuần " + week);
+                                row.createCell(1)
+                                                .setCellValue(stats.getTotalRunTime());
+                                row.createCell(2).setCellValue(stats.getTotalPgTime());
+                                row.createCell(3).setCellValue(stats.getTotalOffsetTime());
+                                row.createCell(4).setCellValue(stats.getTotalStopTime());
+                                row.createCell(5).setCellValue(stats.getTotalErrorTime());
+                                row.createCell(6).setCellValue(eff.getOperationalEfficiency());
+                                row.createCell(7).setCellValue(eff.getPgEfficiency());
+                                row.createCell(8).setCellValue(eff.getValueEfficiency());
+                                row.createCell(9).setCellValue(eff.getOee());
+                                row.createCell(10).setCellValue(eff.getOffsetLoss());
+                                row.createCell(11).setCellValue(eff.getOtherLoss());
+                        }
+                } else if (timePeriodInfo.getDay() <= 7) {
+                        title = "Thống kê máy " + machine.getMachineId() + " "
+                                        + Instant.ofEpochMilli(timePeriodInfo.getStartDate())
+                                                        .atZone(ZoneId.systemDefault()).toLocalDate()
+                                                        .format(exportDateFormatter)
+                                        + " - "
+                                        + Instant.ofEpochMilli(timePeriodInfo.getEndDate())
+                                                        .atZone(ZoneId.systemDefault()).toLocalDate()
+                                                        .format(exportDateFormatter)
+                                        + ".xlsx";
+                        long days = timePeriodInfo.getDay();
+                        LocalDate start = Instant.ofEpochMilli(timePeriodInfo.getStartDate())
+                                        .atZone(ZoneId.systemDefault()).toLocalDate();
+                        for (int i = 0; i < days; i++) {
+                                LocalDate day = start.plusDays(i);
+                                StatisticRequestDto dayDto = new StatisticRequestDto();
+                                dayDto.setId(requestDto.getId());
+                                dayDto.setGroupId(requestDto.getGroupId());
+                                dayDto.setStartDate(day.format(dateFormatter));
+                                dayDto.setEndDate(day.format(dateFormatter));
+                                MachineEfficiencyResponseDto eff = getMachineEfficiency(dayDto);
+
+                                TimePeriodInfo dayInfo = TimeRange.getRangeTypeAndWeek(dayDto);
+                                MachineDetailStatisticDto stats = calculateMachineTime(requestDto.getId(), dayInfo);
+                                Row row = sheet.createRow(rowIdx++);
+                                row.createCell(0).setCellValue(day.format(dateFormatter));
+                                row.createCell(1).setCellValue(stats.getTotalRunTime());
+                                row.createCell(2).setCellValue(stats.getTotalPgTime());
+                                row.createCell(3).setCellValue(stats.getTotalOffsetTime());
+                                row.createCell(4).setCellValue(stats.getTotalStopTime());
+                                row.createCell(5).setCellValue(stats.getTotalErrorTime());
+                                row.createCell(6).setCellValue(eff.getOperationalEfficiency());
+                                row.createCell(7).setCellValue(eff.getPgEfficiency());
+                                row.createCell(8).setCellValue(eff.getValueEfficiency());
+                                row.createCell(9).setCellValue(eff.getOee());
+                                row.createCell(10).setCellValue(eff.getOffsetLoss());
+                                row.createCell(11).setCellValue(eff.getOtherLoss());
+                        }
+                }
+                Row titleRow = sheet.createRow(1);
+                titleRow.createCell(4).setCellValue(title.replace(".xlsx", ""));
+                try {
+                        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                        workbook.write(response.getOutputStream());
+                        response.flushBuffer();
+                } catch (Exception e) {
+                        e.printStackTrace();
+                } finally {
+                        try {
+                                workbook.close();
+                        } catch (Exception ignore) {
+                        }
+                }
+        }
+
+        @Override
+        public void exportExcelGroupMachinesToResponse(StatisticRequestDto requestDto,
+                        HttpServletResponse response) {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'exportExcelGroupMachinesToResponse'");
         }
 
 }

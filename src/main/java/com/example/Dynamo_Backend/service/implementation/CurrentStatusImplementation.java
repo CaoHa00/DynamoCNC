@@ -70,7 +70,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         currentStatus.setStatus(arr[1]);
 
         if (arr.length < 3) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
             String nowStr = LocalDateTime.now().format(formatter);
             currentStatus.setTime(nowStr);
         } else {

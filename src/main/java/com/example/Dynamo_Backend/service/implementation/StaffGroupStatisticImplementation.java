@@ -1,10 +1,22 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +36,7 @@ import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.service.GroupStatisticService;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 import com.example.Dynamo_Backend.util.TimeRange;
 
 @Service
@@ -223,6 +236,121 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             }
         }
         return overviewDtos;
+    }
+
+    public HashMap<String, List<StaffGroupOverviewDto>> calculateDataByDay(GroupEfficiencyRequestDto requestDto) {
+        String startDate = requestDto.getStartDate().concat(" 00:00:00");
+        String endDate = requestDto.getEndDate().concat(" 23:59:59");
+        requestDto.setStartDate(startDate);
+        requestDto.setEndDate(endDate);
+
+        HashMap<String, StaffGroupOverviewDto> exportData = new HashMap<>();
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+        long i = 0;
+        if (timePeriodInfo.getDay() <= 7) {
+            i = 1;
+        } else if (timePeriodInfo.getDay() > 7 && timePeriodInfo.getDay() <= 31) {
+            i = 7;
+        } else {
+            i = timePeriodInfo.getDay() / 12;
+        }
+        HashMap<String, List<StaffGroupOverviewDto>> overviewDtos = aggregateDataForPeriod(requestDto.getGroupId(),
+                timePeriodInfo, i,
+                requestDto);
+        return overviewDtos;
+    }
+
+    private HashMap<String, List<StaffGroupOverviewDto>> aggregateDataForPeriod(String groupId,
+            TimePeriodInfo timePeriodInfo, long days, GroupEfficiencyRequestDto requestDto) {
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate().substring(0, 10));
+        LocalDate endDate = LocalDate.parse(requestDto.getEndDate().substring(0, 10));
+
+        HashMap<String, List<StaffGroupOverviewDto>> map = new HashMap<>();
+        // Example: adjust repository query
+        List<StaffKpi> staffKpiList = staffKpiRepository.findByGroup_groupIdAndMonthAndYear(groupId,
+                timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+        LocalDate date = startDate;
+        for (; date.getDayOfMonth() <= endDate.getDayOfMonth();) {
+            List<StaffGroupOverviewDto> overviewDtos = new ArrayList<>();
+            Long startTimestamp = DateTimeUtil.convertStringToTimestamp(requestDto.getStartDate());
+            Long endTimestamp = DateTimeUtil.convertStringToTimestamp(requestDto.getEndDate());
+            for (StaffKpi staffKpi : staffKpiList) {
+                float totalWorkingHours = 0f;
+                float totalMachineTime = 0f;
+                int totalManufactoringPoints = 0;
+                Float totalPgTime = 0f;
+                Set<String> uniqueProcesses = new HashSet<>();
+                List<OperateHistory> operateHistories = operateHistoryRepository
+                        .findByStaff_Id(staffKpi.getStaff().getId());
+                StaffGroupOverviewDto dtos = new StaffGroupOverviewDto();
+                dtos.setStaffIdNumber(staffKpi.getStaff().getStaffId());
+                dtos.setStaffFullName(staffKpi.getStaff().getStaffName());
+                if (!operateHistories.isEmpty()) {
+                    for (OperateHistory operateHistory : operateHistories) {
+                        if (operateHistory.getStopTime() >= startTimestamp
+                                && operateHistory.getStopTime() <= endTimestamp) {
+                            totalManufactoringPoints += operateHistory.getManufacturingPoint();
+                            totalPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
+                            totalWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime())
+                                    / 3600000f;
+                            totalMachineTime += (operateHistory.getStopTime() - operateHistory.getStartTime())
+                                    / 3600000f;
+                            uniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
+                        }
+                    }
+                }
+                Float kpi = 0f;
+                if (totalPgTime != 0f) {
+                    kpi = totalManufactoringPoints * 6 / totalPgTime;
+                }
+                overviewDtos = new ArrayList<>();
+                overviewDtos.add(new StaffGroupOverviewDto(
+                        staffKpi.getStaff().getId(),
+                        staffKpi.getStaff().getStaffId(),
+                        staffKpi.getStaff().getStaffName(),
+                        staffKpi.getWorkGoal(),
+                        totalWorkingHours,
+                        staffKpi.getManufacturingPoint(),
+                        totalManufactoringPoints,
+                        uniqueProcesses.size(), staffKpi.getOleGoal(), 0f,
+                        staffKpi.getKpi(), kpi, staffKpi.getMachineTimeGoal(), totalMachineTime,
+                        staffKpi.getPgTimeGoal(), totalPgTime));
+            }
+
+            date = date.plusDays(days);
+            map.put(date.toString(), overviewDtos);
+        }
+        return map;
+    }
+
+    @Override
+    public ByteArrayInputStream exportExcel(GroupEfficiencyRequestDto requestDto) throws IOException {
+        HashMap<String, List<StaffGroupOverviewDto>> overviewDtos = calculateDataByDay(requestDto);
+        String[] headers = { "Ngày", "Tên Nhân Viên", "Mã nhân viên", };
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Sheet sheet = workbook.createSheet("Data");
+
+            // Create header
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(headers[i]);
+            }
+
+            // Fill rows
+            // for (int i = 1; i < data.size(); i++) {
+            // Row row = sheet.createRow(i);
+            // for (int j = 0; j < data.get(i).length; j++) {
+            // row.createCell(j).setCellValue(data.get(i)[j]);
+            // }
+            // }
+
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        }
+
     }
 
 }

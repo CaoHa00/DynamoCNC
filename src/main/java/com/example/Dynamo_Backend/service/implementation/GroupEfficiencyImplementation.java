@@ -11,22 +11,21 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.GroupEfficiencyResponseDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
+import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
-import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
-import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
-import com.example.Dynamo_Backend.mapper.MachineMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
+import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.service.GroupEfficiencyService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
+import com.example.Dynamo_Backend.util.TimeRange;
 
 @Service
 public class GroupEfficiencyImplementation implements GroupEfficiencyService {
@@ -36,6 +35,9 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
     @Autowired
     GroupKpiRepository groupKpiRepository;
 
+    @Autowired
+    private GroupRepository groupRepository;
+
     @Override
     public GroupEfficiencyResponseDto getGroupEfficiency(GroupEfficiencyRequestDto requestDto) {
         String startDate = requestDto.getStartDate().concat(" 00:00:00"); // Should be "2025-07-21"
@@ -43,7 +45,7 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         requestDto.setStartDate(startDate);
         requestDto.setEndDate(endDate);
 
-        TimePeriodInfo timePeriodInfo = getRangeTypeAndWeek(requestDto);
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
         List<MachineKpi> kpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
                 requestDto.getGroupId(),
                 timePeriodInfo.getMonth(),
@@ -62,6 +64,8 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         Float mainAndElectricProductPgTime = 0f;
         Float otherProductPgTime = 0f;
         GroupKpi groupKpi = null;
+        Group group = groupRepository.findById(requestDto.getGroupId())
+                .orElseThrow(() -> new BusinessException("Group not found with id: " + requestDto.getGroupId()));
 
         for (MachineKpi kpi : kpiList) {
             List<DrawingCodeProcess> processes = kpi.getMachine().getDrawingCodeProcesses();
@@ -87,14 +91,14 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
-                    .orElseThrow(() -> new BusinessException("Group KPI not found"));
+                    .orElseGet(GroupKpi::new);
         } else {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndMonthAndYear(
                     requestDto.getGroupId(), timePeriodInfo.getWeek(), timePeriodInfo.getMonth(),
-                    timePeriodInfo.getYear()).orElseThrow(() -> new BusinessException("Group KPI not found"));
+                    timePeriodInfo.getYear()).orElseGet(GroupKpi::new);
         }
         if (numberOfMachine > 0) {
-            if (numberOfMachine > 0 && groupKpi.getWorkingHour() > 0) {
+            if (numberOfMachine > 0 && groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() > 0) {
                 operationalEfficiency = (totalRunTime / (numberOfMachine * groupKpi.getWorkingHour())) * 100;
             }
             if (totalRunTime > 0) {
@@ -112,19 +116,19 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
             }
         }
 
-        return new GroupEfficiencyResponseDto(groupKpi.getGroup().getGroupId(), groupKpi.getGroup().getGroupName(),
+        return new GroupEfficiencyResponseDto(group.getGroupId(), group.getGroupName(),
                 operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss);
     }
 
     @Override
     public TimePeriodInfo getRangeTypeAndWeek(GroupEfficiencyRequestDto dto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
         long days = ChronoUnit.DAYS.between(start, end) + 1;
         Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
         Long endTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getEndDate());
-        if (days < 1 || days > 31) {
+        if (days > 31) {
             throw new BusinessException("Invalid date range");
         }
         if (days <= 7 && start.getMonth() == end.getMonth()) {
