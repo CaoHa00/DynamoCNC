@@ -39,4 +39,12 @@ public class StaffDetailStatisticController {
         StaffWorkingStatisticDto workingStatisticDto = staffDetailStatisticService.getStaffWorkingStatistic(requestDto);
         return ResponseEntity.ok(workingStatisticDto);
     }
+
+    @PostMapping("/detail")
+    public ResponseEntity<StaffWorkingStatisticDto> getStaffWorkingStatisticDetail(
+            @RequestBody StatisticRequestDto requestDto) {
+        StaffWorkingStatisticDto workingStatisticDto = staffDetailStatisticService.getStaffWorkingStatistic(requestDto);
+        return ResponseEntity.ok(workingStatisticDto);
+    }
+
 }

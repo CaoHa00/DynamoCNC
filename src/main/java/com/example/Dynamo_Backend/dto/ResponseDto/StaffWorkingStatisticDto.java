@@ -1,5 +1,9 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
+import java.util.List;
+
+import com.example.Dynamo_Backend.dto.StaffKpiDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +24,6 @@ public class StaffWorkingStatisticDto {
     private Float oleGoal;
     private Float kpi;
     private Float kpiGoal;
+
+    private List<StaffKpiDto> staffDto;
 }
