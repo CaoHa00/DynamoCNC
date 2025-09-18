@@ -30,6 +30,8 @@ public interface DrawingCodeProcessService {
 
         List<DrawingCodeProcessResponseDto> getAllTodoProcesses();
 
+        List<DrawingCodeProcessResponseDto> getAll();
+
         List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned);
 
         void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);

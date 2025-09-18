@@ -71,7 +71,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
                 drawingCodeProcess.setProcessStatus(1);
-                drawingCodeProcess.setIsPlan(0);
+                drawingCodeProcess.setIsPlan(drawingCodeProcessDto.getIsPlan());
                 // check if it is added by manager or staff
                 if (drawingCodeProcess.getIsPlan() == 0) {
                         Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId()).orElse(null);
@@ -801,4 +801,21 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
                 return response;
         }
+
+        @Override
+        public List<DrawingCodeProcessResponseDto> getAll() {
+                List<DrawingCodeProcess> all = drawingCodeProcessRepository.findAll();
+                // List<DrawingCodeProcess> todoProcesses = new ArrayList<>();
+                return all.stream().map(process -> {
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapToOrderDetailDto(process.getOrderDetail());
+                        Machine machine = process.getMachine();
+                        MachineDto machineDto = (machine != null)
+                                        ? MachineMapper.mapToMachineDto(machine)
+                                        : null;
+                        PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, null, planDto, null);
+                }).toList();
+        }
+
 }
