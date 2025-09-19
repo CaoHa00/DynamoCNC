@@ -49,4 +49,7 @@ public interface DrawingCodeProcessService {
 
         List<DrawingCodeProcessResponseDto> getProcessByMachine(Integer machineId, Long start, Long stop);
 
+        List<DrawingCodeProcessResponseDto> getCompletedProcessWithOperateHistoryData(String staffId, Long start,
+                        Long stop);
+
 }

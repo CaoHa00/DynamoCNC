@@ -177,4 +177,19 @@ public class DrawingCodeProcessController {
         return ResponseEntity.status(HttpStatus.OK).body(processes);
     }
 
+    @GetMapping("/completed-with-history")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getCompletedProcessWithOperateHistoryData(
+            @RequestParam(name = "staff_id", required = false) String staffId,
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> processes = drawingCodeProcessService
+                .getCompletedProcessWithOperateHistoryData(staffId, start,
+                        stop);
+        return ResponseEntity.status(HttpStatus.OK).body(processes);
+    }
+
 }
