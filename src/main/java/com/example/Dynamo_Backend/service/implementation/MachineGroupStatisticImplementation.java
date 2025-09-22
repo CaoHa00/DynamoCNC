@@ -244,8 +244,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             Float totalRunTime = 0f;
             Float totalStopTime = 0f;
             Float totalPgTime = 0f;
-            Float totalOffsetTime = 0f;
-            Float totalSpanTime = 0f;
+            Float totalEmptyTime = 0f;
             Float totalErrorTime = 0f;
             Float pgTimeExpected = 0f;
             Integer doneProcesssCount = 0;
@@ -268,10 +267,6 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     if (process.getProcessStatus() == 3) {
                         doneProcesssCount++;
                     }
-                    ProcessTime processTime = process.getProcessTime() == null
-                            ? processTimeService.calculateProcessTime(process)
-                            : process.getProcessTime();
-                    totalSpanTime += processTime.getSpanTime();
                     pgTimeExpected += process.getPgTime();
                 }
             }
@@ -297,7 +292,13 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                                 : (next.getTimeStamp() - log.getTimeStamp());
                         break;
                     case "R2":
-                        totalOffsetTime += isLast
+                        totalRunTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    case "0":
+                        totalEmptyTime += isLast
                                 ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
                                         - log.getTimeStamp())
                                 : (next.getTimeStamp() - log.getTimeStamp());
@@ -311,12 +312,12 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 }
             }
 
-            totalRunTime = totalPgTime + totalOffsetTime;
+            totalRunTime += totalPgTime;
             overviewDto.setRunTime(totalRunTime / 3600000f);
             overviewDto.setStopTime(totalStopTime / 3600000f);
             overviewDto.setPgTime(totalPgTime / 3600000f);
-            overviewDto.setOffsetTime(totalOffsetTime / 3600000f);
-            overviewDto.setSpanTime(totalSpanTime / 3600000f);
+            overviewDto.setEmptyTime(totalEmptyTime / 3600000f);
+            overviewDto.setErrorTime(totalErrorTime / 3600000f);
             overviewDto.setPgTimeExpect(pgTimeExpected);
             overviewList.add(overviewDto);
         }
