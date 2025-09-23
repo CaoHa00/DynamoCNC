@@ -24,6 +24,6 @@ public class StaffGroupStatisticDto {
     private Float totalKpi;
     private Float kpiRate;
 
-    private List<StaffKpiDto> staff;
+    private List<StaffKpiDto> staffDto;
 
 }
