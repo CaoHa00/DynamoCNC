@@ -162,6 +162,12 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 requestDto.getGroupId(), previousTime.getMonth(), previousTime.getYear());
         Group group = groupRepository.findById(requestDto.getGroupId()).orElse(null);
         if (previousMachineKpiList.isEmpty()) {
+            currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime() / 3600000f);
+            currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime() / 3600000f);
+            currentPeriodStats.setTotalPgTime(currentPeriodStats.getTotalPgTime() / 3600000f);
+            currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime() / 3600000f);
+            currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime() / 3600000f);
+            currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime() / 3600000f);
             return new MachineGroupStatisticDto(requestDto.getGroupId(), group != null ? group.getGroupName() : "",
                     currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
                     currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
