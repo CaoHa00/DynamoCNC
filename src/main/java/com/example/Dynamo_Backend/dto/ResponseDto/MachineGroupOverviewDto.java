@@ -13,8 +13,8 @@ public class MachineGroupOverviewDto {
     private Float runTime;
     private Float stopTime;
     private Float pgTime;
-    private Float offsetTime;
-    private Float spanTime;
+    private Float emptyTime;
+    private Float errorTime;
     private Float pgTimeExpect;
     private Integer numberOfProcesses;
 }

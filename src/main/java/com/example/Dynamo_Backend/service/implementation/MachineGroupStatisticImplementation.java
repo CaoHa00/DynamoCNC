@@ -162,6 +162,12 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 requestDto.getGroupId(), previousTime.getMonth(), previousTime.getYear());
         Group group = groupRepository.findById(requestDto.getGroupId()).orElse(null);
         if (previousMachineKpiList.isEmpty()) {
+            currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime() / 3600000f);
+            currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime() / 3600000f);
+            currentPeriodStats.setTotalPgTime(currentPeriodStats.getTotalPgTime() / 3600000f);
+            currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime() / 3600000f);
+            currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime() / 3600000f);
+            currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime() / 3600000f);
             return new MachineGroupStatisticDto(requestDto.getGroupId(), group != null ? group.getGroupName() : "",
                     currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
                     currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
@@ -239,40 +245,34 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 .collect(Collectors.groupingBy(log -> log.getMachine().getMachineId()));
 
         List<MachineGroupOverviewDto> overviewList = new ArrayList<>();
-        Float totalRunTime = 0f;
-        Float totalStopTime = 0f;
-        Float totalPgTime = 0f;
-        Float totalOffsetTime = 0f;
-        Float totalSpanTime = 0f;
-        Float totalErrorTime = 0f;
-        Float pgTimeExpected = 0f;
-        Integer doneProcesssCount = 0;
-        if (logsByMachine.keySet().size() != 0) {
-            for (Integer machineId : logsByMachine.keySet()) {
-                List<Log> logs = logsByMachine.get(machineId);
-                List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
-                MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
-                overviewDto.setMachineId(machineId);
-                overviewDto.setMachineName(logs.get(0).getMachine().getMachineName());
+        for (Integer machineId : logsByMachine.keySet()) {
+            Float totalRunTime = 0f;
+            Float totalStopTime = 0f;
+            Float totalPgTime = 0f;
+            Float totalEmptyTime = 0f;
+            Float totalErrorTime = 0f;
+            Float pgTimeExpected = 0f;
+            Integer doneProcesssCount = 0;
 
-                if (!processes.isEmpty()) {
-                    for (DrawingCodeProcess process : processes) {
-                        if (process.getStartTime() == null || process.getEndTime() == null)
-                            continue;
-                        // Only consider processes in the time range
-                        if (process.getStartTime() > timePeriodInfo.getEndDate() ||
-                                process.getEndTime() < timePeriodInfo.getStartDate()) {
-                            continue;
-                        }
-                        if (process.getProcessStatus() == 3) {
-                            doneProcesssCount++;
-                        }
-                        ProcessTime processTime = process.getProcessTime() == null
-                                ? processTimeService.calculateProcessTime(process)
-                                : process.getProcessTime();
-                        totalSpanTime += processTime.getSpanTime();
-                        pgTimeExpected += process.getPgTime();
+            List<Log> logs = logsByMachine.get(machineId);
+            List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
+            MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
+            overviewDto.setMachineId(machineId);
+            overviewDto.setMachineName(logs.get(0).getMachine().getMachineName());
+
+            if (!processes.isEmpty()) {
+                for (DrawingCodeProcess process : processes) {
+                    if (process.getStartTime() == null || process.getEndTime() == null)
+                        continue;
+                    // Only consider processes in the time range
+                    if (process.getStartTime() > timePeriodInfo.getEndDate() ||
+                            process.getEndTime() < timePeriodInfo.getStartDate()) {
+                        continue;
                     }
+                    if (process.getProcessStatus() == 3) {
+                        doneProcesssCount++;
+                    }
+                    pgTimeExpected += process.getPgTime();
                 }
                 overviewDto.setNumberOfProcesses(doneProcesssCount);
 
@@ -302,6 +302,12 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                                             - log.getTimeStamp())
                                     : (next.getTimeStamp() - log.getTimeStamp());
                             break;
+                         case "0":
+                        totalEmptyTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
                         default:
                             totalStopTime += isLast
                                     ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
@@ -335,7 +341,14 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 overviewDto.setNumberOfProcesses(doneProcesssCount);
                 overviewList.add(overviewDto);
             }
-
+            totalRunTime += totalPgTime;
+            overviewDto.setRunTime(totalRunTime / 3600000f);
+            overviewDto.setStopTime(totalStopTime / 3600000f);
+            overviewDto.setPgTime(totalPgTime / 3600000f);
+            overviewDto.setEmptyTime(totalEmptyTime / 3600000f);
+            overviewDto.setErrorTime(totalErrorTime / 3600000f);
+            overviewDto.setPgTimeExpect(pgTimeExpected);
+            overviewList.add(overviewDto);
         }
 
         return overviewList;

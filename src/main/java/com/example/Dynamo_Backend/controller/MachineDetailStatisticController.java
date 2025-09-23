@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.*;
 import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
@@ -54,6 +55,18 @@ public class MachineDetailStatisticController {
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setHeader("Content-Disposition", "attachment; filename");
             machineDetailStatisticService.exportExcelToResponse(requestDto, response);
+        } catch (Exception e) {
+            response.setStatus(500);
+        }
+    }
+
+    @PostMapping("/export-excel-group")
+    public void exportExcelEachMachines(@RequestBody GroupEfficiencyRequestDto requestDto,
+            HttpServletResponse response) {
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename");
+            machineDetailStatisticService.exportExcelGroupMachinesToResponse(requestDto, response);
         } catch (Exception e) {
             response.setStatus(500);
         }
