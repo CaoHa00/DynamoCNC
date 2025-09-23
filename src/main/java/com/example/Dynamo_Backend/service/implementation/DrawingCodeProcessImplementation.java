@@ -223,8 +223,19 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                         planDto = (process.getPlan() != null)
                                                         ? PlanMapper.mapToPlanDto(process.getPlan())
                                                         : null;
+                                        List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                                                        ? process.getOperateHistories().stream().map(operate -> {
+                                                                Staff staff = staffRepository
+                                                                                .findById(operate.getStaff().getId())
+                                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                                "Staff is not found for process: "
+                                                                                                                + operate.getStaff()
+                                                                                                                                .getId()));
+                                                                return StaffMapper.mapStaffNameDto(staff);
+                                                        }).toList()
+                                                        : null;
                                         todoList.add(DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
-                                                        null, planDto, null));
+                                                        staffDtos, planDto, null));
                                 }
                         }
                         if (process.getProcessStatus() == 2
@@ -234,10 +245,21 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 planDto = (process.getPlan() != null)
                                                 ? PlanMapper.mapToPlanDto(process.getPlan())
                                                 : null;
+                                List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                                                ? process.getOperateHistories().stream().map(operate -> {
+                                                        Staff staff = staffRepository
+                                                                        .findById(operate.getStaff().getId())
+                                                                        .orElseThrow(() -> new RuntimeException(
+                                                                                        "Staff is not found for process: "
+                                                                                                        + operate.getStaff()
+                                                                                                                        .getId()));
+                                                        return StaffMapper.mapStaffNameDto(staff);
+                                                }).toList()
+                                                : null;
                                 TempProcess tempProcess = tempProcessRepository.findByProcessId(process.getProcessId());
 
                                 inProgress = DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
-                                                null, planDto, null);
+                                                staffDtos, planDto, null);
                                 inProgress.setManufacturingPoint(tempProcess.getPoint());
                                 inProgress.setPgTime(tempProcess.getPgTime());
 
@@ -307,7 +329,18 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                         : null;
                         PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
                                         : null;
-                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, null, planDto, null);
+                        List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                                        ? process.getOperateHistories().stream().map(operate -> {
+                                                Staff staff = staffRepository.findById(operate.getStaff().getId())
+                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                "Staff is not found for process: "
+                                                                                                + operate.getStaff()
+                                                                                                                .getId()));
+                                                return StaffMapper.mapStaffNameDto(staff);
+                                        }).toList()
+                                        : null;
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, staffDtos, planDto,
+                                        null);
                 }).toList();
         }
 
@@ -814,7 +847,19 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                         : null;
                         PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
                                         : null;
-                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, null, planDto, null);
+
+                        List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                                        ? process.getOperateHistories().stream().map(operate -> {
+                                                Staff staff = staffRepository.findById(operate.getStaff().getId())
+                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                "Staff is not found for process: "
+                                                                                                + operate.getStaff()
+                                                                                                                .getId()));
+                                                return StaffMapper.mapStaffNameDto(staff);
+                                        }).toList()
+                                        : null;
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, staffDtos, planDto,
+                                        null);
                 }).toList();
         }
 
