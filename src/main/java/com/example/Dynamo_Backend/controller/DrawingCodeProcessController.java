@@ -35,6 +35,12 @@ public class DrawingCodeProcessController {
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAll() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getAll();
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
     @GetMapping("/planned")
     public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllPlannedDrawingCodes() {
         List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(1);
@@ -168,6 +174,21 @@ public class DrawingCodeProcessController {
             stop = null;
         List<DrawingCodeProcessResponseDto> processes = drawingCodeProcessService.getCompletedProcess(3, start,
                 stop);
+        return ResponseEntity.status(HttpStatus.OK).body(processes);
+    }
+
+    @GetMapping("/completed-with-history")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getCompletedProcessWithOperateHistoryData(
+            @RequestParam(name = "staff_id", required = false) String staffId,
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> processes = drawingCodeProcessService
+                .getCompletedProcessWithOperateHistoryData(staffId, start,
+                        stop);
         return ResponseEntity.status(HttpStatus.OK).body(processes);
     }
 

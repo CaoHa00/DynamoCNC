@@ -81,6 +81,7 @@ public class OrderDetailStatisticImplementation implements OrderDetailStatisticS
                                 previousTotalTime += (process.getEndTime() - process.getStartTime()) / 3600000f;
                         }
                 }
+                // calculate time rate
                 timeRate = previousTotalTime == 0 ? 0f
                                 : (float) (totalTime - previousTotalTime) / previousTotalTime * 100;
 

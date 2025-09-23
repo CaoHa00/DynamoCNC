@@ -169,12 +169,20 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             String drawingCodeName = drawingCodeProcess != null
                     ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
                     : null;
+            Float pgTime = drawingCodeProcess != null
+                    ? drawingCodeProcess.getPgTime()
+                    : null;
+            Long startTime = drawingCodeProcess != null
+                    ? drawingCodeProcess.getStartTime()
+                    : null;
             machine.setMachineKpis(null);
             CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
                     currentStatus.getId(),
                     MachineMapper.mapToMachineDto(machine),
                     staffDto,
                     drawingCodeName,
+                    pgTime,
+                    startTime,
                     currentStatus.getTime(),
                     currentStatus.getStatus());
             result.add(responseDto);

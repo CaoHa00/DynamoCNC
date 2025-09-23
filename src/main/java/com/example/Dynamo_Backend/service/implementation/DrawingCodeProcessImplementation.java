@@ -71,7 +71,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setUpdatedDate(createdTimestamp);
                 drawingCodeProcess.setStatus(status);
                 drawingCodeProcess.setProcessStatus(1);
-                drawingCodeProcess.setIsPlan(0);
+                drawingCodeProcess.setIsPlan(drawingCodeProcessDto.getIsPlan());
                 // check if it is added by manager or staff
                 if (drawingCodeProcess.getIsPlan() == 0) {
                         Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId()).orElse(null);
@@ -801,4 +801,69 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
                 return response;
         }
+
+        @Override
+        public List<DrawingCodeProcessResponseDto> getAll() {
+                List<DrawingCodeProcess> all = drawingCodeProcessRepository.findAll();
+                // List<DrawingCodeProcess> todoProcesses = new ArrayList<>();
+                return all.stream().map(process -> {
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapToOrderDetailDto(process.getOrderDetail());
+                        Machine machine = process.getMachine();
+                        MachineDto machineDto = (machine != null)
+                                        ? MachineMapper.mapToMachineDto(machine)
+                                        : null;
+                        PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+                        return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, null, planDto, null);
+                }).toList();
+        }
+
+        @Override
+        public List<DrawingCodeProcessResponseDto> getCompletedProcessWithOperateHistoryData(String staffId, Long start,
+                        Long stop) {
+                List<DrawingCodeProcess> completedProcesses = drawingCodeProcessRepository
+                                .findProcessesByStaffAndTimeRange(staffId, start, stop);
+                return completedProcesses.stream().map(process -> {
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapOrderCodeDto(process.getOrderDetail());
+                        Machine machine = process.getMachine();
+                        MachineDto machineDto = (machine != null)
+                                        ? MachineMapper.mapOnlyMachineName(machine)
+                                        : null;
+                        PlanDto planDto = (process.getPlan() != null) ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+                        ProcessTimeDto processTimeDto = (process.getProcessTime() != null)
+                                        ? ProcessTimeMapper.mapToProcessTimeDto(process.getProcessTime())
+                                        : null;
+                        List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                                        ? process.getOperateHistories().stream().map(operate -> {
+                                                Staff staff = staffRepository.findById(operate.getStaff().getId())
+                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                "Staff is not found for process: "
+                                                                                                + operate.getStaff()
+                                                                                                                .getId()));
+                                                return StaffMapper.mapStaffNameDto(staff);
+                                        }).toList()
+                                        : null;
+
+                        // Get all OperateHistory for this process and sum pgTime and manufacturingPoint
+                        List<OperateHistory> histories = operateHistoryRepository
+                                        .findByDrawingCodeProcess_processIdAndStaff_Id(process.getProcessId(), staffId);
+                        Float totalPgTime = histories.stream()
+                                        .map(OperateHistory::getPgTime)
+                                        .reduce(0f, Float::sum);
+                        Integer totalManufacturingPoint = histories.stream()
+                                        .map(OperateHistory::getManufacturingPoint)
+                                        .reduce(0, Integer::sum);
+
+                        DrawingCodeProcessResponseDto dto = DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto,
+                                        process, staffDtos, planDto, processTimeDto);
+
+                        // Replace pgTime and manufacturingPoint with summed values from OperateHistory
+                        dto.setPgTime(totalPgTime);
+                        dto.setManufacturingPoint(totalManufacturingPoint);
+
+                        return dto;
+                }).toList();
+        }
+
 }

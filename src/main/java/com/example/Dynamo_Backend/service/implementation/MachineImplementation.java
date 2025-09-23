@@ -9,19 +9,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.Dynamo_Backend.dto.CurrentStaffDto;
+import com.example.Dynamo_Backend.dto.CurrentStatusDto;
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
 import com.example.Dynamo_Backend.dto.StaffKpiDto;
 import com.example.Dynamo_Backend.dto.RequestDto.MachineRequestDto;
+import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
+import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
+import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.service.CurrentStaffService;
+import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.MachineKpiService;
 import com.example.Dynamo_Backend.service.MachineService;
 
@@ -39,6 +46,10 @@ public class MachineImplementation implements MachineService {
 
     MachineKpiRepository machineKpiRepository;
     MachineKpiService machineKpiService;
+
+    CurrentStatusService currentStatusService;
+
+    CurrentStaffRepository currentStaffRepository;
 
     @Override
     public MachineDto addMachine(MachineRequestDto machineDto) {
@@ -58,6 +69,16 @@ public class MachineImplementation implements MachineService {
         // saveMachine.getMachineKpis().add(MachineKpiMapper.mapToMachineKpi(saveMachineKpiDto));
 
         MachineDto result = MachineMapper.mapToMachineDto(saveMachine);
+
+        // add current status for machine
+        CurrentStatusDto currentStatus = new CurrentStatusDto();
+        currentStatus.setMachineId(result.getMachineId());
+        currentStatus.setStatus("0");
+        currentStatusService.addCurrentStatus(currentStatus);
+
+        CurrentStaff currentStaff = new CurrentStaff();
+        currentStaff.setMachine(saveMachine);
+        currentStaffRepository.save(currentStaff);
 
         // return MachineMapper.mapToMachineDto(saveMachine);
         return result;
