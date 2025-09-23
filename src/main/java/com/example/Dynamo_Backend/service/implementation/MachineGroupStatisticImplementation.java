@@ -245,6 +245,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 .collect(Collectors.groupingBy(log -> log.getMachine().getMachineId()));
 
         List<MachineGroupOverviewDto> overviewList = new ArrayList<>();
+
         for (Integer machineId : logsByMachine.keySet()) {
             Float totalRunTime = 0f;
             Float totalStopTime = 0f;
@@ -274,73 +275,49 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                     }
                     pgTimeExpected += process.getPgTime();
                 }
-                overviewDto.setNumberOfProcesses(doneProcesssCount);
+            }
+            overviewDto.setNumberOfProcesses(doneProcesssCount);
 
-                boolean isLast = false;
-                for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
-                    Log log = logsByMachine.get(machineId).get(i);
-                    String status = log.getStatus();
+            boolean isLast = false;
+            for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
+                Log log = logsByMachine.get(machineId).get(i);
+                String status = log.getStatus();
 
-                    isLast = (i + 1 >= logsByMachine.get(machineId).size());
-                    Log next = isLast ? null : logsByMachine.get(machineId).get(i + 1);
-                    if (log.getStatus().contains("E")) {
-                        totalErrorTime += isLast
+                isLast = (i + 1 >= logsByMachine.get(machineId).size());
+                Log next = isLast ? null : logsByMachine.get(machineId).get(i + 1);
+                if (log.getStatus().contains("E")) {
+                    totalErrorTime += isLast
+                            ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis()) - log.getTimeStamp())
+                            : (next.getTimeStamp() - log.getTimeStamp());
+                }
+                switch (status) {
+                    case "R1":
+                        totalPgTime += isLast
                                 ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
                                         - log.getTimeStamp())
                                 : (next.getTimeStamp() - log.getTimeStamp());
-                    }
-                    switch (status) {
-                        case "R1":
-                            totalPgTime += isLast
-                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                            - log.getTimeStamp())
-                                    : (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                        case "R2":
-                            totalOffsetTime += isLast
-                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                            - log.getTimeStamp())
-                                    : (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                         case "0":
+                        break;
+                    case "R2":
+                        totalRunTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
+                    case "0":
                         totalEmptyTime += isLast
                                 ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
                                         - log.getTimeStamp())
                                 : (next.getTimeStamp() - log.getTimeStamp());
                         break;
-                        default:
-                            totalStopTime += isLast
-                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                            - log.getTimeStamp())
-                                    : (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                    }
+                    default:
+                        totalStopTime += isLast
+                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
+                                        - log.getTimeStamp())
+                                : (next.getTimeStamp() - log.getTimeStamp());
+                        break;
                 }
+            }
 
-                totalRunTime = totalPgTime + totalOffsetTime;
-                overviewDto.setRunTime(totalRunTime / 3600000f);
-                overviewDto.setStopTime(totalStopTime / 3600000f);
-                overviewDto.setPgTime(totalPgTime / 3600000f);
-                overviewDto.setOffsetTime(totalOffsetTime / 3600000f);
-                overviewDto.setSpanTime(totalSpanTime / 3600000f);
-                overviewDto.setPgTimeExpect(pgTimeExpected);
-                overviewList.add(overviewDto);
-            }
-        } else {
-            for (MachineKpi machineKpi : machineKpiList) {
-                MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
-                totalRunTime = totalPgTime + totalOffsetTime;
-                overviewDto.setRunTime(totalRunTime);
-                overviewDto.setStopTime(totalStopTime);
-                overviewDto.setPgTime(totalPgTime);
-                overviewDto.setOffsetTime(totalOffsetTime);
-                overviewDto.setSpanTime(totalSpanTime);
-                overviewDto.setPgTimeExpect(pgTimeExpected);
-                overviewDto.setMachineId(machineKpi.getMachine().getMachineId());
-                overviewDto.setMachineName(machineKpi.getMachine().getMachineName());
-                overviewDto.setNumberOfProcesses(doneProcesssCount);
-                overviewList.add(overviewDto);
-            }
             totalRunTime += totalPgTime;
             overviewDto.setRunTime(totalRunTime / 3600000f);
             overviewDto.setStopTime(totalStopTime / 3600000f);
@@ -350,7 +327,6 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             overviewDto.setPgTimeExpect(pgTimeExpected);
             overviewList.add(overviewDto);
         }
-
         return overviewList;
     }
 
