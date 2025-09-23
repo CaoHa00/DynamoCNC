@@ -148,8 +148,7 @@ public class StaffKpiImplementation implements StaffKpiService {
         try (InputStream inputStream = file.getInputStream();
                 Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
-
-            // ...existing code...
+            List<StaffKpi> staffKpis = new ArrayList<>();
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue; // Skip header row
@@ -191,8 +190,9 @@ public class StaffKpiImplementation implements StaffKpiService {
                 long currentTimestamp = System.currentTimeMillis();
                 staffKpi.setCreatedDate(currentTimestamp);
                 staffKpi.setUpdatedDate(currentTimestamp);
-                staffKpiRepository.save(staffKpi);
+                staffKpis.add(staffKpi);
             }
+            staffKpiRepository.saveAll(staffKpis);
         } catch (Exception e) {
             throw new RuntimeException("Failed to import staff KPI from Excel file: " + e.getMessage(), e);
         }

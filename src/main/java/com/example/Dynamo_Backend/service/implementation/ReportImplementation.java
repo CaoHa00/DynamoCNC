@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
@@ -95,6 +96,7 @@ public class ReportImplementation implements ReportService {
                         Sheet sheet = workbook.getSheetAt(0);
                         java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
                                         .ofPattern("dd/MM/yyyy");
+                        List<Report> reports = new ArrayList<>();
                         for (Row row : sheet) {
                                 if (row.getRowNum() < 6)
                                         continue; // Skip header rows
@@ -135,8 +137,9 @@ public class ReportImplementation implements ReportService {
                                                 .toInstant().toEpochMilli();
                                 report.setCreatedDate(createdDate);
 
-                                reportRepository.save(report);
+                                reports.add(report);
                         }
+                        reportRepository.saveAll(reports);
                 } catch (Exception e) {
                         throw new RuntimeException("Failed to import report from Excel file: " + e.getMessage(), e);
                 }

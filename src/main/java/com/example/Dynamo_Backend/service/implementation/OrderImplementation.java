@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
@@ -79,6 +80,7 @@ public class OrderImplementation implements OrderService {
             InputStream inputStream = ((MultipartFile) file).getInputStream();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
+            List<Order> orders = new ArrayList<>();
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue;
@@ -92,8 +94,9 @@ public class OrderImplementation implements OrderService {
                     orderDto.setPoNumber(poNumberCell.getStringCellValue());
                 }
                 orderDto.setStatus(1);
-                addOrder(orderDto);
+                orders.add(OrderMapper.mapToOrder(orderDto));
             }
+            orderRepository.saveAll(orders);
             workbook.close();
             inputStream.close();
         } catch (Exception e) {
