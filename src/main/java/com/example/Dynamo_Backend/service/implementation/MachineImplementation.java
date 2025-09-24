@@ -20,6 +20,7 @@ import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
@@ -88,7 +89,7 @@ public class MachineImplementation implements MachineService {
     @Override
     public MachineDto updateMachine(Integer Id, MachineRequestDto machineDto) {
         Machine machine = machineRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
         machine.setMachineWork(machineDto.getMachineWork());
         machine.setMachineName(machineDto.getMachineName());
@@ -109,14 +110,14 @@ public class MachineImplementation implements MachineService {
     @Override
     public MachineDto getMachineById(Integer Id) {
         Machine machine = machineRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" + Id));
         return MachineMapper.mapToMachineDto(machine);
     }
 
     @Override
     public void deleteMachine(Integer Id) {
         Machine machine = machineRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" + Id));
         machineRepository.delete(machine);
         List<MachineKpi> machineKpis = machineKpiRepository.findByMachine_machineId(Id);
         for (MachineKpi machineKpi : machineKpis) {

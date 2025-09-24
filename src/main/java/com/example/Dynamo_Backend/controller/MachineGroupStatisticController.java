@@ -51,6 +51,13 @@ public class MachineGroupStatisticController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping("/top-5-lowest")
+    public ResponseEntity<List<MachineRunTimeDto>> getTop5Lowest(
+            @RequestBody GroupEfficiencyRequestDto requestDto) {
+        List<MachineRunTimeDto> response = groupStatisticService.getTop5LowestOverview(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @PostMapping("/export-excel")
     public void exportExcel(@RequestBody GroupEfficiencyRequestDto requestDto,
             HttpServletResponse response) {

@@ -32,6 +32,8 @@ public class SecurityConfig {
                                 "/api/drawing-code-process/**")
                         .hasAnyRole("ADMIN", "USER")
                         .anyRequest().hasRole("ADMIN"))
+                .exceptionHandling(
+                        exceptionHandling -> exceptionHandling.accessDeniedHandler(new CustomAccessDeniedHandler()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -18,6 +18,7 @@ import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.OperateHistory;
+import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
@@ -77,7 +78,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus.setTime(arr[2]);
         }
         Machine machine = machineRepository.findById(machineIdInt)
-                .orElseThrow(() -> new RuntimeException("Machine is not found when find machine for currentStatus"));
+                .orElseThrow(() -> new BusinessException("Machine is not found when find machine for currentStatus"));
         logService.addLog(currentStatus, machine,
                 currentStaff != null ? currentStaff.getStaff() : null);
         currentStatusRepository.save(currentStatus);
@@ -111,7 +112,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     @Override
     public CurrentStatusDto updateCurrentStatus(String id, CurrentStatusDto currentStatusDto) {
         CurrentStatus currentStatus = currentStatusRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CurrentStatus not found with id: " + id));
+                .orElseThrow(() -> new BusinessException("CurrentStatus not found with id: " + id));
         currentStatus.setMachineId(currentStatusDto.getMachineId());
         currentStatus.setStatus(currentStatusDto.getStatus());
         currentStatus.setTime(currentStatusDto.getTime());
@@ -127,7 +128,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     @Override
     public CurrentStatusDto getCurrentStatusById(String id) {
         CurrentStatus currentStatus = currentStatusRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CurrentStatus not found with id: " + id));
+                .orElseThrow(() -> new BusinessException("CurrentStatus not found with id: " + id));
         return CurrentStatusMapper.mapToCurrentStatusDto(currentStatus);
     }
 

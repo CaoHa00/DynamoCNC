@@ -14,6 +14,7 @@ import com.example.Dynamo_Backend.dto.ResponseDto.AdminResponseDto;
 import com.example.Dynamo_Backend.entities.Admin;
 import com.example.Dynamo_Backend.entities.Role;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.AdminMapper;
 import com.example.Dynamo_Backend.repository.AdminRepository;
 import com.example.Dynamo_Backend.repository.RoleRepository;
@@ -52,12 +53,14 @@ public class AdminImplement implements AdminService {
         Set<Role> roles = new HashSet<>();
         if (requestDto.getRoles() == null || requestDto.getRoles().isEmpty()) {
             Role defaultRole = roleRepository.findByName("ROLE_USER")
-                    .orElseThrow(() -> new RuntimeException("Default role not found"));
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException(
+                                    "Default role USER not found, please check the database."));
             roles.add(defaultRole);
         } else {
             for (String roleName : requestDto.getRoles()) {
                 Role role = roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+                        .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
                 roles.add(role);
             }
         }
@@ -70,14 +73,14 @@ public class AdminImplement implements AdminService {
     @Override
     public AdminResponseDto getAdminById(String Id) {
         Admin admin = adminRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         return AdminMapper.mapToAdminResponseDto(admin);
     }
 
     @Override
     public AdminResponseDto updateAdmin(String Id, AdminRequestDto adminRequestDto) {
         Admin admin = adminRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         long updatedTimestamp = System.currentTimeMillis();
         admin.setEmail(adminRequestDto.getEmail());
         admin.setUpdatedDate(updatedTimestamp);
@@ -90,7 +93,7 @@ public class AdminImplement implements AdminService {
     @Override
     public void deleteAdmin(String Id) {
         Admin admin = adminRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         adminRepository.delete(admin);
     }
 

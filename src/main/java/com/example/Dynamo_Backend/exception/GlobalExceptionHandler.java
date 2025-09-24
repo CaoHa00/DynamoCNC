@@ -40,4 +40,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(450).body(ex.getMessage());
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(404).body(ex.getMessage());
+    }
+
 }

@@ -12,7 +12,7 @@ public class StaffKpiMapper {
     public static StaffKpi mapToStaffKpi(StaffKpiDto staffKpiDto) {
         StaffKpi staffKpi = new StaffKpi();
         // Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-        // .orElseThrow(() -> new RuntimeException("Staff is not found:" +
+        // .orElseThrow(() -> new ResourceNotFoundException("Staff is not found:" +
         // staffKpiDto.getStaffId()));
         // staffKpi.setStaff(staff);
         staffKpi.setYear(staffKpiDto.getYear());

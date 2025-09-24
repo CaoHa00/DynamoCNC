@@ -26,6 +26,9 @@ public class MachineGroupStatisticDto {
     private Float pgTimeRate;
     private Float offsetTimeRate;
     private Float spanTimeRate;
+    private Integer totalProcesses;
+    private Float processRate;
+    private Integer totalMachines;
 
     private List<MachineKpiDto> machines;
 }

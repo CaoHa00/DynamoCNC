@@ -5,6 +5,8 @@ import java.security.MessageDigest;
 
 import org.apache.commons.codec.digest.HmacUtils;
 
+import com.example.Dynamo_Backend.exception.BusinessException;
+
 public class TuyaSignatureHelper {
     public static String generateSignature(String clientId, String secret, long timestamp, String nonce, String method,
             String body, String url) {
@@ -39,7 +41,7 @@ public class TuyaSignatureHelper {
             }
             return hexString.toString();
         } catch (Exception e) {
-            throw new RuntimeException("Error generating SHA-256 hash", e);
+            throw new BusinessException("Error generating SHA-256 hash");
         }
     }
 

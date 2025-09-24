@@ -9,6 +9,7 @@ import com.example.Dynamo_Backend.dto.ProcessTimeDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.ProcessTime;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.ProcessTimeMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.LogRepository;
@@ -34,10 +35,10 @@ public class ProcessTimeImplementation implements ProcessTimeService {
     @Override
     public ProcessTimeDto updateProcessTime(Integer processTimeId, ProcessTimeDto processTimeDto) {
         ProcessTime processTime = processTimeRepository.findById(processTimeId)
-                .orElseThrow(() -> new RuntimeException("ProcessTime is not found:" + processTimeId));
+                .orElseThrow(() -> new ResourceNotFoundException("ProcessTime is not found:" + processTimeId));
         DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
                 .findById(processTimeDto.getDrawingCodeProcessId())
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "DrawingCodeProcess is not found:" + processTimeDto.getDrawingCodeProcessId()));
 
         processTime.setDrawingCodeProcess(drawingCodeProcess);
@@ -54,14 +55,14 @@ public class ProcessTimeImplementation implements ProcessTimeService {
     @Override
     public ProcessTimeDto getProcessTimeById(Integer processTimeId) {
         ProcessTime processTime = processTimeRepository.findById(processTimeId)
-                .orElseThrow(() -> new RuntimeException("ProcessTime is not found:" + processTimeId));
+                .orElseThrow(() -> new ResourceNotFoundException("ProcessTime is not found:" + processTimeId));
         return ProcessTimeMapper.mapToProcessTimeDto(processTime);
     }
 
     @Override
     public void deleteProcessTime(Integer processTimeId) {
         ProcessTime processTime = processTimeRepository.findById(processTimeId)
-                .orElseThrow(() -> new RuntimeException("ProcessTime is not found:" + processTimeId));
+                .orElseThrow(() -> new ResourceNotFoundException("ProcessTime is not found:" + processTimeId));
         processTimeRepository.delete(processTime);
     }
 
