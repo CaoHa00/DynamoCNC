@@ -122,12 +122,8 @@ public class GroupImplementation implements GroupService {
                     continue; // Skip header row
                 Group group = new Group();
 
-                group.setGroupName(row.getCell(1).getStringCellValue());
-
-                Cell typeCell = row.getCell(2);
-                Cell nameCell = row.getCell(3);
-                if (nameCell == null || nameCell.getCellType() == CellType.BLANK || typeCell == null
-                        || typeCell.getCellType() == CellType.BLANK)
+                Cell nameCell = row.getCell(2);
+                if (nameCell == null || nameCell.getCellType() == CellType.BLANK)
                     continue;
                 String groupName = nameCell.getStringCellValue().trim();
                 if (groupName.isEmpty())

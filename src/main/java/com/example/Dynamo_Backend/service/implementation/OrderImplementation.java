@@ -96,6 +96,9 @@ public class OrderImplementation implements OrderService {
                     order.setPoNumber(poNumberCell.getStringCellValue());
                 }
                 order.setStatus(1);
+                long currentTimestamp = System.currentTimeMillis();
+                order.setCreatedDate(currentTimestamp);
+                order.setUpdatedDate(currentTimestamp);
                 orders.add(order);
             }
             orderRepository.saveAll(orders);
