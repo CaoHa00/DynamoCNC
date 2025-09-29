@@ -184,4 +184,19 @@ public class GroupImplementation implements GroupService {
 
         return GroupMapper.mapToGroupResponseDto(group);
     }
+
+    @Override
+    public GroupResponseDto getGroupByStaffId(String payload) {
+        int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+        int currentYear = LocalDate.now().getYear();
+        String[] arr = payload.split("-");
+        String machineId = arr[0];
+        Integer machineIdInt = Integer.parseInt(machineId) + 1;
+        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
+        Group group = groupRepository.findLatestByStaffId(currentStatus.getStaffId(), currentMonth, currentYear)
+                .orElse(null);
+        return GroupMapper.mapToGroupResponseDto(group);
+
+    }
+
 }

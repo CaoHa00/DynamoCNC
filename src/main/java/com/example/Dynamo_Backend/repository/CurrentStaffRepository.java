@@ -6,4 +6,5 @@ import com.example.Dynamo_Backend.entities.CurrentStaff;
 
 public interface CurrentStaffRepository extends JpaRepository<CurrentStaff, Long> {
     CurrentStaff findByMachine_MachineId(Integer machineId);
+
 }

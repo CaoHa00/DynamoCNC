@@ -32,4 +32,6 @@ public interface GroupService {
 
     GroupResponseDto getGroupByMachineId(String payload);
 
+    GroupResponseDto getGroupByStaffId(String payload);
+
 }

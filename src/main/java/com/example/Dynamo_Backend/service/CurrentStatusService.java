@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.Dynamo_Backend.dto.CurrentStatusDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 
 public interface CurrentStatusService {
@@ -22,4 +23,6 @@ public interface CurrentStatusService {
     List<CurrentStatusDto> getAllCurrentStatus();
 
     List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId);
+
+    List<ListCurrentStaffStatusDto> getCurrentStaffStatusByGroupId(String groupId);
 }
