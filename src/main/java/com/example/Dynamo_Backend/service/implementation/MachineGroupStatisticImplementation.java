@@ -231,6 +231,8 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime() / 3600000f);
         currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime() / 3600000f);
         currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime() / 3600000f);
+        previousMachineKpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
         return new MachineGroupStatisticDto(group.getGroupId(), group.getGroupName(),
                 currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
                 currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),

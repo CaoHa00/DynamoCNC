@@ -24,6 +24,7 @@ import org.springframework.messaging.MessagingException;
 
 import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
 import com.example.Dynamo_Backend.event.OperateHistoryMessageEvent;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.GroupService;
@@ -85,9 +86,14 @@ public class MQTTConfig {
                     currentStatusService.addCurrentStatus(message.getPayload().toString());
                     eventPublisher.publishEvent(new OperateHistoryMessageEvent(message.getPayload().toString()));
                     GroupResponseDto groupDto = groupService.getGroupByMachineId(message.getPayload().toString());
+                    GroupResponseDto groupDto1 = groupService.getGroupByStaffId(message.getPayload().toString());
                     if (groupDto != null) {
                         List<CurrentStatusResponseDto> statusList = currentStatusService
                                 .getCurrentStatusByGroupId(groupDto.getGroupId());
+
+                        List<ListCurrentStaffStatusDto> listStaffStatus = currentStatusService
+                                .getCurrentStaffStatusByGroupId(groupDto1.getGroupId());
+
                         Map<String, Long> statusCount = groupService.getGroupCountByGroupId(groupDto.getGroupId());
                         try {
                             ObjectMapper objectMapper = new ObjectMapper();
@@ -100,6 +106,7 @@ public class MQTTConfig {
                                         }
                                     });
                             MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                            MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
 
                             // String statusCountJson = objectMapper.writeValueAsString(
                             // Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",

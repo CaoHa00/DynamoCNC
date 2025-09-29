@@ -40,4 +40,20 @@ public interface GroupRepository extends JpaRepository<Group, String> {
                         @Param("machineId") int machineId,
                         @Param("month") int month,
                         @Param("year") int year);
+
+        @Query("""
+                            SELECT g
+                            FROM Group g
+                            JOIN StaffKpi k ON g = k.group
+                            WHERE k.staff.id = :staffId
+                            ORDER BY
+                                CASE WHEN k.year = :year AND k.month = :month THEN 0 ELSE 1 END,
+                                k.year DESC,
+                                k.month DESC
+                        """)
+        Optional<Group> findLatestByStaffId(
+                        @Param("staffId") String staffId,
+                        @Param("month") int month,
+                        @Param("year") int year);
+
 }

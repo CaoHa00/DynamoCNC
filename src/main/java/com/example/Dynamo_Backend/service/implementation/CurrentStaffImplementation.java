@@ -1,18 +1,31 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.CurrentStaffDto;
+import com.example.Dynamo_Backend.dto.StaffDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.Staff;
+import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.entities.CurrentStaff;
+import com.example.Dynamo_Backend.entities.CurrentStatus;
+import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.mapper.CurrentStaffMapper;
+import com.example.Dynamo_Backend.mapper.MachineMapper;
+import com.example.Dynamo_Backend.mapper.StaffMapper;
 import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
+import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
+import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.service.CurrentStaffService;
 

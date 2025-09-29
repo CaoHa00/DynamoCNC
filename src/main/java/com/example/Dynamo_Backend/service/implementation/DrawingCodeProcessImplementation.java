@@ -17,6 +17,7 @@ import com.example.Dynamo_Backend.dto.*;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
 import com.example.Dynamo_Backend.entities.*;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
@@ -409,6 +410,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 List<CurrentStatusResponseDto> statusList = currentStatusService
                                 .getCurrentStatusByGroupId(group.getGroupId());
+                List<ListCurrentStaffStatusDto> listStaffStatus = currentStatusService
+                                .getCurrentStaffStatusByGroupId(group.getGroupId());
                 try {
                         ObjectMapper objectMapper = new ObjectMapper();
                         String jsonMessage = objectMapper.writeValueAsString(
@@ -420,6 +423,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 }
                                         });
                         MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
                 } catch (IOException e) {
                         e.printStackTrace();
                 }
@@ -516,6 +520,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .orElse(null);
                 List<CurrentStatusResponseDto> statusList = currentStatusService
                                 .getCurrentStatusByGroupId(group.getGroupId());
+                List<ListCurrentStaffStatusDto> listStaffStatus = currentStatusService
+                                .getCurrentStaffStatusByGroupId(group.getGroupId());
                 try {
                         ObjectMapper objectMapper = new ObjectMapper();
                         String jsonMessage = objectMapper.writeValueAsString(
@@ -527,6 +533,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 }
                                         });
                         MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+
                 } catch (IOException e) {
                         e.printStackTrace();
                 }
@@ -801,6 +809,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 List<CurrentStatusResponseDto> statusList = currentStatusService
                                 .getCurrentStatusByGroupId(group.getGroupId());
+                List<ListCurrentStaffStatusDto> listStaffStatus = currentStatusService
+                                .getCurrentStaffStatusByGroupId(group.getGroupId());
                 try {
                         ObjectMapper objectMapper = new ObjectMapper();
                         String jsonMessage = objectMapper.writeValueAsString(
@@ -812,6 +822,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 }
                                         });
                         MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+
                 } catch (IOException e) {
                         e.printStackTrace();
                 }

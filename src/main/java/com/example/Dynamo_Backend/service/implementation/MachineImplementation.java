@@ -77,9 +77,9 @@ public class MachineImplementation implements MachineService {
         currentStatus.setStatus("0");
         currentStatusService.addCurrentStatus(currentStatus);
 
-        CurrentStaff currentStaff = new CurrentStaff();
-        currentStaff.setMachine(saveMachine);
-        currentStaffRepository.save(currentStaff);
+        // CurrentStaff currentStaff = new CurrentStaff();
+        // currentStaff.setMachine(saveMachine);
+        // currentStaffRepository.save(currentStaff);
 
         // return MachineMapper.mapToMachineDto(saveMachine);
         return result;

@@ -80,7 +80,7 @@ public class PlanImplementation implements PlanService {
                 Plan plan = planRepository.findById(planId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Plan is not found:" + planId));
                 long updatedTimestamp = System.currentTimeMillis();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime startDateTime = LocalDateTime.parse(planDto.getStartTime(), formatter);
                 long startDateTimestamp = startDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
