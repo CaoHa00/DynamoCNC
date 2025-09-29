@@ -30,7 +30,7 @@ public class PasswordResetController {
             response.put("message", "sent");
             return ResponseEntity.ok(response);
 
-        } catch (ResourceNotFoundException e) {
+        } catch (RuntimeException e) {
             Map<String, String> response = new HashMap<>();
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);

@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import com.example.Dynamo_Backend.dto.ReportDto;
 import com.example.Dynamo_Backend.entities.Admin;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Report;
+import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.ReportMapper;
 import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.ReportService;
@@ -35,12 +38,12 @@ public class ReportImplementation implements ReportService {
                 Report report = ReportMapper.mapToReport(reportDto);
                 long createdTimestamp = System.currentTimeMillis();
                 Group group = groupRepository.findById(reportDto.getGroupId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Group is not found:" + reportDto.getGroupId()));
                 report.setGroup(group);
 
                 Admin admin = adminRepository.findById(reportDto.getAdminId())
-                                .orElseThrow(() -> new RuntimeException("Admin is not found:" +
+                                .orElseThrow(() -> new ResourceNotFoundException("Admin is not found:" +
                                                 reportDto.getAdminId()));
                 report.setAdmin(admin);
 
@@ -53,12 +56,12 @@ public class ReportImplementation implements ReportService {
         @Override
         public ReportDto updateReport(Integer reportId, ReportDto reportDto) {
                 Report report = reportRepository.findById(reportId)
-                                .orElseThrow(() -> new RuntimeException("Report is not found:" + reportId));
+                                .orElseThrow(() -> new ResourceNotFoundException("Report is not found:" + reportId));
                 Group group = groupRepository.findById(reportDto.getGroupId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Group is not found:" + reportDto.getGroupId()));
                 Admin admin = adminRepository.findById(reportDto.getAdminId())
-                                .orElseThrow(() -> new RuntimeException("Admin is not found:" +
+                                .orElseThrow(() -> new ResourceNotFoundException("Admin is not found:" +
                                                 reportDto.getAdminId()));
                 report.setAdmin(admin);
                 report.setGroup(group);
@@ -72,14 +75,14 @@ public class ReportImplementation implements ReportService {
         @Override
         public ReportDto getReportById(Integer reportId) {
                 Report report = reportRepository.findById(reportId)
-                                .orElseThrow(() -> new RuntimeException("Report is not found:" + reportId));
+                                .orElseThrow(() -> new ResourceNotFoundException("Report is not found:" + reportId));
                 return ReportMapper.maptoReportDto(report);
         }
 
         @Override
         public void deleteReport(Integer reportId) {
                 Report report = reportRepository.findById(reportId)
-                                .orElseThrow(() -> new RuntimeException("Report is not found:" + reportId));
+                                .orElseThrow(() -> new ResourceNotFoundException("Report is not found:" + reportId));
                 reportRepository.delete(report);
         }
 
@@ -94,8 +97,8 @@ public class ReportImplementation implements ReportService {
                 try (InputStream inputStream = file.getInputStream();
                                 Workbook workbook = new XSSFWorkbook(inputStream)) {
                         Sheet sheet = workbook.getSheetAt(0);
-                        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
-                                        .ofPattern("dd/MM/yyyy");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
                         List<Report> reports = new ArrayList<>();
                         for (Row row : sheet) {
                                 if (row.getRowNum() < 6)
@@ -113,7 +116,7 @@ public class ReportImplementation implements ReportService {
 
                                 String groupName = row.getCell(4).getStringCellValue();
                                 Group group = groupRepository.findByGroupName(groupName)
-                                                .orElseThrow(() -> new RuntimeException(
+                                                .orElseThrow(() -> new ResourceNotFoundException(
                                                                 "Group is not found when add report by excel: "
                                                                                 + groupName));
                                 report.setGroup(group);
@@ -126,7 +129,7 @@ public class ReportImplementation implements ReportService {
 
                                 // maybe find by email
                                 Admin admin = adminRepository.findById(adminId)
-                                                .orElseThrow(() -> new RuntimeException(
+                                                .orElseThrow(() -> new ResourceNotFoundException(
                                                                 "Admin is not found when add report by excel: "
                                                                                 + adminId));
                                 report.setAdmin(admin);
@@ -141,7 +144,8 @@ public class ReportImplementation implements ReportService {
                         }
                         reportRepository.saveAll(reports);
                 } catch (Exception e) {
-                        throw new RuntimeException("Failed to import report from Excel file: " + e.getMessage(), e);
+                        throw new BusinessException(
+                                        "Failed to import report from Excel file: " + e.getMessage());
                 }
         }
 }

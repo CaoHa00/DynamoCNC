@@ -12,6 +12,7 @@ import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.OperateHistory;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.TempProcess;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.DrawingCodeProcessMapper;
 
 import com.example.Dynamo_Backend.mapper.OperateHistoryMapper;
@@ -145,7 +146,8 @@ public class OperateHistoryImplementation implements OperateHistoryService {
         // public OperateHistoryDto updateOperateHistory(String Id, OperateHistoryDto
         // operateHistoryDto) {
         // OperateHistory operateHistory = operateHistoryRepository.findById(Id)
-        // .orElseThrow(() -> new RuntimeException("DrawingCode is not found:" + Id));
+        // .orElseThrow(() -> new ResourceNotFoundException("DrawingCode is not found:"
+        // + Id));
         // DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService
         // .getDrawingCodeProcessById(operateHistoryDto.getDrawingCodeProcessId());
         // DrawingCodeProcess updateDrawingCodeProcess = DrawingCodeProcessMapper
@@ -168,14 +170,14 @@ public class OperateHistoryImplementation implements OperateHistoryService {
         @Override
         public OperateHistoryDto getOperateHistoryById(String Id) {
                 OperateHistory operateHistory = operateHistoryRepository.findById(Id)
-                                .orElseThrow(() -> new RuntimeException("OperateHistory is not found:" + Id));
+                                .orElseThrow(() -> new ResourceNotFoundException("OperateHistory is not found:" + Id));
                 return OperateHistoryMapper.mapToOperateHistoryDto(operateHistory);
         }
 
         @Override
         public void deleteOperateHistory(String Id) {
                 OperateHistory operateHistory = operateHistoryRepository.findById(Id)
-                                .orElseThrow(() -> new RuntimeException("DrawingCode is not found:" + Id));
+                                .orElseThrow(() -> new ResourceNotFoundException("DrawingCode is not found:" + Id));
                 operateHistoryRepository.delete(operateHistory);
         }
 

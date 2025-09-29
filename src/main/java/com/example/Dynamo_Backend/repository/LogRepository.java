@@ -11,7 +11,8 @@ import com.example.Dynamo_Backend.entities.Log;
 
 public interface LogRepository extends JpaRepository<Log, String> {
         @Query(value = "SELECT TOP 5 l.machine_id AS machineId, " +
-                        "SUM(l_next.next_time_stamp - l.time_stamp) / 3600000.0 AS totalRunTime " +
+                        "       machine.machine_name AS machineName, " +
+                        "       SUM(l_next.next_time_stamp - l.time_stamp) / 3600000.0 AS totalRunTime " +
                         "FROM log l " +
                         "INNER JOIN ( " +
                         "    SELECT machine_id, time_stamp, " +
@@ -20,15 +21,39 @@ public interface LogRepository extends JpaRepository<Log, String> {
                         "    FROM log " +
                         "    WHERE time_stamp BETWEEN :startTime AND :endTime " +
                         ") l_next ON l.machine_id = l_next.machine_id AND l.time_stamp = l_next.time_stamp " +
+                        "INNER JOIN machine_kpi m ON l.machine_id = m.machine_id " +
+                        "  AND m.group_id = :groupId AND m.month = :month AND m.year = :year " +
+                        "INNER JOIN machine machine ON l.machine_id = machine.machine_id " +
                         "WHERE l.status IN ('R1', 'R2') " +
                         "  AND l_next.next_time_stamp IS NOT NULL " +
-                        "  AND l.machine_id IN ( " +
-                        "      SELECT DISTINCT m.machine_id FROM machine_kpi m " +
-                        "      WHERE m.group_id = :groupId AND m.month = :month AND m.year = :year " +
-                        "  ) " +
-                        "GROUP BY l.machine_id " +
+                        "GROUP BY l.machine_id, machine.machine_name " +
                         "ORDER BY totalRunTime DESC", nativeQuery = true)
         List<MachineRunTimeDto> findTop5MachineRunTimeByGroupAndTime(
+                        @Param("groupId") String groupId,
+                        @Param("month") int month,
+                        @Param("year") int year,
+                        @Param("startTime") long startTime,
+                        @Param("endTime") long endTime);
+
+        @Query(value = "SELECT TOP 5 l.machine_id AS machineId, " +
+                        "       machine.machine_name AS machineName, " +
+                        "       SUM(l_next.next_time_stamp - l.time_stamp) / 3600000.0 AS totalRunTime " +
+                        "FROM log l " +
+                        "INNER JOIN ( " +
+                        "    SELECT machine_id, time_stamp, " +
+                        "           LEAD(time_stamp) OVER (PARTITION BY machine_id ORDER BY time_stamp) AS next_time_stamp "
+                        +
+                        "    FROM log " +
+                        "    WHERE time_stamp BETWEEN :startTime AND :endTime " +
+                        ") l_next ON l.machine_id = l_next.machine_id AND l.time_stamp = l_next.time_stamp " +
+                        "INNER JOIN machine_kpi m ON l.machine_id = m.machine_id " +
+                        "  AND m.group_id = :groupId AND m.month = :month AND m.year = :year " +
+                        "INNER JOIN machine machine ON l.machine_id = machine.machine_id " +
+                        "WHERE l.status IN ('R1', 'R2') " +
+                        "  AND l_next.next_time_stamp IS NOT NULL " +
+                        "GROUP BY l.machine_id, machine.machine_name " +
+                        "ORDER BY totalRunTime ASC", nativeQuery = true)
+        List<MachineRunTimeDto> findTop5MachineLowestRunTimeByGroupAndTime(
                         @Param("groupId") String groupId,
                         @Param("month") int month,
                         @Param("year") int year,

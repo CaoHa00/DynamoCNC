@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.Dynamo_Backend.dto.CurrentStaffDto;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.Staff;
+import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.mapper.CurrentStaffMapper;
 import com.example.Dynamo_Backend.repository.MachineRepository;
@@ -30,10 +31,12 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     public CurrentStaffDto addCurrentStaff(CurrentStaffDto currentStaffDto) {
         CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(currentStaffDto.getMachineId());
         Staff staff = staffRepository.findById(currentStaffDto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + currentStaffDto.getStaffId()));
+                .orElseThrow(() -> new BusinessException(
+                        "Staff is not found:" + currentStaffDto.getStaffId() + " Please check the database."));
         if (currentStaff == null) {
             Machine machine = machineRepository.findById(currentStaffDto.getMachineId())
-                    .orElseThrow(() -> new RuntimeException("Machine is not found:" + currentStaffDto.getMachineId()));
+                    .orElseThrow(() -> new BusinessException(
+                            "Machine is not found:" + currentStaffDto.getMachineId() + " Please check the database."));
             currentStaff = new CurrentStaff();
             currentStaff.setMachine(machine);
         }
@@ -47,13 +50,13 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     @Override
     public CurrentStaffDto updateCurrentStaff(Long Id, CurrentStaffDto currentStaffDto) {
         CurrentStaff currentStaff = currentStaffRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("CurrentStaff is not found:" + Id));
+                .orElseThrow(() -> new BusinessException("CurrentStaff is not found:" + Id));
         Staff staff;
         if (currentStaffDto.getStaffId() == null) {
             staff = null;
         } else {
             staff = staffRepository.findById(currentStaffDto.getStaffId())
-                    .orElseThrow(() -> new RuntimeException("Staff is not found:" + currentStaffDto.getStaffId()));
+                    .orElseThrow(() -> new BusinessException("Staff is not found:" + currentStaffDto.getStaffId()));
         }
 
         currentStaff.setAssignedAt(System.currentTimeMillis());
@@ -68,7 +71,7 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     @Override
     public void deleteCurrentStaff(Long Id) {
         CurrentStaff currentStaff = currentStaffRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("CurrentStaff is not found:" + Id));
+                .orElseThrow(() -> new BusinessException("CurrentStaff is not found:" + Id));
         currentStaff.setStaff(null);
         currentStaffRepository.save(currentStaff);
         // currentStaffRepository.delete(currentStaff);
@@ -84,7 +87,7 @@ public class CurrentStaffImplementation implements CurrentStaffService {
     @Override
     public CurrentStaffDto getCurrentStaffById(Long Id) {
         CurrentStaff currentStaff = currentStaffRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("CurrentStaff is not found:" + Id));
+                .orElseThrow(() -> new BusinessException("CurrentStaff is not found:" + Id));
 
         return CurrentStaffMapper.mapToCurrentStaffDto(currentStaff);
     }

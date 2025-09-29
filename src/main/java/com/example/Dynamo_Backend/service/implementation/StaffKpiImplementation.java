@@ -15,6 +15,8 @@ import com.example.Dynamo_Backend.dto.StaffKpiDto;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
+import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
@@ -39,7 +41,8 @@ public class StaffKpiImplementation implements StaffKpiService {
         }
         long createdTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("StaffKpiKpi is not found:" + staffKpiDto.getStaffId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("StaffKpiKpi is not found:" + staffKpiDto.getStaffId()));
         staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
         Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
         staffKpi.setGroup(group);
@@ -69,13 +72,13 @@ public class StaffKpiImplementation implements StaffKpiService {
         // Load the record by ID if not found earlier
         if (staffKpi == null) {
             staffKpi = staffKpiRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("StaffKpi not found with id: " + id));
+                    .orElseThrow(() -> new ResourceNotFoundException("StaffKpi not found with id: " + id));
         }
 
         // Set related entities
         Group group = groupRepository.findById(dto.getGroupId()).orElse(null);
         Staff staff = staffRepository.findById(dto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found: " + dto.getStaffId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found: " + dto.getStaffId()));
 
         // Update fields
         staffKpi.setGroup(group);
@@ -126,14 +129,14 @@ public class StaffKpiImplementation implements StaffKpiService {
     @Override
     public StaffKpiDto getStaffKpiById(Integer Id) {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("StaffKpi is not found:" + Id));
         return StaffKpiMapper.mapToStaffKpiDto(staffKpi);
     }
 
     @Override
     public void deleteStaffKpi(Integer Id) {
         StaffKpi staffKpi = staffKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("StaffKpi is not found:" + Id));
         staffKpiRepository.delete(staffKpi);
     }
 
@@ -153,7 +156,6 @@ public class StaffKpiImplementation implements StaffKpiService {
                 if (row.getRowNum() < 6)
                     continue; // Skip header row
 
-                // Defensive: skip if any required cell is missing
                 boolean missing = false;
                 for (int i = 2; i <= 11; i++) {
                     if (row.getCell(i) == null) {
@@ -168,16 +170,14 @@ public class StaffKpiImplementation implements StaffKpiService {
                 staffKpi.setYear((int) row.getCell(2).getNumericCellValue());
                 staffKpi.setMonth((int) row.getCell(3).getNumericCellValue());
 
-                // Defensive: check staff lookup
                 int staffId = (int) row.getCell(4).getNumericCellValue();
                 Staff staff = staffRepository.findByStaffId(staffId)
-                        .orElseThrow(() -> new RuntimeException("Staff not found: " + staffId));
+                        .orElseThrow(() -> new ResourceNotFoundException("Staff not found: " + staffId));
                 staffKpi.setStaff(staff);
 
-                // Group
                 String groupName = row.getCell(5).getStringCellValue();
                 Group group = groupRepository.findByGroupName(groupName)
-                        .orElseThrow(() -> new RuntimeException("Group not found: " + groupName));
+                        .orElseThrow(() -> new ResourceNotFoundException("Group not found: " + groupName));
                 staffKpi.setGroup(group);
 
                 staffKpi.setPgTimeGoal((float) row.getCell(6).getNumericCellValue());
@@ -194,7 +194,7 @@ public class StaffKpiImplementation implements StaffKpiService {
             }
             staffKpiRepository.saveAll(staffKpis);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import staff KPI from Excel file: " + e.getMessage(), e);
+            throw new BusinessException("Failed to import staff KPI from Excel file: " + e.getMessage());
         }
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.example.Dynamo_Backend.dto.LogDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.Staff;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.OperateHistory;
@@ -54,14 +55,14 @@ public class LogImplementation implements LogService {
         @Override
         public LogDto getLogById(String statsId) {
                 Log stats = logRepository.findById(statsId)
-                                .orElseThrow(() -> new RuntimeException("stats is not found:" + statsId));
+                                .orElseThrow(() -> new ResourceNotFoundException("stats is not found:" + statsId));
                 return LogMapper.mapToStatsDto(stats);
         }
 
         @Override
         public void deleteLog(String statsId) {
                 Log stats = logRepository.findById(statsId)
-                                .orElseThrow(() -> new RuntimeException("stats is not found:" + statsId));
+                                .orElseThrow(() -> new ResourceNotFoundException("stats is not found:" + statsId));
                 logRepository.delete(stats);
 
         }

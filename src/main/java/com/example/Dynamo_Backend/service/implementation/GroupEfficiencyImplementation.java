@@ -122,7 +122,7 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
 
     @Override
     public TimePeriodInfo getRangeTypeAndWeek(GroupEfficiencyRequestDto dto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
         long days = ChronoUnit.DAYS.between(start, end) + 1;

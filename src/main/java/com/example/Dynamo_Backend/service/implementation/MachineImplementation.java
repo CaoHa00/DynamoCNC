@@ -20,6 +20,7 @@ import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
@@ -88,7 +89,7 @@ public class MachineImplementation implements MachineService {
     @Override
     public MachineDto updateMachine(Integer Id, MachineRequestDto machineDto) {
         Machine machine = machineRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
         machine.setMachineWork(machineDto.getMachineWork());
         machine.setMachineName(machineDto.getMachineName());
@@ -109,14 +110,14 @@ public class MachineImplementation implements MachineService {
     @Override
     public MachineDto getMachineById(Integer Id) {
         Machine machine = machineRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" + Id));
         return MachineMapper.mapToMachineDto(machine);
     }
 
     @Override
     public void deleteMachine(Integer Id) {
         Machine machine = machineRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" + Id));
         machineRepository.delete(machine);
         List<MachineKpi> machineKpis = machineKpiRepository.findByMachine_machineId(Id);
         for (MachineKpi machineKpi : machineKpis) {
@@ -141,35 +142,27 @@ public class MachineImplementation implements MachineService {
                 if (row.getRowNum() < 6)
                     continue;
 
-                Machine machineDto = new Machine();
-                String idCell = row.getCell(0).getStringCellValue();
-                String machineId = idCell.substring(idCell.length() - 3, idCell.length() - 1);
-                machineDto.setMachineId(Integer.parseInt(machineId));
-                machineDto.setMachineName(row.getCell(1).getStringCellValue());
-                machineDto.setMachineType(row.getCell(3).getStringCellValue());
-                machineDto.setMachineWork(row.getCell(4).getStringCellValue());
-                machineDto.setMachineOffice(row.getCell(5).getStringCellValue());
+                // Skip empty rows by checking if essential cells are empty
+                String machineName = getCellStringValue(row, 2);
+                String machineType = getCellStringValue(row, 3);
+                String groupCell = getCellStringValue(row, 6);
 
-                machineDto.setStatus(1);
-
-                machineList.add(machineDto);
-
-                boolean missing = false;
-                for (int i = 2; i <= 8; i++) {
-                    if (row.getCell(i) == null) {
-                        missing = true;
-                        break;
-                    }
-                }
-                if (missing)
+                // Skip row if essential fields are empty
+                if (machineName.trim().isEmpty() || machineType.trim().isEmpty() || groupCell.trim().isEmpty()) {
                     continue;
+                }
+
+                // String idCell = row.getCell(0).getStringCellValue();
+                // String machineId = idCell.substring(idCell.length() - 3, idCell.length() -
+                // 1);
+                // machineDto.setMachineId(Integer.parseInt(machineId));
 
                 Machine machine = new Machine();
-                machine.setMachineName(row.getCell(2).getStringCellValue());
-                machine.setMachineType(row.getCell(3).getStringCellValue());
+                machine.setMachineName(machineName);
+                machine.setMachineType(machineType);
 
-                machine.setMachineWork(row.getCell(4).getStringCellValue());
-                machine.setMachineOffice(row.getCell(5).getStringCellValue());
+                machine.setMachineWork(getCellStringValue(row, 4));
+                machine.setMachineOffice(getCellStringValue(row, 5));
                 machine.setStatus(1);
                 Long createdTimestamp = System.currentTimeMillis();
                 machine.setCreatedDate(createdTimestamp);
@@ -182,13 +175,12 @@ public class MachineImplementation implements MachineService {
                 machineKpi.setMonth(now.getMonthValue());
                 machineKpi.setYear(now.getYear());
                 machineKpi.setMachine(newMachine);
-                String groupIdCell = row.getCell(6).getStringCellValue();
-                Group group = groupRepository.findByGroupName(groupIdCell)
+                Group group = groupRepository.findByGroupName(groupCell)
                         .orElseThrow(() -> new BusinessException(
-                                "Group not found when import file excel with id: " + groupIdCell));
+                                "Group not found when import file excel with name: " + groupCell));
                 machineKpi.setGroup(group);
-                machineKpi.setMachineMiningTarget((float) row.getCell(7).getNumericCellValue());
-                machineKpi.setOee((float) row.getCell(8).getNumericCellValue());
+                machineKpi.setMachineMiningTarget((float) getCellNumericValue(row, 7));
+                machineKpi.setOee((float) getCellNumericValue(row, 8));
                 machineKpi.setCreatedDate(createdTimestamp);
                 machineKpi.setUpdatedDate(createdTimestamp);
                 machineKpiRepository.save(machineKpi);
@@ -204,6 +196,46 @@ public class MachineImplementation implements MachineService {
     public List<MachineDto> getActiveMachines() {
         List<Machine> machines = machineRepository.findAllByStatus(1);
         return machines.stream().map(MachineMapper::mapToMachineDto).toList();
+    }
+
+    private String getCellStringValue(Row row, int cellIndex) {
+        Cell cell = row.getCell(cellIndex);
+        if (cell == null) {
+            return "";
+        }
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                return String.valueOf((int) cell.getNumericCellValue());
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                return cell.getCellFormula();
+            default:
+                return "";
+        }
+    }
+
+    private double getCellNumericValue(Row row, int cellIndex) {
+        Cell cell = row.getCell(cellIndex);
+        if (cell == null) {
+            return 0.0;
+        }
+
+        switch (cell.getCellType()) {
+            case NUMERIC:
+                return cell.getNumericCellValue();
+            case STRING:
+                try {
+                    return Double.parseDouble(cell.getStringCellValue());
+                } catch (NumberFormatException e) {
+                    return 0.0;
+                }
+            default:
+                return 0.0;
+        }
     }
 
 }
