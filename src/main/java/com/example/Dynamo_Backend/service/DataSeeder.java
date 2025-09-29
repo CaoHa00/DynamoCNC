@@ -28,6 +28,8 @@ public class DataSeeder {
         private final ProcessTimeRepository processTimeRepository;
         private final OperateHistoryRepository operateHistoryRepository;
         private final LogRepository logRepository;
+        private final CurrentStatusRepository currentStatusRepository;
+        private final CurrentStaffRepository currentStaffRepository;
 
         long createdTimestamp = System.currentTimeMillis();
 
@@ -38,7 +40,8 @@ public class DataSeeder {
                                 || machineRepository.count() > 0 || drawingCodeRepository.count() > 0
                                 || orderRepository.count() > 0 || orderDetailRepository.count() > 0
                                 || processRepository.count() > 0 || planRepository.count() > 0
-                                || reportRepository.count() > 0 || adminRepository.count() > 0) {
+                                || reportRepository.count() > 0 || adminRepository.count() > 0
+                                || currentStatusRepository.count() > 0) {
                         System.out.println("🟡 Skipping DataLoader: data already exists.");
                         return;
                 } else {
@@ -236,6 +239,51 @@ public class DataSeeder {
                         machine5.setCreatedDate(createdTimestamp);
                         machine5.setUpdatedDate(createdTimestamp);
                         machineRepository.save(machine5);
+
+                        CurrentStatus currentStatus1 = new CurrentStatus();
+                        currentStatus1.setMachineId(machine1.getMachineId());
+                        currentStatus1.setStatus("0");
+                        currentStatusRepository.save(currentStatus1);
+
+                        CurrentStatus currentStatus2 = new CurrentStatus();
+                        currentStatus2.setMachineId(machine2.getMachineId());
+                        currentStatus2.setStatus("0");
+                        currentStatusRepository.save(currentStatus2);
+
+                        CurrentStatus currentStatus3 = new CurrentStatus();
+                        currentStatus3.setMachineId(machine3.getMachineId());
+                        currentStatus3.setStatus("0");
+                        currentStatusRepository.save(currentStatus3);
+
+                        CurrentStatus currentStatus4 = new CurrentStatus();
+                        currentStatus4.setMachineId(machine4.getMachineId());
+                        currentStatus4.setStatus("0");
+                        currentStatusRepository.save(currentStatus4);
+
+                        CurrentStatus currentStatus5 = new CurrentStatus();
+                        currentStatus5.setMachineId(machine5.getMachineId());
+                        currentStatus5.setStatus("0");
+                        currentStatusRepository.save(currentStatus5);
+
+                        CurrentStaff currentStaff1 = new CurrentStaff();
+                        currentStaff1.setMachine(machine1);
+                        currentStaffRepository.save(currentStaff1);
+
+                        CurrentStaff currentStaff2 = new CurrentStaff();
+                        currentStaff2.setMachine(machine2);
+                        currentStaffRepository.save(currentStaff2);
+
+                        CurrentStaff currentStaff3 = new CurrentStaff();
+                        currentStaff3.setMachine(machine3);
+                        currentStaffRepository.save(currentStaff3);
+
+                        CurrentStaff currentStaff4 = new CurrentStaff();
+                        currentStaff4.setMachine(machine4);
+                        currentStaffRepository.save(currentStaff4);
+
+                        CurrentStaff currentStaff5 = new CurrentStaff();
+                        currentStaff5.setMachine(machine5);
+                        currentStaffRepository.save(currentStaff5);
 
                         MachineKpi machineKpi1 = new MachineKpi();
                         machineKpi1.setGroup(group4);

@@ -19,5 +19,5 @@ public interface MachineDetailStatisticService {
 
     void exportExcelToResponse(StatisticRequestDto requestDto, HttpServletResponse response);
 
-    void exportExcelGroupMachinesToResponse(StatisticRequestDto requestDto, HttpServletResponse response);
+    void exportExcelGroupMachinesToResponse(GroupEfficiencyRequestDto requestDto, HttpServletResponse response);
 }

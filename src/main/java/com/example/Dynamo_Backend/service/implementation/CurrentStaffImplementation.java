@@ -31,9 +31,9 @@ public class CurrentStaffImplementation implements CurrentStaffService {
         CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(currentStaffDto.getMachineId());
         Staff staff = staffRepository.findById(currentStaffDto.getStaffId())
                 .orElseThrow(() -> new RuntimeException("Staff is not found:" + currentStaffDto.getStaffId()));
-        Machine machine = machineRepository.findById(currentStaffDto.getMachineId())
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + currentStaffDto.getMachineId()));
         if (currentStaff == null) {
+            Machine machine = machineRepository.findById(currentStaffDto.getMachineId())
+                    .orElseThrow(() -> new RuntimeException("Machine is not found:" + currentStaffDto.getMachineId()));
             currentStaff = new CurrentStaff();
             currentStaff.setMachine(machine);
         }
