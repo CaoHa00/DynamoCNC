@@ -37,7 +37,7 @@ public class StaffKpiImplementation implements StaffKpiService {
                 staffKpiDto.getMonth(),
                 staffKpiDto.getYear());
         if (staffKpi != null) {
-            throw new IllegalArgumentException("Goal of this staff is already set");
+            throw new BusinessException("Goal of this staff is already set");
         }
         long createdTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())

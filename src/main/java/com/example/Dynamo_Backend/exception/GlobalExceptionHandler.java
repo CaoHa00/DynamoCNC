@@ -36,13 +36,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<String> handleBusinessException(BusinessException ex) {
-        return ResponseEntity.status(450).body(ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Exception");
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(450).body(error);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return ResponseEntity.status(404).body(ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Resource Not Found");
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(404).body(error);
     }
 
 }
