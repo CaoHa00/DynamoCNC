@@ -17,7 +17,7 @@ public class MachineKpiMapper {
     public static MachineKpi mapToMachineKpi(MachineKpiDto machineKpiDto) {
         MachineKpi machineKpi = new MachineKpi();
         // Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
-        // .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+        // .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
         // machineKpiDto.getMachineId()));
         // machineKpi.setMachine(machine);
         machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());

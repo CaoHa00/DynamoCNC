@@ -18,15 +18,13 @@ import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.*;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
+import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
-import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
-import com.example.Dynamo_Backend.repository.GroupRepository;
-import com.example.Dynamo_Backend.repository.LogRepository;
-import com.example.Dynamo_Backend.repository.MachineKpiRepository;
+import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
 import com.example.Dynamo_Backend.util.TimeRange;
@@ -53,6 +51,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
     @Autowired
     private LogRepository logRepository;
 
+    @Autowired
+    private GroupKpiRepository groupKpiRepository;
+
     public MachineGroupStatisticDto calculateTotalTime(TimePeriodInfo timePeriodInfo, String groupId) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new BusinessException("Group not found when get machine group statistic"));
@@ -61,15 +62,15 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         if (machineKpiList.isEmpty()) {
             return new MachineGroupStatisticDto(group.getGroupId(), group.getGroupName(), 0f, 0f, 0f, 0f, 0f, 0f, 0f,
                     0f, 0f,
-                    0f, 0f, 0f, machineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
+                    0f, 0f, 0f, 0, 0f, 0, machineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
         }
         Float totalRunTime = 0f;
         Float totalStopTime = 0f;
         Float totalPgTime = 0f;
         Float totalOffsetTime = 0f;
         Float totalSpanTime = 0f;
-
         Float totalErrorTime = 0f;
+        Integer totalProcesses = 0;
 
         List<Integer> machineIds = machineKpiList.stream()
                 .map(kpi -> kpi.getMachine().getMachineId())
@@ -92,6 +93,9 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 if (process.getStartTime() > timePeriodInfo.getEndDate() ||
                         process.getEndTime() < timePeriodInfo.getStartDate()) {
                     continue;
+                }
+                if (process.getProcessStatus() == 3) {
+                    totalProcesses++;
                 }
                 ProcessTime processTime = process.getProcessTime() == null
                         ? processTimeService.calculateProcessTime(process)
@@ -136,7 +140,8 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         totalRunTime = totalPgTime + totalOffsetTime;
         return new MachineGroupStatisticDto(groupId, "", totalRunTime, totalStopTime, totalPgTime,
                 totalOffsetTime, totalSpanTime, totalErrorTime, totalErrorTime, 0f, 0f,
-                0f, 0f, 0f, machineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
+                0f, 0f, 0f, totalProcesses, 0f, machineKpiList.size(),
+                machineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
     }
 
     @Override
@@ -158,22 +163,32 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         MachineGroupStatisticDto currentPeriodStats = calculateTotalTime(timePeriodInfo, requestDto.getGroupId());
         MachineGroupStatisticDto previousPeriodStats = calculateTotalTime(previousTime, requestDto.getGroupId());
 
-        List<MachineKpi> previousMachineKpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
-                requestDto.getGroupId(), previousTime.getMonth(), previousTime.getYear());
+        // List<MachineKpi> previousMachineKpiList =
+        // machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+        // requestDto.getGroupId(), previousTime.getMonth(), previousTime.getYear());
         Group group = groupRepository.findById(requestDto.getGroupId()).orElse(null);
-        if (previousMachineKpiList.isEmpty()) {
-            currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime() / 3600000f);
-            currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime() / 3600000f);
-            currentPeriodStats.setTotalPgTime(currentPeriodStats.getTotalPgTime() / 3600000f);
-            currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime() / 3600000f);
-            currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime() / 3600000f);
-            currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime() / 3600000f);
-            return new MachineGroupStatisticDto(requestDto.getGroupId(), group != null ? group.getGroupName() : "",
-                    currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
-                    currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
-                    currentPeriodStats.getTotalSpanTime(), currentPeriodStats.getTotalErrorTime(), 0f, 0f, 0f, 0f, 0f,
-                    0f, previousMachineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
-        }
+        // if (previousMachineKpiList.isEmpty()) {
+        // currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime() /
+        // 3600000f);
+        // currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime()
+        // / 3600000f);
+        // currentPeriodStats.setTotalPgTime(currentPeriodStats.getTotalPgTime() /
+        // 3600000f);
+        // currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime() /
+        // 3600000f);
+        // currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime() /
+        // 3600000f);
+        // currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime() /
+        // 3600000f);
+        // return new MachineGroupStatisticDto(requestDto.getGroupId(), group != null ?
+        // group.getGroupName() : "",
+        // currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
+        // currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
+        // currentPeriodStats.getTotalSpanTime(),
+        // currentPeriodStats.getTotalErrorTime(), 0f, 0f, 0f, 0f, 0f,
+        // 0f, currentPeriodStats.getTotalProcesses(), 0f,
+        // previousMachineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
+        // }
 
         if (previousPeriodStats.getTotalOffsetTime() != 0f) {
             totalOffsetTimeRate = ((currentPeriodStats.getTotalOffsetTime() - previousPeriodStats.getTotalOffsetTime())
@@ -204,6 +219,11 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             totalErrorTimeRate = ((currentPeriodStats.getTotalErrorTime() - previousPeriodStats.getTotalErrorTime())
                     / previousPeriodStats.getTotalErrorTime()) * 100;
         }
+        if (previousPeriodStats.getTotalProcesses() != 0) {
+            currentPeriodStats.setProcessRate(
+                    ((float) (currentPeriodStats.getTotalProcesses() - previousPeriodStats.getTotalProcesses())
+                            / previousPeriodStats.getTotalProcesses()) * 100);
+        }
 
         currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime() / 3600000f);
         currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime() / 3600000f);
@@ -217,7 +237,8 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 currentPeriodStats.getTotalSpanTime(), currentPeriodStats.getTotalErrorTime(), totalErrorTimeRate,
                 totalRunTimeRate,
                 totalStopTimeRate, totalPgTimeRate, totalOffsetTimeRate, totalSpanTimeRate,
-                previousMachineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
+                currentPeriodStats.getTotalProcesses(), currentPeriodStats.getProcessRate(),
+                currentPeriodStats.getMachines().size(), currentPeriodStats.getMachines());
     }
 
     @Override
@@ -243,6 +264,17 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
 
         Map<Integer, List<Log>> logsByMachine = allLogs.stream()
                 .collect(Collectors.groupingBy(log -> log.getMachine().getMachineId()));
+
+        GroupKpi groupKpi;
+        if (timePeriodInfo.isMonth()) {
+            groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
+                    requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
+                    .orElseGet(GroupKpi::new);
+        } else {
+            groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndMonthAndYear(
+                    requestDto.getGroupId(), timePeriodInfo.getWeek(), timePeriodInfo.getMonth(),
+                    timePeriodInfo.getYear()).orElseGet(GroupKpi::new);
+        }
 
         List<MachineGroupOverviewDto> overviewList = new ArrayList<>();
 
@@ -325,6 +357,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             overviewDto.setEmptyTime(totalEmptyTime / 3600000f);
             overviewDto.setErrorTime(totalErrorTime / 3600000f);
             overviewDto.setPgTimeExpect(pgTimeExpected);
+            overviewDto.setGroupTarget(groupKpi.getWorkingHourGoal() != null ? groupKpi.getWorkingHourGoal() : 0f);
             overviewList.add(overviewDto);
         }
         return overviewList;
@@ -453,7 +486,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Thống kê nhóm máy");
         int rowIdx = 5;
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter exportDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         Row headerRow = sheet.createRow(rowIdx++);
@@ -578,5 +611,24 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             } catch (Exception ignore) {
             }
         }
+    }
+
+    @Override
+    public List<MachineRunTimeDto> getTop5LowestOverview(GroupEfficiencyRequestDto requestDto) {
+        String startDate = requestDto.getStartDate().concat(" 00:00:00");
+        String endDate = requestDto.getEndDate().concat(" 23:59:59");
+        requestDto.setStartDate(startDate);
+        requestDto.setEndDate(endDate);
+        TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+
+        List<MachineKpi> machineKpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+        if (machineKpiList == null || machineKpiList.isEmpty()) {
+            return List.of();
+        }
+        List<MachineRunTimeDto> top5MachineRunTime = logRepository.findTop5MachineLowestRunTimeByGroupAndTime(
+                requestDto.getGroupId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear(),
+                timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
+        return top5MachineRunTime;
     }
 }

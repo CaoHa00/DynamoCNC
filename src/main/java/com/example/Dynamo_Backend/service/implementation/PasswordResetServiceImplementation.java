@@ -41,7 +41,7 @@ public class PasswordResetServiceImplementation {
 
     public void initiatePasswordReset(String email) {
         Admin account = adminRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Account"));
+                .orElseThrow(() -> new ResourceNotFoundException("Account can not found with email: " + email));
 
         String resetToken = generateSecureToken();
 
@@ -100,7 +100,7 @@ public class PasswordResetServiceImplementation {
             resetToken.setUsed(true);
             tokenRepository.save(resetToken);
         } else {
-            throw new ResourceNotFoundException("method should be 'reset' or 'update'. method was: " + method);
+            throw new BusinessException("method should be 'reset' or 'update'. method was: " + method);
         }
     }
 

@@ -10,6 +10,7 @@ import com.example.Dynamo_Backend.dto.StaffGroupDto;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffGroup;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.GroupMapper;
 
 import com.example.Dynamo_Backend.mapper.StaffGroupMapper;
@@ -53,7 +54,7 @@ public class StaffGroupImplementation implements StaffGroupService {
     @Override
     public StaffGroupDto updateStaffGroup(String Id, StaffGroupDto staffGroupDto) {
         StaffGroup staffGroup = staffGroupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("staffGroup is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("staffGroup is not found:" + Id));
         GroupDto group = groupService.getGroupById(staffGroupDto.getGroupId());
         StaffDto staff = staffService.getStaffById(staffGroupDto.getStaffId());
         Group updateGroup = GroupMapper.mapToGroup(group);
@@ -70,14 +71,14 @@ public class StaffGroupImplementation implements StaffGroupService {
     @Override
     public StaffGroupDto getStaffGroupById(String Id) {
         StaffGroup staffGroup = staffGroupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("staffGroup is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("staffGroup is not found:" + Id));
         return StaffGroupMapper.mapToStaffGroupDto(staffGroup);
     }
 
     @Override
     public void deleteStaffGroup(String Id) {
         StaffGroup staffGroup = staffGroupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("StaffGroup is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("StaffGroup is not found:" + Id));
         staffGroupRepository.delete(staffGroup);
     }
 

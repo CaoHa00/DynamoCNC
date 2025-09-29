@@ -6,6 +6,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.service.EmailService;
 
 import jakarta.mail.MessagingException;
@@ -41,7 +42,7 @@ public class EmailServiceImplementation implements EmailService {
             mailSender.send(message);
 
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send password reset email", e);
+            throw new BusinessException("Failed to send password reset email: " + e.getMessage());
         }
     }
 

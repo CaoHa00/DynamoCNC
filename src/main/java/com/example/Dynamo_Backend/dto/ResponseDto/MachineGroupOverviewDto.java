@@ -17,4 +17,5 @@ public class MachineGroupOverviewDto {
     private Float errorTime;
     private Float pgTimeExpect;
     private Integer numberOfProcesses;
+    private Float groupTarget;
 }

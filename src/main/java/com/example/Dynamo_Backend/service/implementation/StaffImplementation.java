@@ -13,6 +13,8 @@ import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
+import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
 import com.example.Dynamo_Backend.mapper.StaffMapper;
 import com.example.Dynamo_Backend.repository.GroupRepository;
@@ -57,7 +59,7 @@ public class StaffImplementation implements StaffService {
         StaffKpiDto staffKpiDto = StaffKpiMapper.mapToStaffKpiDto(staffRequestDto);
         StaffKpiDto saveKpi = staffKpiService.addStaffKpi(staffKpiDto);
         StaffKpi staffKpi = staffKpiRepository.findById(saveKpi.getKpiId())
-                .orElseThrow(() -> new RuntimeException("StaffKpi is not found:"));
+                .orElseThrow(() -> new ResourceNotFoundException("StaffKpi is not found:"));
         saveStaff.getStaffKpis().add(staffKpi);
 
         return StaffMapper.mapToStaffDto(saveStaff);
@@ -67,7 +69,7 @@ public class StaffImplementation implements StaffService {
     public void deleteStaff(List<String> ids) {
         for (String id : ids) {
             Staff staff = staffRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Staff is not found:" + id));
+                    .orElseThrow(() -> new ResourceNotFoundException("Staff is not found:" + id));
             staffRepository.delete(staff);
 
             List<StaffKpi> staffKpis = staffKpiRepository.findByStaff_Id(id);
@@ -87,14 +89,14 @@ public class StaffImplementation implements StaffService {
     @Override
     public StaffDto getStaffById(String Id) {
         Staff staff = staffRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Staff is not found:" + Id));
         return StaffMapper.mapToStaffDto(staff);
     }
 
     @Override
     public StaffDto updateStaff(String Id, StaffRequestDto staffDto) {
         Staff staff = staffRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Staff is not found:" + Id));
 
         long updatedTimestamp = System.currentTimeMillis();
         staff.setCreatedDate(staff.getCreatedDate());
@@ -165,7 +167,7 @@ public class StaffImplementation implements StaffService {
                 // Set group
                 String groupName = row.getCell(7).getStringCellValue();
                 Group group = groupRepository.findByGroupName(groupName)
-                        .orElseThrow(() -> new RuntimeException("Group not found: " + groupName));
+                        .orElseThrow(() -> new ResourceNotFoundException("Group not found: " + groupName));
                 staffKpi.setGroup(group);
                 staffKpi.setStaff(savedStaff);
                 staffKpi.setMonth(currentMonth);
@@ -185,7 +187,7 @@ public class StaffImplementation implements StaffService {
             staffKpiRepository.saveAll(staffKpiList);
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage(), e);
+            throw new BusinessException("Failed to import staff from Excel file: " + e.getMessage());
         }
     }
 

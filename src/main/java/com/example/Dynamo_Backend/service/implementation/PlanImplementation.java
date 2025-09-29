@@ -14,6 +14,7 @@ import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.Plan;
 import com.example.Dynamo_Backend.entities.Staff;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.PlanMapper;
 import com.example.Dynamo_Backend.repository.AdminRepository;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
@@ -45,12 +46,13 @@ public class PlanImplementation implements PlanService {
                 Plan plan = PlanMapper.mapToPlan(planDto);
                 long createdTimestamp = System.currentTimeMillis();
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(planDto.getProcessId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "DrawingCode Process is not found:" + planDto.getProcessId()));
                 Staff staff = staffRepository.findByStaffId(planDto.getStaffId())
-                                .orElseThrow(() -> new RuntimeException("Staff is not found:" + planDto.getStaffId()));
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Staff is not found:" + planDto.getStaffId()));
                 Machine machine = machineRepository.findById(planDto.getMachineId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Machine is not found:" + planDto.getMachineId()));
 
                 // after security, check if admin login
@@ -76,21 +78,22 @@ public class PlanImplementation implements PlanService {
         @Override
         public PlanDto updatePlan(Integer planId, PlanDto planDto) {
                 Plan plan = planRepository.findById(planId)
-                                .orElseThrow(() -> new RuntimeException("Plan is not found:" + planId));
+                                .orElseThrow(() -> new ResourceNotFoundException("Plan is not found:" + planId));
                 long updatedTimestamp = System.currentTimeMillis();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime startDateTime = LocalDateTime.parse(planDto.getStartTime(), formatter);
                 long startDateTimestamp = startDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
                 LocalDateTime endDate = LocalDateTime.parse(planDto.getEndTime(), formatter);
                 long endDateTimestamp = endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(planDto.getProcessId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "DrawingCode Process is not found:" + planDto.getProcessId()));
                 Staff staff = staffRepository.findByStaffId(planDto.getStaffId())
-                                .orElseThrow(() -> new RuntimeException("Staff is not found:" + planDto.getStaffId()));
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Staff is not found:" + planDto.getStaffId()));
                 Machine machine = machineRepository.findById(planDto.getMachineId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Machine is not found:" + planDto.getMachineId()));
                 plan.setDrawingCodeProcess(drawingCodeProcess);
                 plan.setInProgress(planDto.getInProgress());
@@ -113,14 +116,14 @@ public class PlanImplementation implements PlanService {
         @Override
         public PlanDto getPlanById(Integer planId) {
                 Plan plan = planRepository.findById(planId)
-                                .orElseThrow(() -> new RuntimeException("Plan is not found:" + planId));
+                                .orElseThrow(() -> new ResourceNotFoundException("Plan is not found:" + planId));
                 return PlanMapper.mapToPlanDto(plan);
         }
 
         @Override
         public void deletePlan(Integer planId) {
                 Plan plan = planRepository.findById(planId)
-                                .orElseThrow(() -> new RuntimeException("Plan is not found:" + planId));
+                                .orElseThrow(() -> new ResourceNotFoundException("Plan is not found:" + planId));
                 planRepository.delete(plan);
         }
 

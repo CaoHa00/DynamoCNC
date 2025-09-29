@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.Dynamo_Backend.dto.GroupKpiDto;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
+import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.GroupKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
@@ -33,7 +35,7 @@ public class GroupKpiImplementation implements GroupKpiService {
         long createdTimestamp = System.currentTimeMillis();
         GroupKpi groupKpi = GroupKpiMapper.mapToGroupKpi(groupKpiDto);
         Group group = groupRepository.findById(groupKpiDto.getGroupId())
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + groupKpiDto.getGroupId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Group is not found:" + groupKpiDto.getGroupId()));
 
         groupKpi.setGroup(group);
         groupKpi.setCreatedDate(createdTimestamp);
@@ -46,10 +48,10 @@ public class GroupKpiImplementation implements GroupKpiService {
     @Override
     public GroupKpiDto updateGroupKpi(Integer Id, GroupKpiDto groupKpiDto) {
         GroupKpi groupKpi = groupKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("GroupKpi is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("GroupKpi is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
         Group group = groupRepository.findById(groupKpiDto.getGroupId())
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + groupKpiDto.getGroupId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Group is not found:" + groupKpiDto.getGroupId()));
 
         groupKpi.setGroup(group);
 
@@ -69,14 +71,14 @@ public class GroupKpiImplementation implements GroupKpiService {
     @Override
     public GroupKpiDto getGroupKpiById(Integer Id) {
         GroupKpi groupKpi = groupKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("GroupKpi is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("GroupKpi is not found:" + Id));
         return GroupKpiMapper.mapToGroupKpiDto(groupKpi);
     }
 
     @Override
     public void deleteGroupKpi(Integer Id) {
         GroupKpi groupKpi = groupKpiRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("GroupKpi is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("GroupKpi is not found:" + Id));
         groupKpiRepository.delete(groupKpi);
     }
 
@@ -126,7 +128,7 @@ public class GroupKpiImplementation implements GroupKpiService {
                     }
                     localDate = LocalDate.parse(dateStr, formatter);
                 } else {
-                    throw new RuntimeException("Unsupported cell type for date: " + dateCell.getCellType());
+                    throw new BusinessException("Unsupported cell type for date: " + dateCell.getCellType());
                 }
                 int year = localDate.getYear();
                 int month = localDate.getMonthValue();
@@ -156,7 +158,7 @@ public class GroupKpiImplementation implements GroupKpiService {
             inputStream.close();
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import group KPI from Excel file: " + e.getMessage());
+            throw new BusinessException("Failed to import group KPI from Excel file: " + e.getMessage());
         }
     }
 
@@ -208,7 +210,7 @@ public class GroupKpiImplementation implements GroupKpiService {
             inputStream.close();
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import group KPI from Excel file: " + e.getMessage());
+            throw new BusinessException("Failed to import group KPI from Excel file: " + e.getMessage());
         }
     }
 

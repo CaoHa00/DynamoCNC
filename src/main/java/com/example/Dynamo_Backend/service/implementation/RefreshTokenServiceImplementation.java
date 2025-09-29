@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.Dynamo_Backend.dto.RequestDto.LoginRequest;
@@ -14,6 +13,8 @@ import com.example.Dynamo_Backend.dto.ResponseDto.AuthResponseDto;
 import com.example.Dynamo_Backend.entities.Admin;
 import com.example.Dynamo_Backend.entities.RefreshToken;
 import com.example.Dynamo_Backend.entities.Role;
+import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.repository.AdminRepository;
 import com.example.Dynamo_Backend.repository.RefreshTokenRepository;
 import com.example.Dynamo_Backend.security.JwtUtil;
@@ -37,11 +38,11 @@ public class RefreshTokenServiceImplementation implements RefreshTokenService {
     public AuthResponseDto refreshToken(String requestToken) {
         Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(requestToken);
         if (refreshTokenOpt.isEmpty()) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new BusinessException("Invalid refresh token");
         }
         RefreshToken refreshToken = refreshTokenOpt.get();
         if (refreshToken.getExpiryDate().before(new Date(System.currentTimeMillis()))) {
-            throw new RuntimeException("Refresh token expired");
+            throw new BusinessException("Refresh token expired");
         }
         Admin admin = refreshToken.getAdmin();
 
@@ -66,7 +67,7 @@ public class RefreshTokenServiceImplementation implements RefreshTokenService {
                 : request.getEmail();
         Admin admin = adminRepository.findByUsername(identifier)
                 .or(() -> adminRepository.findByEmail(identifier))
-                .orElseThrow(() -> new RuntimeException("Admin not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
         String newRefreshToken = UUID.randomUUID().toString();
         refreshToken.setToken(newRefreshToken);
         refreshToken.setExpiryDate(new Date(System.currentTimeMillis() + EXPIRATION));

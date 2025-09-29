@@ -12,6 +12,7 @@ import com.example.Dynamo_Backend.dto.OrderDetailDto;
 import com.example.Dynamo_Backend.entities.DrawingCode;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.OrderDetail;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.entities.Order;
 import com.example.Dynamo_Backend.mapper.DrawingCodeMapper;
 import com.example.Dynamo_Backend.mapper.OrderDetailMapper;
@@ -57,7 +58,7 @@ public class OrderDetailImplementation implements OrderDetailService {
     @Override
     public OrderDetailDto updateOrderDetail(String Id, OrderDetailDto orderDetailDto) {
         OrderDetail orderDetail = orderDetailRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("OrderD    etail is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("OrderDetail is not found:" + Id));
         DrawingCodeDto drawingCode = drawingCodeService.getDrawingCodeById(orderDetailDto.getDrawingCodeId());
         OrderDto order = orderService.getOrderById(orderDetailDto.getOrderId());
         DrawingCode updateDrawingCode = DrawingCodeMapper.mapToDrawingCode(drawingCode);
@@ -86,7 +87,7 @@ public class OrderDetailImplementation implements OrderDetailService {
     @Override
     public void deleteOrderDetail(String Id) {
         OrderDetail orderDetail = orderDetailRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("OrderDetail is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("OrderDetail is not found:" + Id));
         orderDetailRepository.delete(orderDetail);
     }
 

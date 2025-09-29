@@ -349,7 +349,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 Workbook workbook = new XSSFWorkbook();
                 Sheet sheet = workbook.createSheet("Thống kê máy");
                 int rowIdx = 5;
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 DateTimeFormatter exportDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
                 Row headerRow = sheet.createRow(rowIdx++);
@@ -471,7 +471,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 Workbook workbook = new XSSFWorkbook();
                 Sheet sheet = workbook.createSheet("Thống kê máy");
                 int rowIdx = 5;
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 DateTimeFormatter exportDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
                 Row headerRow = sheet.createRow(rowIdx++);

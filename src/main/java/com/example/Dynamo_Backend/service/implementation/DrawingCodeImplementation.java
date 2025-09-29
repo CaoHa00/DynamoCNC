@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeDto;
 import com.example.Dynamo_Backend.entities.DrawingCode;
+import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.DrawingCodeMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeRepository;
 import com.example.Dynamo_Backend.repository.OrderDetailRepository;
@@ -40,7 +41,8 @@ public class DrawingCodeImplementation implements DrawingCodeService {
     @Override
     public DrawingCodeDto updateDrawingCode(String drawingCodeId, DrawingCodeDto drawingCodeDto) {
         DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeId)
-                .orElseThrow(() -> new RuntimeException("DrawingCode is not found:" + drawingCodeId));
+                .orElseThrow(() -> new BusinessException(
+                        "DrawingCode is not found:" + drawingCodeId + "Please check again"));
         long updatedTimestamp = System.currentTimeMillis();
         drawingCode.setDrawingCodeName(drawingCodeDto.getDrawingCodeName());
         drawingCode.setStatus(drawingCodeDto.getStatus());
@@ -55,14 +57,14 @@ public class DrawingCodeImplementation implements DrawingCodeService {
     @Override
     public DrawingCodeDto getDrawingCodeById(String drawingCodeId) {
         DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeId)
-                .orElseThrow(() -> new RuntimeException("DrawingCode is not found:" + drawingCodeId));
+                .orElseThrow(() -> new BusinessException("DrawingCode is not found:" + drawingCodeId));
         return DrawingCodeMapper.mapToDrawingCodeDto(drawingCode);
     }
 
     @Override
     public void deleteDrawingCode(String drawingCodeId) {
         DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeId)
-                .orElseThrow(() -> new RuntimeException("DrawingCode is not found:" + drawingCodeId));
+                .orElseThrow(() -> new BusinessException("DrawingCode is not found:" + drawingCodeId));
         drawingCodeRepository.delete(drawingCode);
     }
 
@@ -100,7 +102,7 @@ public class DrawingCodeImplementation implements DrawingCodeService {
             workbook.close();
             inputStream.close();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import staff from Excel file: " + e.getMessage());
+            throw new BusinessException("Failed to import staff from Excel file: " + e.getMessage());
         }
     }
 

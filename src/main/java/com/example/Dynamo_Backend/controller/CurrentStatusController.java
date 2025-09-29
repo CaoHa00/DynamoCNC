@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.Dynamo_Backend.dto.CurrentStatusDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 
 import lombok.AllArgsConstructor;
@@ -55,6 +56,13 @@ public class CurrentStatusController {
     public ResponseEntity<List<CurrentStatusResponseDto>> getCurrentStatusByGroupId(
             @PathVariable("groupId") String groupId) {
         List<CurrentStatusResponseDto> currentStatuss = currentStatusService.getCurrentStatusByGroupId(groupId);
+        return ResponseEntity.status(HttpStatus.OK).body(currentStatuss);
+    }
+
+    @GetMapping("/staff/by-group/{groupId}")
+    public ResponseEntity<List<ListCurrentStaffStatusDto>> getCurrentStaffStatusByGroupId(
+            @PathVariable("groupId") String groupId) {
+        List<ListCurrentStaffStatusDto> currentStatuss = currentStatusService.getCurrentStaffStatusByGroupId(groupId);
         return ResponseEntity.status(HttpStatus.OK).body(currentStatuss);
     }
 
