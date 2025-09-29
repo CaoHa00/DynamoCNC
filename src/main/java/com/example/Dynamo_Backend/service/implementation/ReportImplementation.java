@@ -98,6 +98,7 @@ public class ReportImplementation implements ReportService {
                                 Workbook workbook = new XSSFWorkbook(inputStream)) {
                         Sheet sheet = workbook.getSheetAt(0);
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
                         List<Report> reports = new ArrayList<>();
                         for (Row row : sheet) {
                                 if (row.getRowNum() < 6)
