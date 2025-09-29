@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
@@ -130,6 +131,7 @@ public class MachineKpiImplementation implements MachineKpiService {
             InputStream inputStream = file.getInputStream();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
+            List<MachineKpi> machineKpis = new ArrayList<>();
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue; // Skip header row
@@ -169,8 +171,9 @@ public class MachineKpiImplementation implements MachineKpiService {
                 long createdTimestamp = System.currentTimeMillis();
                 machineKpi.setCreatedDate(createdTimestamp);
                 machineKpi.setUpdatedDate(createdTimestamp);
-                machineKpiRepository.save(machineKpi);
+                machineKpis.add(machineKpi);
             }
+            machineKpiRepository.saveAll(machineKpis);
             workbook.close();
             inputStream.close();
         } catch (Exception e) {

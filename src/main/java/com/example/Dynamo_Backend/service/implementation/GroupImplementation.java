@@ -2,6 +2,7 @@ package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +114,7 @@ public class GroupImplementation implements GroupService {
             InputStream inputStream = ((MultipartFile) file).getInputStream();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
+            List<Group> groups = new ArrayList<>();
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue; // Skip header row
@@ -134,8 +136,9 @@ public class GroupImplementation implements GroupService {
                 long createdTimestamp = System.currentTimeMillis();
                 group.setCreatedDate(createdTimestamp);
                 group.setUpdatedDate(createdTimestamp);
-                groupRepository.save(group);
+                groups.add(group);
             }
+            groupRepository.saveAll(groups);
             workbook.close();
             inputStream.close();
         } catch (Exception e) {
