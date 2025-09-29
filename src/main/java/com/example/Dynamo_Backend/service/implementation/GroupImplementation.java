@@ -2,6 +2,7 @@ package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.GroupMapper;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
@@ -52,7 +55,7 @@ public class GroupImplementation implements GroupService {
     @Override
     public GroupDto updateGroup(String Id, GroupDto groupDto) {
         Group group = groupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + Id));
+                .orElseThrow(() -> new BusinessException("Group is not found:" + Id));
         long updatedTimestamp = System.currentTimeMillis();
 
         group.setUpdatedDate(updatedTimestamp);
@@ -65,14 +68,14 @@ public class GroupImplementation implements GroupService {
     @Override
     public GroupDto getGroupById(String Id) {
         Group group = groupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Group is not found:" + Id));
         return GroupMapper.mapToGroupDto(group);
     }
 
     @Override
     public void deleteGroup(String Id) {
         Group group = groupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Group is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("Group is not found:" + Id));
         groupRepository.delete(group);
     }
 
@@ -113,17 +116,14 @@ public class GroupImplementation implements GroupService {
             InputStream inputStream = ((MultipartFile) file).getInputStream();
             Workbook workbook = new XSSFWorkbook(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
+            List<Group> groups = new ArrayList<>();
             for (Row row : sheet) {
                 if (row.getRowNum() < 6)
                     continue; // Skip header row
                 Group group = new Group();
 
-                group.setGroupName(row.getCell(1).getStringCellValue());
-
-                Cell typeCell = row.getCell(2);
-                Cell nameCell = row.getCell(3);
-                if (nameCell == null || nameCell.getCellType() == CellType.BLANK || typeCell == null
-                        || typeCell.getCellType() == CellType.BLANK)
+                Cell nameCell = row.getCell(2);
+                if (nameCell == null || nameCell.getCellType() == CellType.BLANK)
                     continue;
                 String groupName = nameCell.getStringCellValue().trim();
                 if (groupName.isEmpty())
@@ -134,12 +134,13 @@ public class GroupImplementation implements GroupService {
                 long createdTimestamp = System.currentTimeMillis();
                 group.setCreatedDate(createdTimestamp);
                 group.setUpdatedDate(createdTimestamp);
-                groupRepository.save(group);
+                groups.add(group);
             }
+            groupRepository.saveAll(groups);
             workbook.close();
             inputStream.close();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to import groups from Excel file: " + e.getMessage());
+            throw new BusinessException("Failed to import groups from Excel file: " + e.getMessage());
         }
     }
 
@@ -148,7 +149,7 @@ public class GroupImplementation implements GroupService {
         int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
         int currentYear = LocalDate.now().getYear();
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found with ID: " + groupId));
+                .orElseThrow(() -> new ResourceNotFoundException("Group not found with ID: " + groupId));
         List<Machine> machines = machineRepository.findMachinesByGroupIdLatestOrCurrent(group.getGroupId(),
                 currentMonth, currentYear);
         Map<String, Long> statusCount = machines.stream()
@@ -180,7 +181,7 @@ public class GroupImplementation implements GroupService {
         Integer machineIdInt = Integer.parseInt(machineId) + 1;
         String machineStr = String.format("%02d", machineIdInt);
         Group group = groupRepository.findLatestByMachineId(machineIdInt, currentMonth, currentYear)
-                .orElseThrow(() -> new RuntimeException("Group not found for machineId: " + machineStr));
+                .orElseThrow(() -> new ResourceNotFoundException("Group not found for machineId: " + machineStr));
 
         return GroupMapper.mapToGroupResponseDto(group);
     }

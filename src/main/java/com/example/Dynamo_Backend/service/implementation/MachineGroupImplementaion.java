@@ -10,6 +10,7 @@ import com.example.Dynamo_Backend.dto.MachineGroupDto;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineGroup;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.GroupMapper;
 import com.example.Dynamo_Backend.mapper.MachineGroupMapper;
 import com.example.Dynamo_Backend.mapper.MachineMapper;
@@ -50,7 +51,7 @@ public class MachineGroupImplementaion implements MachineGroupService {
     @Override
     public MachineGroupDto updateMachineGroup(String Id, MachineGroupDto machineGroupDto) {
         MachineGroup machineGroup = machineGroupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("MachineGroup is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("MachineGroup is not found:" + Id));
         GroupDto group = groupService.getGroupById(machineGroupDto.getGroupId());
         MachineDto machine = machineService.getMachineById(machineGroupDto.getMachineId());
         Group updateGroup = GroupMapper.mapToGroup(group);
@@ -67,14 +68,14 @@ public class MachineGroupImplementaion implements MachineGroupService {
     @Override
     public MachineGroupDto getMachineGroupById(String Id) {
         MachineGroup machineGroup = machineGroupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("MachineGroup is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("MachineGroup is not found:" + Id));
         return MachineGroupMapper.mapToMachineGroupDto(machineGroup);
     }
 
     @Override
     public void deleteMachineGroup(String Id) {
         MachineGroup machineGroup = machineGroupRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("MachineGroup is not found:" + Id));
+                .orElseThrow(() -> new ResourceNotFoundException("MachineGroup is not found:" + Id));
         machineGroupRepository.delete(machineGroup);
     }
 

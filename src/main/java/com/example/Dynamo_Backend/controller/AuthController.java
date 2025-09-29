@@ -6,6 +6,7 @@ import com.example.Dynamo_Backend.dto.ResponseDto.AuthResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.LoginResponse;
 import com.example.Dynamo_Backend.entities.Admin;
 import com.example.Dynamo_Backend.entities.Role;
+import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.security.JwtUtil;
 import com.example.Dynamo_Backend.service.RefreshTokenService;
 
@@ -56,7 +57,7 @@ public class AuthController {
             String refreshToken = refreshTokenService.generateRefreshToken(request);
             return new LoginResponse(token, refreshToken, userId, email, username, fullname, roles);
         } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid credentials");
+            throw new BusinessException("Invalid credentials");
         }
     }
 

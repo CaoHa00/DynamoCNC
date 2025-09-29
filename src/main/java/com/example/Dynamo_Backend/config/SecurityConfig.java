@@ -28,10 +28,11 @@ public class SecurityConfig {
                         // .requestMatchers("/api/auth/*", "/api/admin/register",
                         // "/api/password-reset/*").permitAll()
                         .requestMatchers("/api/**", "/ws/**").permitAll()
-                        .requestMatchers("/api/current-staff/**", "/api/current-status/**",
-                                "/api/drawing-code-process/**")
-                        .hasAnyRole("ADMIN", "USER")
-                        .anyRequest().hasRole("ADMIN"))
+                // .requestMatchers("/api/current-staff/**", "/api/current-status/**",
+                // "/api/drawing-code-process/**")
+                // .hasAnyRole("ADMIN", "USER")
+                // .anyRequest().hasRole("ADMIN")
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

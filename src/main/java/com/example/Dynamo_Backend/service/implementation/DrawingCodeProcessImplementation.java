@@ -20,6 +20,7 @@ import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
 import com.example.Dynamo_Backend.entities.*;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.*;
@@ -57,12 +58,13 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 long createdTimestamp = System.currentTimeMillis();
                 int status = 1;
                 OrderDetail orderDetail = orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderCode())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new BusinessException(
                                                 "OrderDetail is not found:"
-                                                                + drawingCodeProcessDto.getOrderCode()));
+                                                                + drawingCodeProcessDto.getOrderCode() +
+                                                                "Please check again!"));
                 // Machine machine =
                 // machineRepository.findById(drawingCodeProcessDto.getMachineId())
-                // .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+                // .orElseThrow(() -> new BusinessException("Machine is not found:" +
                 // drawingCodeProcessDto.getMachineId()));
                 DrawingCodeProcess drawingCodeProcess = DrawingCodeProcessMapper
                                 .mapToDrawingCodeProcess(drawingCodeProcessDto);
@@ -93,11 +95,11 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         public DrawingCodeProcessResponseDto updateDrawingCodeProcess(String drawingCodeProcessId,
                         DrawingCodeProcessResquestDto drawingCodeProcessDto) {
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(drawingCodeProcessId)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new BusinessException(
                                                 "DrawingCode Process is not found:" + drawingCodeProcessId));
                 long updatedTimestamp = System.currentTimeMillis();
                 Staff staff = staffRepository.findByStaffId(drawingCodeProcessDto.getStaffId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new BusinessException(
                                                 "Staff is not found:" + drawingCodeProcessDto.getStaffId()));
 
                 if (drawingCodeProcessDto.getMachineId() != null && drawingCodeProcessDto.getMachineId() > 9) {
@@ -134,7 +136,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 OrderDetail orderDetail = drawingCodeProcessDto.getOrderCode() != null
                                 ? orderDetailRepository.findByOrderCode(drawingCodeProcessDto.getOrderCode())
-                                                .orElseThrow(() -> new RuntimeException(
+                                                .orElseThrow(() -> new BusinessException(
                                                                 "OrderDetail is not found:"
                                                                                 + drawingCodeProcessDto
                                                                                                 .getOrderCode()))
@@ -202,7 +204,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         @Override
         public DrawingCodeProcessDto getDrawingCodeProcessById(String drawingCodeProcessId) {
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(drawingCodeProcessId)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new BusinessException(
                                                 "DrawingCode Process is not found:" + drawingCodeProcessId));
                 return DrawingCodeProcessMapper.mapToDrawingCodeProcessDto(drawingCodeProcess);
         }
@@ -228,7 +230,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                         ? process.getOperateHistories().stream().map(operate -> {
                                                                 Staff staff = staffRepository
                                                                                 .findById(operate.getStaff().getId())
-                                                                                .orElseThrow(() -> new RuntimeException(
+                                                                                .orElseThrow(() -> new BusinessException(
                                                                                                 "Staff is not found for process: "
                                                                                                                 + operate.getStaff()
                                                                                                                                 .getId()));
@@ -250,7 +252,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 ? process.getOperateHistories().stream().map(operate -> {
                                                         Staff staff = staffRepository
                                                                         .findById(operate.getStaff().getId())
-                                                                        .orElseThrow(() -> new RuntimeException(
+                                                                        .orElseThrow(() -> new BusinessException(
                                                                                         "Staff is not found for process: "
                                                                                                         + operate.getStaff()
                                                                                                                         .getId()));
@@ -283,7 +285,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         }
                 }
                 if (currentProcess.size() > 1) {
-                        new RuntimeException("Have more than 1 processes in progess!");
+                        throw new BusinessException("Have more than 1 processes in progess!");
                 } else if (currentProcess.size() == 1) {
                         drawingCodeProcess = currentProcess.get(0);
                 } else {
@@ -295,7 +297,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         @Override
         public void deleteDrawingCodeProcess(String drawingCodeProcessId) {
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(drawingCodeProcessId)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new BusinessException(
                                                 "DrawingCode Process is not found:" + drawingCodeProcessId));
                 drawingCodeProcessRepository.delete(drawingCodeProcess);
         }
@@ -333,7 +335,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         List<StaffDto> staffDtos = (process.getOperateHistories() != null)
                                         ? process.getOperateHistories().stream().map(operate -> {
                                                 Staff staff = staffRepository.findById(operate.getStaff().getId())
-                                                                .orElseThrow(() -> new RuntimeException(
+                                                                .orElseThrow(() -> new BusinessException(
                                                                                 "Staff is not found for process: "
                                                                                                 + operate.getStaff()
                                                                                                                 .getId()));
@@ -350,7 +352,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 long timestampNow = System.currentTimeMillis();
 
                 DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new BusinessException(
                                                 "DrawingCodeProcess is not found:" + drawingCodeProcessId));
                 // check if there is any process in progress on this machine
                 List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachine_MachineId(machineId);
@@ -361,7 +363,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
 
                 // check: just the empty machine(status=0) can start
-                Machine machine = machineRepository.findById(machineId).orElseThrow(() -> new RuntimeException(
+                Machine machine = machineRepository.findById(machineId).orElseThrow(() -> new ResourceNotFoundException(
                                 "Machine is not found:" + machineId));
                 machine.setStatus(1);
                 machineRepository.save(machine);
@@ -383,7 +385,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 tempProcessRepository.save(tempProcess);
 
-                Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new RuntimeException(
+                Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new ResourceNotFoundException(
                                 "Staff is not found:" + staffId));
                 // cập nhật staff đang làm
                 CurrentStaffDto currentStaffDto = new CurrentStaffDto(null, staff.getId(), staff.getStaffId(),
@@ -450,11 +452,11 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 OrderDetail orderDetail = orderDetailRepository
                                 .findByOrderCode(drawingCodeProcessDto.getOrderCode())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "OrderDetail is not found:"
                                                                 + drawingCodeProcessDto.getOrderCode()));
                 Machine machine = machineRepository.findById(drawingCodeProcessDto.getMachineId())
-                                .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+                                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
                                                 drawingCodeProcessDto.getMachineId()));
                 DrawingCodeProcess drawingCodeProcess = new DrawingCodeProcess();
                 drawingCodeProcess.setOrderDetail(orderDetail);
@@ -473,7 +475,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 drawingCodeProcess.setPgTime(drawingCodeProcessDto.getPgTime());
                 DrawingCodeProcess savedrawingCodeProcess = drawingCodeProcessRepository.save(drawingCodeProcess);
                 Staff staff = staffRepository.findByStaffId(drawingCodeProcessDto.getStaffId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Staff is not found:" + drawingCodeProcessDto.getStaffId()));
                 // cập nhật staff đang làm
                 CurrentStaffDto currentStaffDto = new CurrentStaffDto(null, staff.getId(), staff.getStaffId(),
@@ -593,7 +595,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         public void doneProcess(String processId) {
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
                                 .findById(processId)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "DrawingCodeProcess is not found:" + processId));
                 Long doneTime = System.currentTimeMillis();
                 OperateHistory operateHistory = operateHistoryRepository
@@ -613,7 +615,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
 
                 Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
-                                .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+                                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
                                                 drawingCodeProcess.getMachine().getMachineId()));
                 machine.setStatus(0);
 
@@ -685,7 +687,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 List<StaffDto> staffDtos = (drawingCodeProcess.getOperateHistories() != null)
                                 ? drawingCodeProcess.getOperateHistories().stream().map(operate -> {
                                         Staff newStaff = staffRepository.findById(operate.getStaff().getId())
-                                                        .orElseThrow(() -> new RuntimeException(
+                                                        .orElseThrow(() -> new ResourceNotFoundException(
                                                                         "Staff is not found for process: "
                                                                                         + operate.getStaff()
                                                                                                         .getId()));
@@ -736,7 +738,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         List<StaffDto> staffDtos = (process.getOperateHistories() != null)
                                         ? process.getOperateHistories().stream().map(operate -> {
                                                 Staff staff = staffRepository.findById(operate.getStaff().getId())
-                                                                .orElseThrow(() -> new RuntimeException(
+                                                                .orElseThrow(() -> new ResourceNotFoundException(
                                                                                 "Staff is not found for process: "
                                                                                                 + operate.getStaff()
                                                                                                                 .getId()));
@@ -753,10 +755,10 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         DrawingCodeProcessResquestDto drawingCodeProcessDto) {
                 long timestampNow = System.currentTimeMillis();
                 DrawingCodeProcess process = drawingCodeProcessRepository.findById(drawingCodeProcessId)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "DrawingCodeProcess is not found:" + drawingCodeProcessId));
                 Machine machine = machineRepository.findById(process.getMachine().getMachineId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Machine is not found:" + process.getMachine().getMachineId()));
 
                 CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
@@ -768,7 +770,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 }
 
                 Staff staff = staffRepository.findByStaffId(drawingCodeProcessDto.getStaffId())
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Staff is not found:"
                                                                 + drawingCodeProcessDto.getStaffId()));
                 TempProcess tempProcess = tempProcessRepository.findByProcessId(drawingCodeProcessId);
@@ -863,7 +865,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         List<StaffDto> staffDtos = (process.getOperateHistories() != null)
                                         ? process.getOperateHistories().stream().map(operate -> {
                                                 Staff staff = staffRepository.findById(operate.getStaff().getId())
-                                                                .orElseThrow(() -> new RuntimeException(
+                                                                .orElseThrow(() -> new ResourceNotFoundException(
                                                                                 "Staff is not found for process: "
                                                                                                 + operate.getStaff()
                                                                                                                 .getId()));
@@ -894,7 +896,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         List<StaffDto> staffDtos = (process.getOperateHistories() != null)
                                         ? process.getOperateHistories().stream().map(operate -> {
                                                 Staff staff = staffRepository.findById(operate.getStaff().getId())
-                                                                .orElseThrow(() -> new RuntimeException(
+                                                                .orElseThrow(() -> new ResourceNotFoundException(
                                                                                 "Staff is not found for process: "
                                                                                                 + operate.getStaff()
                                                                                                                 .getId()));
