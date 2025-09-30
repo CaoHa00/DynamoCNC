@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,12 +38,12 @@ public class StaffKpiImplementation implements StaffKpiService {
                 staffKpiDto.getMonth(),
                 staffKpiDto.getYear());
         if (staffKpi != null) {
-            throw new IllegalArgumentException("Goal of this staff is already set");
+            throw new BusinessException("Goal of this staff is already set");
         }
         long createdTimestamp = System.currentTimeMillis();
         Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("StaffKpiKpi is not found:" + staffKpiDto.getStaffId()));
+                        () -> new ResourceNotFoundException("StaffKpi is not found:" + staffKpiDto.getStaffId()));
         staffKpi = StaffKpiMapper.mapToStaffKpi(staffKpiDto);
         Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
         staffKpi.setGroup(group);
@@ -61,12 +62,12 @@ public class StaffKpiImplementation implements StaffKpiService {
 
         // If it exists and is not the same record, reject
         if (staffKpi != null && !staffKpi.getId().equals(id)) {
-            throw new IllegalArgumentException("Goal of this staff is already set");
+            throw new BusinessException("Goal of this staff is already set");
         }
 
         // If it exists and is identical, reject
         if (staffKpi != null && staffKpi.isSameAs(dto)) {
-            throw new IllegalArgumentException("Goal of this staff is already set");
+            throw new BusinessException("Goal of this staff is already set");
         }
 
         // Load the record by ID if not found earlier
@@ -105,7 +106,7 @@ public class StaffKpiImplementation implements StaffKpiService {
                 staffKpiDto.getMonth(),
                 staffKpiDto.getYear());
         if (staffKpi.isSameAs(staffKpiDto)) {
-            throw new IllegalArgumentException("Goal of this staff is already set");
+            throw new BusinessException("Goal of this staff is already set");
         } else {
             Group group = groupRepository.findById(staffKpiDto.getGroupId()).orElse(null);
             staffKpi.setGroup(group);
@@ -196,5 +197,68 @@ public class StaffKpiImplementation implements StaffKpiService {
         } catch (Exception e) {
             throw new BusinessException("Failed to import staff KPI from Excel file: " + e.getMessage());
         }
+    }
+
+    @Scheduled(cron = "0 0 0 1 * ?") // Runs at 12:00 AM on the 1st of every month
+    public void createMonthlyStaffKpis() {
+        LocalDate now = LocalDate.now();
+        int year = now.getYear();
+        int month = now.getMonthValue();
+
+        // Previous month
+        int prevYear = (month == 1) ? year - 1 : year;
+        int prevMonth = (month == 1) ? 12 : month - 1;
+
+        List<Staff> activeStaff = staffRepository.findAllByStatus(1);
+        int createdCount = 0;
+
+        for (Staff staff : activeStaff) {
+            // Check if KPI already exists for current month
+            StaffKpi existing = staffKpiRepository.findByStaff_IdAndMonthAndYear(staff.getId(), month, year);
+            if (existing != null) {
+                continue; // Skip if already exists
+            }
+
+            // Fetch previous month's KPI
+            StaffKpi prevKpi = staffKpiRepository.findByStaff_IdAndMonthAndYear(staff.getId(), prevMonth, prevYear);
+
+            StaffKpiDto dto = new StaffKpiDto();
+            dto.setStaffId(staff.getId());
+            dto.setYear(year);
+            dto.setMonth(month);
+
+            if (prevKpi != null) {
+                dto.setPgTimeGoal(prevKpi.getPgTimeGoal());
+                dto.setMachineTimeGoal(prevKpi.getMachineTimeGoal());
+                dto.setManufacturingPoint(prevKpi.getManufacturingPoint());
+                dto.setOleGoal(prevKpi.getOleGoal());
+                dto.setWorkGoal(prevKpi.getWorkGoal());
+                dto.setKpi(prevKpi.getKpi());
+            } else {
+                dto.setPgTimeGoal(0.0f);
+                dto.setMachineTimeGoal(0.0f);
+                dto.setManufacturingPoint(0.0f);
+                dto.setOleGoal(0.0f);
+                dto.setWorkGoal(0.0f);
+                dto.setKpi(0.0f);
+            }
+
+            // Get group from staff's groups (assume first one)
+            if (!staff.getStaffGroups().isEmpty()) {
+                dto.setGroupId(staff.getStaffGroups().get(0).getGroup().getGroupId());
+            } else {
+                continue; // Skip if no group
+            }
+
+            try {
+                addStaffKpi(dto);
+                createdCount++;
+            } catch (BusinessException e) {
+                // Already exists or other business logic, skip
+            }
+        }
+
+        System.out.println("Monthly Staff KPI creation completed. Created " + createdCount + " new KPIs for " + year
+                + "-" + month);
     }
 }
