@@ -23,7 +23,7 @@ public class GroupKpi {
     private Integer Id;
     @Column(name = "year", nullable = false)
     private Integer year;
-    @Column(name = "month", nullable = false)
+    @Column(name = "month", nullable = true)
     private Integer month;
     @Column(name = "week", nullable = true)
     private Integer week;

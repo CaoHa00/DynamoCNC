@@ -83,8 +83,9 @@ public class AdminImplement implements AdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         long updatedTimestamp = System.currentTimeMillis();
         admin.setEmail(adminRequestDto.getEmail());
+        admin.setFullname(adminRequestDto.getFullname());
         admin.setUpdatedDate(updatedTimestamp);
-
+        admin.setPassword(passwordEncoder.encode(adminRequestDto.getPassword()));
         Admin savedAdmin = adminRepository.save(admin);
 
         return AdminMapper.mapToAdminResponseDto(savedAdmin);
@@ -94,7 +95,8 @@ public class AdminImplement implements AdminService {
     public void deleteAdmin(String Id) {
         Admin admin = adminRepository.findById(Id)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
-        adminRepository.delete(admin);
+        admin.setUpdatedDate((long) 0);
+        adminRepository.save(admin);
     }
 
     @Override

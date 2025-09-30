@@ -165,39 +165,52 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         }
         for (Machine machine : machines) {
             CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
-            if (currentStatus == null) {
-                continue;
+            if (currentStatus != null) {
+
+                CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
+                if (currentStaff != null && currentStaff.getStaff() != null) {
+                    currentStaff.getStaff().setStaffKpis(null);
+                }
+                StaffDto staffDto = (currentStaff != null && currentStaff.getStaff() != null)
+                        ? StaffMapper.mapStaffNameDto(currentStaff.getStaff())
+                        : null;
+                DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null
+                        ? drawingCodeProcessRepository
+                                .findById(currentStatus.getProcessId())
+                                .orElse(null)
+                        : null;
+                String drawingCodeName = drawingCodeProcess != null
+                        ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
+                        : null;
+                Float pgTime = drawingCodeProcess != null
+                        ? drawingCodeProcess.getPgTime()
+                        : null;
+                Long startTime = drawingCodeProcess != null
+                        ? drawingCodeProcess.getStartTime()
+                        : null;
+                machine.setMachineKpis(null);
+                CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
+                        currentStatus.getId(),
+                        MachineMapper.mapOnlyMachineName(machine),
+                        staffDto,
+                        drawingCodeName,
+                        pgTime,
+                        startTime,
+                        currentStatus.getTime(),
+                        currentStatus.getStatus());
+                result.add(responseDto);
+            } else {
+                CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
+                        null,
+                        MachineMapper.mapOnlyMachineName(machine),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
+                result.add(responseDto);
             }
-            CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
-            if (currentStaff != null && currentStaff.getStaff() != null) {
-                currentStaff.getStaff().setStaffKpis(null);
-            }
-            StaffDto staffDto = (currentStaff != null && currentStaff.getStaff() != null)
-                    ? StaffMapper.mapStaffNameDto(currentStaff.getStaff())
-                    : null;
-            DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null ? drawingCodeProcessRepository
-                    .findById(currentStatus.getProcessId())
-                    .orElse(null) : null;
-            String drawingCodeName = drawingCodeProcess != null
-                    ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
-                    : null;
-            Float pgTime = drawingCodeProcess != null
-                    ? drawingCodeProcess.getPgTime()
-                    : null;
-            Long startTime = drawingCodeProcess != null
-                    ? drawingCodeProcess.getStartTime()
-                    : null;
-            machine.setMachineKpis(null);
-            CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
-                    currentStatus.getId(),
-                    MachineMapper.mapOnlyMachineName(machine),
-                    staffDto,
-                    drawingCodeName,
-                    pgTime,
-                    startTime,
-                    currentStatus.getTime(),
-                    currentStatus.getStatus());
-            result.add(responseDto);
         }
         return result;
     }
@@ -217,39 +230,50 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         }
         StaffDto staffDto = null;
         for (StaffKpi staffKpi : staffKpis) {
+            Staff staff = staffRepository.findById(staffKpi.getStaff().getId()).orElse(null);
+            staffDto = StaffMapper.mapStaffNameDto(staff);
             List<CurrentStatus> currentStatuses = currentStatusRepository.findByStaffId(staffKpi.getStaff().getId());
-            if (currentStatuses == null) {
-                continue;
-            }
             List<CurrentStatusResponseDto> result = new ArrayList<>();
-            for (CurrentStatus currentStatus : currentStatuses) {
-                Staff staff = staffRepository.findById(currentStatus.getStaffId()).orElse(null);
-                staffDto = StaffMapper.mapStaffNameDto(staff);
-                DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null
-                        ? drawingCodeProcessRepository
-                                .findById(currentStatus.getProcessId())
-                                .orElse(null)
-                        : null;
-                String drawingCodeName = drawingCodeProcess != null
-                        ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
-                        : null;
-                Float pgTime = drawingCodeProcess != null
-                        ? drawingCodeProcess.getPgTime()
-                        : null;
-                Long startTime = drawingCodeProcess != null
-                        ? drawingCodeProcess.getStartTime()
-                        : null;
-                Machine machine = machineRepository.findById(currentStatus.getMachineId()).orElse(null);
-                machine.setMachineKpis(null);
+            if (currentStatuses != null) {
+                for (CurrentStatus currentStatus : currentStatuses) {
+
+                    DrawingCodeProcess drawingCodeProcess = currentStatus.getProcessId() != null
+                            ? drawingCodeProcessRepository
+                                    .findById(currentStatus.getProcessId())
+                                    .orElse(null)
+                            : null;
+                    String drawingCodeName = drawingCodeProcess != null
+                            ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
+                            : null;
+                    Float pgTime = drawingCodeProcess != null
+                            ? drawingCodeProcess.getPgTime()
+                            : null;
+                    Long startTime = drawingCodeProcess != null
+                            ? drawingCodeProcess.getStartTime()
+                            : null;
+                    Machine machine = machineRepository.findById(currentStatus.getMachineId()).orElse(null);
+                    machine.setMachineKpis(null);
+                    CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
+                            currentStatus.getId(),
+                            MachineMapper.mapOnlyMachineName(machine),
+                            null,
+                            drawingCodeName,
+                            pgTime,
+                            startTime,
+                            currentStatus.getTime(),
+                            currentStatus.getStatus());
+                    result.add(responseDto);
+                }
+            } else {
                 CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
-                        currentStatus.getId(),
-                        MachineMapper.mapOnlyMachineName(machine),
                         null,
-                        drawingCodeName,
-                        pgTime,
-                        startTime,
-                        currentStatus.getTime(),
-                        currentStatus.getStatus());
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
                 result.add(responseDto);
             }
             ListCurrentStaffStatusDto dto = new ListCurrentStaffStatusDto();

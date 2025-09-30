@@ -1,11 +1,13 @@
 package com.example.Dynamo_Backend.service.implementation;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,7 +40,7 @@ public class MachineKpiImplementation implements MachineKpiService {
                 machineKpiDto.getMachineId(),
                 machineKpiDto.getMonth(), machineKpiDto.getYear());
         if (machineKpi != null) {
-            throw new IllegalArgumentException("Goal of this machine is already set");
+            throw new BusinessException("Goal of this machine is already set");
         }
         Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
                 .orElseThrow(
@@ -60,10 +62,10 @@ public class MachineKpiImplementation implements MachineKpiService {
                 machineKpiDto.getMachineId(),
                 machineKpiDto.getMonth(), machineKpiDto.getYear());
         if (machineKpi != null && !machineKpi.getId().equals(Id)) {
-            throw new IllegalArgumentException("Goal of this machine is already set");
+            throw new BusinessException("Goal of this machine is already set");
         }
         if (machineKpi != null && machineKpi.isSameAs(machineKpiDto)) {
-            throw new IllegalArgumentException("Goal of this machine is already set");
+            throw new BusinessException("Goal of this machine is already set");
         }
 
         if (machineKpi == null) {
@@ -111,7 +113,7 @@ public class MachineKpiImplementation implements MachineKpiService {
         MachineKpi machineKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(Id,
                 machineKpiDto.getMonth(), machineKpiDto.getYear());
         if (machineKpi.isSameAs(machineKpiDto)) {
-            throw new IllegalArgumentException("Goal of this machine is already set");
+            throw new BusinessException("Goal of this machine is already set");
         } else {
             Group group = groupRepository.findById(machineKpiDto.getGroupId()).orElse(null);
             machineKpi.setGroup(group);
@@ -183,6 +185,63 @@ public class MachineKpiImplementation implements MachineKpiService {
         } catch (Exception e) {
             throw new BusinessException("Failed to import machine KPIs from Excel file: " + e.getMessage());
         }
+    }
+
+    @Scheduled(cron = "0 0 0 1 * ?") // Runs at 12:00 AM on the 1st of every month
+    public void createMonthlyMachineKpis() {
+        LocalDate now = LocalDate.now();
+        int year = now.getYear();
+        int month = now.getMonthValue();
+
+        // Previous month
+        int prevYear = (month == 1) ? year - 1 : year;
+        int prevMonth = (month == 1) ? 12 : month - 1;
+
+        List<Machine> activeMachines = machineRepository.findAll();
+        int createdCount = 0;
+
+        for (Machine machine : activeMachines) {
+            // Check if KPI already exists for current month
+            MachineKpi existing = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(machine.getMachineId(),
+                    month, year);
+            if (existing != null) {
+                continue; // Skip if already exists
+            }
+
+            // Fetch previous month's KPI
+            MachineKpi prevKpi = machineKpiRepository.findByMachine_machineIdAndMonthAndYear(machine.getMachineId(),
+                    prevMonth, prevYear);
+
+            MachineKpiDto dto = new MachineKpiDto();
+            dto.setMachineId(machine.getMachineId());
+            dto.setYear(year);
+            dto.setMonth(month);
+
+            if (prevKpi != null) {
+                dto.setOee(prevKpi.getOee());
+                dto.setMachineMiningTarget(prevKpi.getMachineMiningTarget());
+            } else {
+                dto.setOee(0.0f);
+                dto.setMachineMiningTarget(0.0f);
+            }
+
+            // Get group from machine's groups (assume first one)
+            if (!machine.getMachineGroups().isEmpty()) {
+                dto.setGroupId(machine.getMachineGroups().get(0).getGroup().getGroupId());
+            } else {
+                continue; // Skip if no group
+            }
+
+            try {
+                addMachineKpi(dto);
+                createdCount++;
+            } catch (BusinessException e) {
+                // Already exists or other business logic, skip
+            }
+        }
+
+        System.out.println("Monthly Machine KPI creation completed. Created " + createdCount + " new KPIs for " + year
+                + "-" + month);
     }
 
 }
