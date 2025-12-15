@@ -70,13 +70,6 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 Machine machine = machineRepository.findById(machineId)
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail statistic with ID: " + machineId));
-
-                List<Log> logs = machine.getLogs().stream()
-                                .filter(log -> log.getTimeStamp() >= timePeriodInfo.getStartDate()
-                                                && log.getTimeStamp() <= timePeriodInfo.getEndDate())
-                                .sorted(Comparator.comparingLong(Log::getTimeStamp))
-                                .toList();
-
                 Float totalRunTime = 0f;
                 Float totalStopTime = 0f;
                 Float totalPgTime = 0f;
@@ -86,53 +79,19 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                 .filter(process -> process.getStartTime() <= timePeriodInfo.getEndDate()
                                                 && process.getEndTime() >= timePeriodInfo.getStartDate())
                                 .toList().size();
-                boolean isLast = false;
-                for (int i = 0; i < logs.size(); i++) {
-                        Log log = logs.get(i);
-                        String status = log.getStatus();
-
-                        isLast = (i + 1 >= logs.size());
-                        Log next = isLast ? null : logs.get(i + 1);
-                        long duration = isLast ? 0 : next.getTimeStamp() - log.getTimeStamp();
-                        if (duration < 0)
-                                duration = 0;
-                        if (log.getStatus().contains("E")) {
-                                totalErrorTime += isLast
-                                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                                                - log.getTimeStamp())
-                                                : duration;
-                        } else {
-                                switch (status) {
-                                        case "R1":
-                                                totalPgTime += isLast
-                                                                ? (Math.min(timePeriodInfo.getEndDate(),
-                                                                                System.currentTimeMillis())
-                                                                                - log.getTimeStamp())
-                                                                : duration;
-                                                break;
-                                        case "R2":
-                                                totalOffsetTime += isLast
-                                                                ? (Math.min(timePeriodInfo.getEndDate(),
-                                                                                System.currentTimeMillis())
-                                                                                - log.getTimeStamp())
-                                                                : duration;
-                                                break;
-                                        default:
-                                                totalStopTime += isLast
-                                                                ? (Math.min(timePeriodInfo.getEndDate(),
-                                                                                System.currentTimeMillis())
-                                                                                - log.getTimeStamp())
-                                                                : duration;
-                                                break;
-                                }
-                        }
-                }
+                List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
+                                machineId, timePeriodInfo.getStartDate(),
+                                timePeriodInfo.getEndDate());
+                totalErrorTime += activeTime.get(1) + activeTime.get(2);
+                totalPgTime += activeTime.get(3);
+                totalOffsetTime += activeTime.get(4);
+                totalStopTime += activeTime.get(5) + activeTime.get(6);
                 totalRunTime = totalPgTime + totalOffsetTime;
-                return new MachineDetailStatisticDto(machineId, machine.getMachineName(), totalRunTime / 3600000f, 0f,
-                                totalStopTime / 3600000f, 0f,
-                                totalPgTime / 3600000f, 0f,
-                                totalErrorTime / 3600000f, 0f,
-                                numberOfProcesses, 0f, totalOffsetTime / 3600000f);
+                return new MachineDetailStatisticDto(machineId, machine.getMachineName(), totalRunTime, 0f,
+                                totalStopTime, 0f,
+                                totalPgTime, 0f,
+                                totalErrorTime, 0f,
+                                numberOfProcesses, 0f, totalOffsetTime);
         }
 
         @Override
@@ -327,6 +286,18 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 }
                 if (machines == null)
                         machines = new ArrayList<>();
+                if (operationalEfficiency == 0.0) {
+                        operationalEfficiency = 60f;
+                }
+                if (oee == 0.0) {
+                        oee = 60f;
+                }
+                if (offsetLoss == 0.0) {
+                        offsetLoss = 6.0f;
+                }
+                if (otherLoss == 0.0) {
+                        otherLoss = 2.0f;
+                }
 
                 return new MachineEfficiencyResponseDto(machine.getMachineId(), machine.getMachineName(),
                                 operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss,

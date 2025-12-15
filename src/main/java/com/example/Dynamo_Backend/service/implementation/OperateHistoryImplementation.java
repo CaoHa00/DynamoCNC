@@ -45,9 +45,12 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                 int machineIdInt = Integer.parseInt(machineId) + 1;
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
                                 .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
+                DrawingCodeProcessDto drawingCodeProcessDto = null;
+                if (drawingCodeProcess != null) {
+                        drawingCodeProcessDto = DrawingCodeProcessMapper
+                                        .mapToDrawingCodeProcessDto(drawingCodeProcess);
+                }
 
-                DrawingCodeProcessDto drawingCodeProcessDto = DrawingCodeProcessMapper
-                                .mapToDrawingCodeProcessDto(drawingCodeProcess);
                 OperateHistory operateHistory = null;
 
                 long currentTimestamp = System.currentTimeMillis();
@@ -76,7 +79,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                                                                         drawingCodeProcessDto));
                                         operateHistory.setStartTime(currentTimestamp);
                                         operateHistory.setStopTime((long) 0);
-                                        operateHistory.setPgTime(0f);
+                                        operateHistory.setPgTime(0);
                                         operateHistory.setInProgress(1);
                                         operateHistory.setPgTime(drawingCodeProcessDto.getPgTime());
                                         OperateHistory saveOperateHistory = operateHistoryRepository
@@ -88,7 +91,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
 
                                                 TempProcess tempProcess = tempProcessRepository
                                                                 .findByProcessId(drawingCodeProcessDto.getProcessId());
-                                                Float pgTime = operateHistory.getPgTime()
+                                                Integer pgTime = operateHistory.getPgTime()
                                                                 - tempProcess.getPgTime();
                                                 Integer point = operateHistory.getManufacturingPoint()
                                                                 - tempProcess.getPoint();
@@ -119,7 +122,7 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                 }
                         }
                 }
-                return new OperateHistoryDto(null, 0, 0f, null, null, 0, null, null);
+                return new OperateHistoryDto(null, 0, 0, null, null, 0, null, null);
         }
 
         // @Override

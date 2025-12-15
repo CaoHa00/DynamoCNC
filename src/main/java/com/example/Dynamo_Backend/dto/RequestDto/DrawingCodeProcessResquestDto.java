@@ -13,7 +13,7 @@ public class DrawingCodeProcessResquestDto {
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
-    private Float pgTime;
+    private Integer pgTime;
     private String startTime;
     private String endTime;
     private Integer status;

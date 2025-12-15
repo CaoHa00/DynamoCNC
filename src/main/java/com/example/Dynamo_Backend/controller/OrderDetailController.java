@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListOrderDetailStatus;
 import com.example.Dynamo_Backend.dto.ResponseDto.OrderDetailResponseDto;
 import com.example.Dynamo_Backend.service.OrderDetailService;
 
@@ -55,4 +59,17 @@ public class OrderDetailController {
         OrderDetailDto orderDetails = orderDetailService.getOrderDetailById(Id);
         return ResponseEntity.ok(orderDetails);
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Void> uploadMonthlyGroupKpiExcel(@RequestParam("file") MultipartFile file) {
+        orderDetailService.importExcel(file);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/orderStatus")
+    public ResponseEntity<List<ListOrderDetailStatus>> getOrderStatus() {
+        List<ListOrderDetailStatus> dto = orderDetailService.getListOrderStatus();
+        return ResponseEntity.ok(dto);
+    }
+
 }

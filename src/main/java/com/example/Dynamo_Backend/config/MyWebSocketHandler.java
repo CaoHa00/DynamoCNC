@@ -96,7 +96,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         String jsonMessage = objectMapper.writeValueAsString(
                 new java.util.HashMap<String, Object>() {
                     {
-                        put("type", "status");
+                        put("type", "staff");
                         put("data", currentStatusDtos);
                     }
                 });

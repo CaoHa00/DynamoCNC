@@ -46,6 +46,9 @@ public class GroupImplementation implements GroupService {
     public GroupDto addGroup(GroupDto groupDto) {
         Group group = GroupMapper.mapToGroup(groupDto);
         long createdTimestamp = System.currentTimeMillis();
+        if (groupRepository.existsByGroupName(groupDto.getGroupName())) {
+            throw new BusinessException("Tên nhóm đã tồn tại");
+        }
         group.setCreatedDate(createdTimestamp);
         group.setUpdatedDate(createdTimestamp);
         Group saveGroup = groupRepository.save(group);
@@ -60,7 +63,11 @@ public class GroupImplementation implements GroupService {
 
         group.setUpdatedDate(updatedTimestamp);
         group.setGroupId(groupDto.getGroupId());
+        if (groupRepository.existsByGroupName(groupDto.getGroupName())) {
+            throw new BusinessException("Tên nhóm đã tồn tại");
+        }
         group.setGroupName(groupDto.getGroupName());
+        group.setGroupId(Id);
         Group updatedgroup = groupRepository.save(group);
         return GroupMapper.mapToGroupDto(updatedgroup);
     }
@@ -194,10 +201,11 @@ public class GroupImplementation implements GroupService {
         String machineId = arr[0];
         Integer machineIdInt = Integer.parseInt(machineId) + 1;
         CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
-        Group group = groupRepository.findLatestByStaffId(currentStatus.getStaffId(), currentMonth, currentYear)
-                .orElse(null);
-        return GroupMapper.mapToGroupResponseDto(group);
-
+        List<Group> group = groupRepository.findLatestByStaffId(currentStatus.getStaffId(), currentMonth, currentYear);
+        if (group.size() > 0) {
+            return GroupMapper.mapToGroupResponseDto(group.get(0));
+        } else {
+            return null;
+        }
     }
-
 }

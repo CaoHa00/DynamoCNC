@@ -11,18 +11,17 @@ public class OrderDetailMapper {
         OrderDetailDto orderDetailDto = new OrderDetailDto();
 
         orderDetailDto.setOrderDetailId(orderDetail.getOrderDetailId());
-        orderDetailDto.setDrawingCodeId(orderDetail.getDrawingCode().getDrawingCodeId());
-        orderDetailDto.setDrawingCodeName(orderDetail.getDrawingCode().getDrawingCodeName());
-        orderDetailDto.setPoNumber(orderDetail.getOrder().getPoNumber());
-        orderDetailDto.setOrderId(orderDetail.getOrder().getOrderId());
         orderDetailDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getCreatedDate()));
         orderDetailDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getUpdatedDate()));
         orderDetailDto.setOrderCode(orderDetail.getOrderCode());
         orderDetailDto.setOrderType(orderDetail.getOrderType());
         orderDetailDto.setQuantity(orderDetail.getQuantity());
+        orderDetailDto.setNumberOfSteps(orderDetail.getNumberOfStep());
+        orderDetailDto.setOffice(orderDetailDto.getOffice());
         orderDetailDto.setManagerGroupId(
                 orderDetail.getManagerGroup() != null ? orderDetail.getManagerGroup().getGroupId() : null);
         orderDetailDto.setPgTimeGoal(orderDetail.getPgTimeGoal());
+        orderDetailDto.setProgress(orderDetail.getProgress());
         return orderDetailDto;
     }
 
@@ -31,15 +30,15 @@ public class OrderDetailMapper {
         OrderDetailResponseDto orderDetailDto = new OrderDetailResponseDto();
 
         orderDetailDto.setOrderDetailId(orderDetail.getOrderDetailId());
-        orderDetailDto.setDrawingCodeId(orderDetail.getDrawingCode().getDrawingCodeId());
-        orderDetailDto.setDrawingCodeName(orderDetail.getDrawingCode().getDrawingCodeName());
-        orderDetailDto.setPoNumber(orderDetail.getOrder().getPoNumber());
-        orderDetailDto.setOrderId(orderDetail.getOrder().getOrderId());
+        System.out.println(orderDetail.getOrderCode());
+        System.out.println(orderDetail.getOffice());
         orderDetailDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getCreatedDate()));
         orderDetailDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(orderDetail.getUpdatedDate()));
         orderDetailDto.setOrderCode(orderDetail.getOrderCode());
         orderDetailDto.setOrderType(orderDetail.getOrderType());
         orderDetailDto.setQuantity(orderDetail.getQuantity());
+        orderDetailDto.setNumberOfSteps(orderDetail.getNumberOfStep());
+        orderDetailDto.setOffice(orderDetail.getOffice());
         orderDetailDto.setManagerGroupId(
                 orderDetail.getManagerGroup() != null ? orderDetail.getManagerGroup().getGroupId() : null);
         orderDetailDto.setManagerGroupName(
@@ -48,6 +47,7 @@ public class OrderDetailMapper {
         if (processTimeSummaryDto != null) {
             orderDetailDto.setProcessTimeSummaryDto(processTimeSummaryDto);
         }
+        orderDetailDto.setProgress(orderDetail.getProgress());
         return orderDetailDto;
     }
 
@@ -58,7 +58,10 @@ public class OrderDetailMapper {
         orderDetail.setOrderType(orderDetailDto.getOrderType());
         orderDetail.setQuantity(orderDetailDto.getQuantity());
         orderDetail.setPgTimeGoal(orderDetailDto.getPgTimeGoal());
+        orderDetail.setNumberOfStep(orderDetailDto.getNumberOfSteps());
+        orderDetail.setOffice(orderDetailDto.getOffice());
         // orderDetail.setStatus(orderDetailDto.getStatus());
+        orderDetail.setProgress(orderDetailDto.getProgress());
         return orderDetail;
     }
 

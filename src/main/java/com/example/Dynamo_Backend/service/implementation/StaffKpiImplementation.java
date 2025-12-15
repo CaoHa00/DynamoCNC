@@ -234,20 +234,16 @@ public class StaffKpiImplementation implements StaffKpiService {
                 dto.setOleGoal(prevKpi.getOleGoal());
                 dto.setWorkGoal(prevKpi.getWorkGoal());
                 dto.setKpi(prevKpi.getKpi());
+                dto.setGroupId(prevKpi.getGroup().getGroupId());
             } else {
+                List<Group> group = groupRepository.findAll();
                 dto.setPgTimeGoal(0.0f);
                 dto.setMachineTimeGoal(0.0f);
                 dto.setManufacturingPoint(0.0f);
                 dto.setOleGoal(0.0f);
                 dto.setWorkGoal(0.0f);
                 dto.setKpi(0.0f);
-            }
-
-            // Get group from staff's groups (assume first one)
-            if (!staff.getStaffGroups().isEmpty()) {
-                dto.setGroupId(staff.getStaffGroups().get(0).getGroup().getGroupId());
-            } else {
-                continue; // Skip if no group
+                dto.setGroupId(group.get(0).getGroupId());
             }
 
             try {

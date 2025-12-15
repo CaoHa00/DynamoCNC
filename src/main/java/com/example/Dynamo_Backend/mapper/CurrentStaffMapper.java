@@ -7,7 +7,11 @@ import com.example.Dynamo_Backend.util.DateTimeUtil;
 public class CurrentStaffMapper {
     public static CurrentStaffDto mapToCurrentStaffDto(CurrentStaff currentStaff) {
         CurrentStaffDto currentStaffDto = new CurrentStaffDto();
-        currentStaffDto.setAssignedAt(DateTimeUtil.convertTimestampToString(currentStaff.getAssignedAt()));
+        if (currentStaff.getAssignedAt() == null) {
+            currentStaffDto.setAssignedAt(null);
+        } else {
+            currentStaffDto.setAssignedAt(DateTimeUtil.convertTimestampToString(currentStaff.getAssignedAt()));
+        }
         currentStaffDto.setMachineId(currentStaff.getMachine().getMachineId());
         currentStaffDto.setStaffId(currentStaff.getStaff() != null ? currentStaff.getStaff().getId() : null);
         currentStaffDto.setStaffIdNumber(currentStaff.getStaff() != null ? currentStaff.getStaff().getStaffId() : null);

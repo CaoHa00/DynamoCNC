@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class OperateHistoryDto {
     private String operateHistoryId;
     private Integer manufacturingPoint;
-    private Float pgTime;
+    private Integer pgTime;
     private String startTime;
     private String stopTime;
     private Integer inProgress;

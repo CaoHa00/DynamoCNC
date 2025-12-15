@@ -20,6 +20,7 @@ import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
+import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
@@ -34,6 +35,9 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
 
     @Autowired
     GroupKpiRepository groupKpiRepository;
+
+    @Autowired
+    DrawingCodeProcessRepository drawingCodeProcessRepository;
 
     @Autowired
     private GroupRepository groupRepository;
@@ -66,38 +70,43 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         GroupKpi groupKpi = null;
         Group group = groupRepository.findById(requestDto.getGroupId())
                 .orElseThrow(() -> new BusinessException("Group not found with id: " + requestDto.getGroupId()));
-
+        float workingHour = 0;
+        float pg = 0f;
         for (MachineKpi kpi : kpiList) {
-            List<DrawingCodeProcess> processes = kpi.getMachine().getDrawingCodeProcesses();
+            List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findCompletedProcessesByMachineAndTime(
+                    kpi.getMachine().getMachineId(), DateTimeUtil.convertStringToTimestamp(startDate),
+                    DateTimeUtil.convertStringToTimestamp(endDate));
+            pg = 0f;
             for (DrawingCodeProcess process : processes) {
-                // if (process.getStartTime() >= timePeriodInfo.getStartDate()
-                // && process.getEndTime() <= timePeriodInfo.getEndDate()) {
-                if (process.getStartTime() <= timePeriodInfo.getEndDate() &&
-                        process.getEndTime() >= timePeriodInfo.getStartDate()) {
-                    ProcessTime processTime = process.getProcessTime();
-                    if (processTime == null)
-                        continue;
-                    totalRunTime += processTime.getRunTime();
-                    totalPgTime += processTime.getPgTime();
-                    totalOffsetTime += processTime.getOffsetTime();
-                    if (process.getProcessType().contains("chính") || process.getProcessType().contains("điện")) {
-                        mainAndElectricProductPgTime += processTime.getPgTime();
-                    } else {
-                        otherProductPgTime += processTime.getPgTime();
-                    }
+                if (process.getEndTime() - process.getStartTime() > 86400000) {
+                    pg += process.getPgTime();
+                }
+                ProcessTime processTime = process.getProcessTime();
+                totalRunTime += processTime.getRunTime();
+                totalPgTime += processTime.getPgTime();
+                totalOffsetTime += processTime.getOffsetTime();
+                if (process.getProcessType().contains("Chính") || process.getProcessType().contains("Điện")) {
+                    mainAndElectricProductPgTime += processTime.getPgTime();
+                } else {
+                    otherProductPgTime += processTime.getPgTime();
                 }
             }
+            workingHour += pg;
         }
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
         } else {
-            groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndMonthAndYear(
-                    requestDto.getGroupId(), timePeriodInfo.getWeek(), timePeriodInfo.getMonth(),
-                    timePeriodInfo.getYear()).orElseGet(GroupKpi::new);
+            int a = timePeriodInfo.getWeek();
+            groupKpi = groupKpiRepository.findByGroup_GroupIdAndYearAndWeekAndIsMonth(
+                    requestDto.getGroupId(), timePeriodInfo.getYear(),
+                    timePeriodInfo.getWeekOfYear(), (int) 0).orElseGet(GroupKpi::new);
+            float kpi = groupKpi.getWorkingHour();
+            System.out.println(kpi);
         }
         if (numberOfMachine > 0) {
+
             if (numberOfMachine > 0 && groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() > 0) {
                 operationalEfficiency = (totalRunTime / (numberOfMachine * groupKpi.getWorkingHour())) * 100;
             }
@@ -106,7 +115,7 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
                 offsetLoss = totalOffsetTime / totalRunTime * 100;
             }
             if (mainAndElectricProductPgTime > 0) {
-                valueEfficiency = (totalPgTime / mainAndElectricProductPgTime) * 100;
+                valueEfficiency = (mainAndElectricProductPgTime / totalPgTime) * 100;
             }
             if (totalPgTime > 0) {
                 otherLoss = otherProductPgTime / totalPgTime * 100;
@@ -133,11 +142,12 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         }
         if (days <= 7 && start.getMonth() == end.getMonth()) {
             int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            int weekOfYear = start.get(WeekFields.ISO.weekOfYear());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp);
+                    endTimestamp, weekOfYear);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
             return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp);
+                    endTimestamp, null);
         } else {
             throw new BusinessException("Invalid date range");
         }

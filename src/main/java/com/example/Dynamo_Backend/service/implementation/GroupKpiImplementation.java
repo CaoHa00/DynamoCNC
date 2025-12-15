@@ -220,7 +220,7 @@ public class GroupKpiImplementation implements GroupKpiService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 1 * ?") // Runs at 12:00 AM on the 1st of every month
+    @Scheduled(cron = "0 0 7 1 * ?") // Runs at 7:00 AM on the 1st of every month
     public void createMonthlyGroupKpis() {
         LocalDate now = LocalDate.now();
         int year = now.getYear();
@@ -276,7 +276,7 @@ public class GroupKpiImplementation implements GroupKpiService {
                 + "-" + month);
     }
 
-    @Scheduled(cron = "0 0 0 ? * MON") // Runs at 12:00 AM every Monday
+    @Scheduled(cron = "0 0 7 ? * MON") // Runs at 7:00 AM every Monday
     public void createWeeklyGroupKpis() {
         LocalDate now = LocalDate.now();
         int year = now.getYear();
@@ -337,7 +337,7 @@ public class GroupKpiImplementation implements GroupKpiService {
                 + "-Week" + week);
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // Runs every day at midnight to update workingHour based on report hourDiff
+    @Scheduled(cron = "0 0 7 * * ?") // Runs every day at midnight to update workingHour based on report hourDiff
     public void updateDailyWorkingHours() {
         LocalDate now = LocalDate.now();
         int year = now.getYear();
@@ -380,6 +380,12 @@ public class GroupKpiImplementation implements GroupKpiService {
         }
 
         System.out.println("Daily working hours updated for all groups for date: " + now.toString());
+    }
+
+    @Override
+    public List<GroupKpiDto> getGroupKpiByCurrentWeek() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getGroupKpiByCurrentWeek'");
     }
 
 }

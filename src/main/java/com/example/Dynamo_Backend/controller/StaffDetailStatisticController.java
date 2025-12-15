@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -45,6 +47,15 @@ public class StaffDetailStatisticController {
             @RequestBody StatisticRequestDto requestDto) {
         StaffWorkingStatisticDto workingStatisticDto = staffDetailStatisticService.getStaffWorkingStatistic(requestDto);
         return ResponseEntity.ok(workingStatisticDto);
+    }
+
+    @PostMapping("/export-excel")
+    public ResponseEntity<ByteArrayInputStream> exportExcel(@RequestBody StatisticRequestDto requestDto)
+            throws IOException {
+        ByteArrayInputStream in = staffDetailStatisticService.exportExcel(requestDto);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=staff_detail_statistics.xlsx")
+                .body(in);
     }
 
 }

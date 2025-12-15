@@ -1,10 +1,21 @@
 package com.example.Dynamo_Backend.service.implementation;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -265,5 +276,115 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
                 Math.round(staffKpi.getKpi() * 100.0) / 100.0f,
                 staffKpis.stream().map(StaffKpiMapper::mapToStaffDto).toList());
         return staffWorkingStatisticDto;
+    }
+
+    @Override
+    public ByteArrayInputStream exportExcel(StatisticRequestDto requestDto) throws IOException {
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate().substring(0, 10));
+        LocalDate endDate = LocalDate.parse(requestDto.getEndDate().substring(0, 10));
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+
+        ChronoUnit unit;
+        String periodLabel;
+        if (days < 7) {
+            unit = ChronoUnit.DAYS;
+            periodLabel = "Ngày";
+        } else if (days < 32) {
+            unit = ChronoUnit.WEEKS;
+            periodLabel = "Tuần";
+        } else {
+            unit = ChronoUnit.MONTHS;
+            periodLabel = "Tháng";
+        }
+
+        HashMap<String, List<Float>> dataMap = aggregateDataForPeriod(requestDto, unit);
+        String[] headers = { periodLabel, "Tổng giờ làm", "Tổng điểm", "Số nguyên công", "Tổng giờ PG", "KPI" };
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Sheet sheet = workbook.createSheet("Data");
+
+            // Create header
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(headers[i]);
+            }
+
+            // Fill rows
+            int rowNum = 1;
+            for (String period : dataMap.keySet()) {
+                List<Float> values = dataMap.get(period);
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(period);
+                row.createCell(1).setCellValue(values.get(0)); // totalWorkingHours
+                row.createCell(2).setCellValue(values.get(1)); // totalManufactoringPoints
+                row.createCell(3).setCellValue(values.get(2)); // uniqueProcesses.size()
+                row.createCell(4).setCellValue(values.get(3)); // totalPgTime
+                row.createCell(5).setCellValue(values.get(4)); // kpi
+            }
+
+            // Auto-size columns
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        }
+    }
+
+    private HashMap<String, List<Float>> aggregateDataForPeriod(StatisticRequestDto requestDto, ChronoUnit unit) {
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate().substring(0, 10));
+        LocalDate endDate = LocalDate.parse(requestDto.getEndDate().substring(0, 10));
+
+        HashMap<String, List<Float>> map = new HashMap<>();
+        Staff staff = staffRepository.findByStaffId(requestDto.getId())
+                .orElseThrow(() -> new BusinessException("Staff not found when export excel"));
+        LocalDate currentDate = startDate;
+        while (!currentDate.isAfter(endDate)) {
+            float totalWorkingHours = 0f;
+            int totalManufactoringPoints = 0;
+            Float totalPgTime = 0f;
+            Set<String> uniqueProcesses = new HashSet<>();
+            Long periodStartTimestamp = currentDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            LocalDate nextPeriod = currentDate.plus(1, unit);
+            Long periodEndTimestamp = nextPeriod.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli() - 1;
+
+            List<OperateHistory> operateHistories = operateHistoryRepository.findByStaff_Id(staff.getId());
+            if (!operateHistories.isEmpty()) {
+                for (OperateHistory operateHistory : operateHistories) {
+                    if (operateHistory.getStopTime() >= periodStartTimestamp
+                            && operateHistory.getStopTime() <= periodEndTimestamp) {
+                        totalManufactoringPoints += operateHistory.getManufacturingPoint();
+                        totalPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
+                        totalWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime()) / 3600000f;
+                        uniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
+                    }
+                }
+            }
+            Float kpi = 0f;
+            if (totalPgTime != 0f) {
+                kpi = totalManufactoringPoints * 6 / totalPgTime;
+            }
+            List<Float> values = new ArrayList<>();
+            values.add(totalWorkingHours);
+            values.add((float) totalManufactoringPoints);
+            values.add((float) uniqueProcesses.size());
+            values.add(totalPgTime);
+            values.add(kpi);
+
+            String periodKey;
+            if (unit == ChronoUnit.DAYS) {
+                periodKey = currentDate.toString();
+            } else if (unit == ChronoUnit.WEEKS) {
+                periodKey = "Tuần " + (currentDate.getDayOfYear() / 7 + 1);
+            } else {
+                periodKey = currentDate.getMonth().toString() + " " + currentDate.getYear();
+            }
+            map.put(periodKey, values);
+            currentDate = nextPeriod;
+        }
+        return map;
     }
 }

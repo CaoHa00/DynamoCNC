@@ -109,7 +109,7 @@ public class MachineMapper {
         if (machine == null) {
             return null;
         } else {
-            return new MachineDto(machine.getMachineName());
+            return new MachineDto(machine.getMachineId(), machine.getMachineName());
         }
     }
 }

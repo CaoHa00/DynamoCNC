@@ -20,4 +20,6 @@ public interface GroupKpiService {
     void importGroupKpiWeekFromExcel(MultipartFile file);
 
     void importGroupKpiMonthFromExcel(MultipartFile file);
+
+    List<GroupKpiDto> getGroupKpiByCurrentWeek();
 }

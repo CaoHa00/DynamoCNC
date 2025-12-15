@@ -10,21 +10,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@Entity
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "temp_process")
-public class TempProcess {
+@Data
+@NoArgsConstructor
+@Table(name = "temp_start_time")
+@Entity
+public class TempStartTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "process_id", nullable = false)
-    private String processId;
     @Column(name = "machine_id", nullable = false)
     private Integer machineId;
-    @Column(name = "pg_time", nullable = false)
-    private Integer pgTime;
-    @Column(name = "manufacturing_point", nullable = false)
-    private Integer point;
+    @Column(name = "start_time", nullable = true)
+    private long startTime;
 }

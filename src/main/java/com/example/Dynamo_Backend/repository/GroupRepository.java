@@ -51,9 +51,11 @@ public interface GroupRepository extends JpaRepository<Group, String> {
                                 k.year DESC,
                                 k.month DESC
                         """)
-        Optional<Group> findLatestByStaffId(
+        List<Group> findLatestByStaffId(
                         @Param("staffId") String staffId,
                         @Param("month") int month,
                         @Param("year") int year);
+
+        boolean existsByGroupName(String groupName);
 
 }

@@ -12,6 +12,10 @@ import com.example.Dynamo_Backend.entities.OrderDetail;
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, String> {
     Optional<OrderDetail> findByOrderCode(String orderCode);
 
+    boolean existsByOrderCode(String code);
+
     List<OrderDetail> findByCreatedDateBetween(Long startDate, Long endDate);
+
+    List<OrderDetail> findByStatusAndProgressNot(Integer status, Integer progress);
 
 }

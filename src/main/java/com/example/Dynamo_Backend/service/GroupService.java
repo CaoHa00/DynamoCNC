@@ -6,10 +6,7 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.GroupDto;
-import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
-
-import jakarta.persistence.criteria.CriteriaBuilder.In;
 
 public interface GroupService {
     GroupDto addGroup(GroupDto groupDto);

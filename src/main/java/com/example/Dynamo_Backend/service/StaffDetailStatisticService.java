@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
@@ -13,4 +15,6 @@ public interface StaffDetailStatisticService {
     List<HistoryProcessDto> getStaffHistoryProcesses(StatisticRequestDto dto);
 
     StaffWorkingStatisticDto getStaffWorkingStatistic(StatisticRequestDto dto);
+
+    ByteArrayInputStream exportExcel(StatisticRequestDto requestDto) throws IOException;
 }

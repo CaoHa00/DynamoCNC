@@ -2,10 +2,11 @@ package com.example.Dynamo_Backend.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListOrderDetailStatus;
 import com.example.Dynamo_Backend.dto.ResponseDto.OrderDetailResponseDto;
-import com.example.Dynamo_Backend.entities.DrawingCode;
-import com.example.Dynamo_Backend.entities.Order;
 
 public interface OrderDetailService {
     OrderDetailDto addOrderDetail(OrderDetailDto orderDetailDto);
@@ -19,4 +20,8 @@ public interface OrderDetailService {
     List<OrderDetailResponseDto> getOrderDetails();
 
     void updateOrderCode(String drawingCodeId, String orderId);
+
+    void importExcel(MultipartFile file);
+
+    List<ListOrderDetailStatus> getListOrderStatus();
 }

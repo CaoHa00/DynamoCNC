@@ -19,6 +19,7 @@ import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
+import com.example.Dynamo_Backend.entities.TempStartTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
@@ -28,6 +29,7 @@ import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.repository.TempStartTimeRepository;
 import com.example.Dynamo_Backend.service.CurrentStaffService;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.MachineKpiService;
@@ -47,6 +49,8 @@ public class MachineImplementation implements MachineService {
 
     MachineKpiRepository machineKpiRepository;
     MachineKpiService machineKpiService;
+
+    TempStartTimeRepository tempStartTimeRepository;
 
     CurrentStatusService currentStatusService;
 
@@ -76,6 +80,10 @@ public class MachineImplementation implements MachineService {
         currentStatus.setMachineId(result.getMachineId());
         currentStatus.setStatus("0");
         currentStatusService.addCurrentStatus(currentStatus);
+        TempStartTime tempStartTime = new TempStartTime();
+        tempStartTime.setMachineId(saveMachine.getMachineId());
+        tempStartTime.setStartTime(0);
+        tempStartTimeRepository.save(tempStartTime);
 
         // CurrentStaff currentStaff = new CurrentStaff();
         // currentStaff.setMachine(saveMachine);

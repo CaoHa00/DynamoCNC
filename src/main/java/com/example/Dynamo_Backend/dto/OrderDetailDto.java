@@ -11,17 +11,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @NoArgsConstructor
 public class OrderDetailDto {
     private String orderDetailId;
-    private String drawingCodeId;
-    private String drawingCodeName;
-    private String orderId;
-    private String poNumber;
     private String orderCode;
     private Integer quantity;
     private String orderType;
     private String createdDate;
     private String updatedDate;
-    private Float pgTimeGoal;
+    private Integer pgTimeGoal;
     private String managerGroupId;
+    private Integer numberOfSteps;
+    private String office;
+    private Integer progress;
     // private int status;
 
     public OrderDetailDto(String orderDetailId, String orderCode) {

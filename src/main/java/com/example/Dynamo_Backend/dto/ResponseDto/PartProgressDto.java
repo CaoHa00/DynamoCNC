@@ -5,12 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
-@Data
 @NoArgsConstructor
-public class OrderCodeOverviewDto {
+@Data
+public class PartProgressDto {
+    private String orderDetailId;
     private String orderCode;
-    private Integer pgTimeGoal;
-    private Float pgTime;
-    private Float diffTime;
-
+    private Integer partNumber;
+    private Long totalStep;
+    private Long doneStep;
+    private Long doingStep;
 }

@@ -13,8 +13,10 @@ import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.ProcessTimeMapper;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.LogRepository;
+import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.ProcessTimeRepository;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 @Service
 public class ProcessTimeImplementation implements ProcessTimeService {
@@ -24,6 +26,8 @@ public class ProcessTimeImplementation implements ProcessTimeService {
     DrawingCodeProcessRepository drawingCodeProcessRepository;
     @Autowired
     LogRepository logRepository;
+    @Autowired
+    MachineRepository machineRepository;
 
     @Override
     public ProcessTimeDto addProcessTime(ProcessTimeDto processTimeDto) {
@@ -79,51 +83,29 @@ public class ProcessTimeImplementation implements ProcessTimeService {
                 drawingCodeProcess.getStartTime(),
                 drawingCodeProcess.getEndTime());
         ProcessTime processTime = new ProcessTime();
-        Long doneTime = drawingCodeProcess.getEndTime() != null ? drawingCodeProcess.getEndTime()
-                : System.currentTimeMillis();
 
         if (!logs.isEmpty() && drawingCodeProcess.getMachine().getMachineId() <= 9) {
-            long spanTime = 0L;
-            long runTime = 0L;
-            long pgTime = 0L;
-            long stopTime = 0L;
-            long offsetTime = 0L;
-            boolean isLast = false;
+            float spanTime = 0L;
+            float runTime = 0L;
+            float pgTime = 0L;
+            float stopTime = 0L;
+            float offsetTime = 0L;
 
-            for (int i = 0; i < logs.size(); i++) {
-                Log log = logs.get(i);
-                String status = log.getStatus();
-
-                isLast = (i + 1 >= logs.size());
-                Log next = isLast ? null : logs.get(i + 1);
-                switch (status) {
-                    case "R1":
-                        pgTime += isLast ? (doneTime - log.getTimeStamp()) : (next.getTimeStamp() - log.getTimeStamp());
-                        runTime += isLast ? (doneTime - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    case "R2":
-                        offsetTime += isLast ? (doneTime - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        runTime += isLast ? (doneTime - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    default:
-                        stopTime += isLast ? (doneTime - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                }
-            }
-
-            spanTime = (!logs.get(logs.size() - 1).getStatus().contains("R") ? logs.get(logs.size() - 1).getTimeStamp()
-                    : drawingCodeProcess.getEndTime()) - logs.get(0).getTimeStamp();
+            List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
+                    drawingCodeProcess.getMachine().getMachineId(), drawingCodeProcess.getStartTime(),
+                    drawingCodeProcess.getEndTime());
+            spanTime = (drawingCodeProcess.getEndTime() - drawingCodeProcess.getStartTime()) / 3600000f;
+            pgTime = activeTime.get(3);
+            offsetTime = activeTime.get(4);
+            runTime = pgTime + offsetTime;
+            stopTime = activeTime.get(5) + activeTime.get(6);
 
             // convert ms to hours
-            processTime.setSpanTime(spanTime / 3600000f); // ms to hours
-            processTime.setRunTime(runTime / 3600000f);
-            processTime.setPgTime(pgTime / 3600000f);
-            processTime.setStopTime(stopTime / 3600000f);
-            processTime.setOffsetTime(offsetTime / 3600000f);
+            processTime.setSpanTime(spanTime); // ms to hours
+            processTime.setRunTime(runTime);
+            processTime.setPgTime(pgTime);
+            processTime.setStopTime(stopTime);
+            processTime.setOffsetTime(offsetTime);
             processTime.setDrawingCodeProcess(drawingCodeProcess);
             return processTimeRepository.save(processTime);
         } else {

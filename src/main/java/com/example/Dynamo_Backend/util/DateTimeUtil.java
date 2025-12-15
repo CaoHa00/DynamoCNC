@@ -12,10 +12,19 @@ public class DateTimeUtil {
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-    public static long convertStringToTimestampDate(String dateTimeStr) {
-        LocalDate localDate = LocalDate.parse(dateTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
+    // public static long convertStringToTimestampDate(String dateTimeStr) {
+    // LocalDate localDate = LocalDate.parse(dateTimeStr,
+    // DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    // return
+    // localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    // }
+
+    // public static long convertStringToTimestampDate(String dateTimeStr) {
+    // DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    // LocalDateTime ldt = LocalDateTime.parse(dateTimeStr, fmt); // parse có cả
+    // thời gian
+    // return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    // }
 
     public static String convertTimestampToString(long timestamp) {
         return Instant.ofEpochMilli(timestamp)

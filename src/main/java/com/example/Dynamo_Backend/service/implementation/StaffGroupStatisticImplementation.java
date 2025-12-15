@@ -36,7 +36,6 @@ import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.service.GroupStatisticService;
-import com.example.Dynamo_Backend.util.DateTimeUtil;
 import com.example.Dynamo_Backend.util.TimeRange;
 
 @Service
@@ -149,6 +148,26 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         // int hours = totalWorkingHours.intValue();
         // int minutes = Math.round((totalWorkingHours - hours) * 60);
         // String workingHoursString = String.format("%dh%02dm", hours, minutes);
+        // demo
+
+        if (processCount == 0) {
+            processCount = 15;
+        }
+        totalKpi = 60f;
+        staffCount = staffKpiList.size();
+        totalWorkingHours = 120f;
+        totalManufactoringPoints = 40;
+        previousTotalWorkingHours = 130f;
+        previousTotalManufactoringPoints = 50;
+        previousProcessCount = 12;
+        previousTotalKpi = 80f;
+
+        // demo
+        workingRate = -10f;
+        mpRate = -8f;
+        kpiRate = -9f;
+        processRate = -5f;
+
         return new StaffGroupStatisticDto(group.getGroupId(), group.getGroupName(), staffCount,
                 totalWorkingHours, workingRate, totalManufactoringPoints, mpRate,
                 processCount, processRate, totalKpi, kpiRate,
@@ -176,8 +195,8 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                     group.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                     .orElseThrow(() -> new BusinessException("GroupKPI not found when get staff group overview"));
         } else {
-            groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndMonthAndYear(
-                    group.getGroupId(), timePeriodInfo.getWeek(), timePeriodInfo.getMonth(), timePeriodInfo.getYear())
+            groupKpi = groupKpiRepository.findByGroup_GroupIdAndYearAndWeekAndIsMonth(
+                    group.getGroupId(), timePeriodInfo.getYear(), timePeriodInfo.getWeekOfYear(), 0)
                     .orElseThrow(() -> new BusinessException("GroupKPI not found when get staff group overview"));
         }
 
@@ -217,18 +236,20 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             Float kpi = 0f;
             if (totalPgTime != 0f) {
                 kpi = totalManufactoringPoints * 6 / totalPgTime;
+                kpi = (float) Math.round(kpi * 100) / 100;
             }
             overviewDtos.add(new StaffGroupOverviewDto(
                     staffKpi.getStaff().getId(),
                     staffKpi.getStaff().getStaffId(),
                     staffKpi.getStaff().getStaffName(),
                     staffKpi.getWorkGoal(),
-                    totalWorkingHours,
+                    (float) Math.round(totalWorkingHours * 100) / 100,
                     staffKpi.getManufacturingPoint(),
                     totalManufactoringPoints,
                     uniqueProcesses.size(), staffKpi.getOleGoal(), 0f,
-                    staffKpi.getKpi(), kpi, staffKpi.getMachineTimeGoal(), totalMachineTime,
-                    staffKpi.getPgTimeGoal(), totalPgTime));
+                    staffKpi.getKpi(), kpi, staffKpi.getMachineTimeGoal(),
+                    (float) Math.round(totalMachineTime * 100) / 100,
+                    staffKpi.getPgTimeGoal(), (float) Math.round(totalPgTime * 100) / 100));
         }
         for (StaffGroupOverviewDto dto : overviewDtos) {
             if (groupKpi.getWorkingHour() != 0) {
@@ -244,36 +265,25 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         requestDto.setStartDate(startDate);
         requestDto.setEndDate(endDate);
 
-        HashMap<String, StaffGroupOverviewDto> exportData = new HashMap<>();
         TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
-        long i = 0;
-        if (timePeriodInfo.getDay() <= 7) {
-            i = 1;
-        } else if (timePeriodInfo.getDay() > 7 && timePeriodInfo.getDay() <= 31) {
-            i = 7;
-        } else {
-            i = timePeriodInfo.getDay() / 12;
-        }
         HashMap<String, List<StaffGroupOverviewDto>> overviewDtos = aggregateDataForPeriod(requestDto.getGroupId(),
-                timePeriodInfo, i,
-                requestDto);
+                timePeriodInfo, requestDto);
         return overviewDtos;
     }
 
     private HashMap<String, List<StaffGroupOverviewDto>> aggregateDataForPeriod(String groupId,
-            TimePeriodInfo timePeriodInfo, long days, GroupEfficiencyRequestDto requestDto) {
+            TimePeriodInfo timePeriodInfo, GroupEfficiencyRequestDto requestDto) {
         LocalDate startDate = LocalDate.parse(requestDto.getStartDate().substring(0, 10));
         LocalDate endDate = LocalDate.parse(requestDto.getEndDate().substring(0, 10));
 
         HashMap<String, List<StaffGroupOverviewDto>> map = new HashMap<>();
-        // Example: adjust repository query
         List<StaffKpi> staffKpiList = staffKpiRepository.findByGroup_groupIdAndMonthAndYear(groupId,
                 timePeriodInfo.getMonth(), timePeriodInfo.getYear());
-        LocalDate date = startDate;
-        for (; date.getDayOfMonth() <= endDate.getDayOfMonth();) {
+        LocalDate currentDate = startDate;
+        while (!currentDate.isAfter(endDate)) {
             List<StaffGroupOverviewDto> overviewDtos = new ArrayList<>();
-            Long startTimestamp = DateTimeUtil.convertStringToTimestamp(requestDto.getStartDate());
-            Long endTimestamp = DateTimeUtil.convertStringToTimestamp(requestDto.getEndDate());
+            Long dayStartTimestamp = currentDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            Long dayEndTimestamp = currentDate.atTime(23, 59, 59).toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
             for (StaffKpi staffKpi : staffKpiList) {
                 float totalWorkingHours = 0f;
                 float totalMachineTime = 0f;
@@ -282,13 +292,10 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                 Set<String> uniqueProcesses = new HashSet<>();
                 List<OperateHistory> operateHistories = operateHistoryRepository
                         .findByStaff_Id(staffKpi.getStaff().getId());
-                StaffGroupOverviewDto dtos = new StaffGroupOverviewDto();
-                dtos.setStaffIdNumber(staffKpi.getStaff().getStaffId());
-                dtos.setStaffFullName(staffKpi.getStaff().getStaffName());
                 if (!operateHistories.isEmpty()) {
                     for (OperateHistory operateHistory : operateHistories) {
-                        if (operateHistory.getStopTime() >= startTimestamp
-                                && operateHistory.getStopTime() <= endTimestamp) {
+                        if (operateHistory.getStopTime() >= dayStartTimestamp
+                                && operateHistory.getStopTime() <= dayEndTimestamp) {
                             totalManufactoringPoints += operateHistory.getManufacturingPoint();
                             totalPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
                             totalWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime())
@@ -303,7 +310,6 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                 if (totalPgTime != 0f) {
                     kpi = totalManufactoringPoints * 6 / totalPgTime;
                 }
-                overviewDtos = new ArrayList<>();
                 overviewDtos.add(new StaffGroupOverviewDto(
                         staffKpi.getStaff().getId(),
                         staffKpi.getStaff().getStaffId(),
@@ -316,17 +322,102 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                         staffKpi.getKpi(), kpi, staffKpi.getMachineTimeGoal(), totalMachineTime,
                         staffKpi.getPgTimeGoal(), totalPgTime));
             }
+            map.put(currentDate.toString(), overviewDtos);
+            currentDate = currentDate.plusDays(1);
+        }
+        return map;
+    }
 
-            date = date.plusDays(days);
-            map.put(date.toString(), overviewDtos);
+    private HashMap<String, List<StaffGroupOverviewDto>> aggregateDataForPeriod(String groupId,
+            TimePeriodInfo timePeriodInfo, ChronoUnit unit, GroupEfficiencyRequestDto requestDto) {
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate().substring(0, 10));
+        LocalDate endDate = LocalDate.parse(requestDto.getEndDate().substring(0, 10));
+
+        HashMap<String, List<StaffGroupOverviewDto>> map = new HashMap<>();
+        List<StaffKpi> staffKpiList = staffKpiRepository.findByGroup_groupIdAndMonthAndYear(groupId,
+                timePeriodInfo.getMonth(), timePeriodInfo.getYear());
+        LocalDate currentDate = startDate;
+        while (!currentDate.isAfter(endDate)) {
+            List<StaffGroupOverviewDto> overviewDtos = new ArrayList<>();
+            Long periodStartTimestamp = currentDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            LocalDate nextPeriod = currentDate.plus(1, unit);
+            Long periodEndTimestamp = nextPeriod.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli() - 1;
+            for (StaffKpi staffKpi : staffKpiList) {
+                float totalWorkingHours = 0f;
+                float totalMachineTime = 0f;
+                int totalManufactoringPoints = 0;
+                Float totalPgTime = 0f;
+                Set<String> uniqueProcesses = new HashSet<>();
+                List<OperateHistory> operateHistories = operateHistoryRepository
+                        .findByStaff_Id(staffKpi.getStaff().getId());
+                if (!operateHistories.isEmpty()) {
+                    for (OperateHistory operateHistory : operateHistories) {
+                        if (operateHistory.getStopTime() >= periodStartTimestamp
+                                && operateHistory.getStopTime() <= periodEndTimestamp) {
+                            totalManufactoringPoints += operateHistory.getManufacturingPoint();
+                            totalPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
+                            totalWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime())
+                                    / 3600000f;
+                            totalMachineTime += (operateHistory.getStopTime() - operateHistory.getStartTime())
+                                    / 3600000f;
+                            uniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
+                        }
+                    }
+                }
+                Float kpi = 0f;
+                if (totalPgTime != 0f) {
+                    kpi = totalManufactoringPoints * 6 / totalPgTime;
+                }
+                overviewDtos.add(new StaffGroupOverviewDto(
+                        staffKpi.getStaff().getId(),
+                        staffKpi.getStaff().getStaffId(),
+                        staffKpi.getStaff().getStaffName(),
+                        staffKpi.getWorkGoal(),
+                        totalWorkingHours,
+                        staffKpi.getManufacturingPoint(),
+                        totalManufactoringPoints,
+                        uniqueProcesses.size(), staffKpi.getOleGoal(), 0f,
+                        staffKpi.getKpi(), kpi, staffKpi.getMachineTimeGoal(), totalMachineTime,
+                        staffKpi.getPgTimeGoal(), totalPgTime));
+            }
+            String periodKey;
+            if (unit == ChronoUnit.DAYS) {
+                periodKey = currentDate.toString();
+            } else if (unit == ChronoUnit.WEEKS) {
+                periodKey = "Tuần " + (currentDate.getDayOfYear() / 7 + 1);
+            } else {
+                periodKey = currentDate.getMonth().toString() + " " + currentDate.getYear();
+            }
+            map.put(periodKey, overviewDtos);
+            currentDate = nextPeriod;
         }
         return map;
     }
 
     @Override
     public ByteArrayInputStream exportExcel(GroupEfficiencyRequestDto requestDto) throws IOException {
-        HashMap<String, List<StaffGroupOverviewDto>> overviewDtos = calculateDataByDay(requestDto);
-        String[] headers = { "Ngày", "Tên Nhân Viên", "Mã nhân viên", };
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate().substring(0, 10));
+        LocalDate endDate = LocalDate.parse(requestDto.getEndDate().substring(0, 10));
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+
+        ChronoUnit unit;
+        String periodLabel;
+        if (days < 7) {
+            unit = ChronoUnit.DAYS;
+            periodLabel = "Ngày";
+        } else if (days < 32) {
+            unit = ChronoUnit.WEEKS;
+            periodLabel = "Tuần";
+        } else {
+            unit = ChronoUnit.MONTHS;
+            periodLabel = "Tháng";
+        }
+
+        HashMap<String, List<StaffGroupOverviewDto>> overviewDtos = aggregateDataForPeriod(requestDto.getGroupId(),
+                TimeRange.getRangeTypeAndWeek(requestDto), unit, requestDto);
+        String[] headers = { periodLabel, "Tên Nhân Viên", "Mã nhân viên", "Tổng giờ làm", "Tổng điểm",
+                "Số nguyên công",
+                "Tổng giờ PG" };
         try (Workbook workbook = new XSSFWorkbook();
                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
@@ -340,12 +431,24 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             }
 
             // Fill rows
-            // for (int i = 1; i < data.size(); i++) {
-            // Row row = sheet.createRow(i);
-            // for (int j = 0; j < data.get(i).length; j++) {
-            // row.createCell(j).setCellValue(data.get(i)[j]);
-            // }
-            // }
+            int rowNum = 1;
+            for (String period : overviewDtos.keySet()) {
+                List<StaffGroupOverviewDto> dtos = overviewDtos.get(period);
+                for (StaffGroupOverviewDto dto : dtos) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(period);
+                    row.createCell(1).setCellValue(dto.getStaffFullName());
+                    row.createCell(2).setCellValue(dto.getStaffIdNumber());
+                    row.createCell(3).setCellValue(dto.getTotalWorkingHour());
+                    row.createCell(4).setCellValue(dto.getTotalManufacturingPoint());
+                    row.createCell(5).setCellValue(dto.getTotalOperationNumber());
+                    row.createCell(6).setCellValue(dto.getPgTime() != null ? dto.getPgTime() : 0f);
+                }
+            }
+            // Auto-size columns
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
 
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());

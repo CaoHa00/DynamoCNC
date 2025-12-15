@@ -15,7 +15,7 @@ public class CurrentStatusResponseDto {
     private MachineDto machineDto;
     private StaffDto staffDto;
     private String drawingCodeName;
-    private Float pgTime;
+    private Integer pgTime;
     private Long startTime;
     private String time;
     private String status;

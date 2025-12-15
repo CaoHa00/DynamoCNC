@@ -65,6 +65,7 @@ public class DrawingCodeImplementation implements DrawingCodeService {
     public void deleteDrawingCode(String drawingCodeId) {
         DrawingCode drawingCode = drawingCodeRepository.findById(drawingCodeId)
                 .orElseThrow(() -> new BusinessException("DrawingCode is not found:" + drawingCodeId));
+
         drawingCodeRepository.delete(drawingCode);
     }
 

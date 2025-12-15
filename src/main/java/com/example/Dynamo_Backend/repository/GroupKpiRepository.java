@@ -1,5 +1,6 @@
 package com.example.Dynamo_Backend.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,5 +18,8 @@ public interface GroupKpiRepository extends JpaRepository<GroupKpi, Integer> {
                         Integer isMonth);
 
         Optional<GroupKpi> findByGroup_GroupIdAndYearAndWeekAndIsMonth(String groupId, Integer year, Integer week,
+                        Integer isMonth);
+
+        List<GroupKpi> findByYearAndWeekAndIsMonth(Integer year, Integer week,
                         Integer isMonth);
 }

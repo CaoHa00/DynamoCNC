@@ -3,12 +3,16 @@ package com.example.Dynamo_Backend.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 
 public interface DrawingCodeProcessService {
         DrawingCodeProcessDto addDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto);
+
+        void addDrawingCodeProcess(List<DrawingCodeProcessResquestDto> drawingCodeProcessDto);
 
         DrawingCodeProcessResponseDto updateDrawingCodeProcess(String drawingCodeProcessId,
                         DrawingCodeProcessResquestDto drawingCodeProcessDto);
@@ -51,5 +55,13 @@ public interface DrawingCodeProcessService {
 
         List<DrawingCodeProcessResponseDto> getCompletedProcessWithOperateHistoryData(String staffId, Long start,
                         Long stop);
+
+        void importExcel(MultipartFile file);
+
+        DrawingCodeProcessDto updateDrawingCodeProcess(DrawingCodeProcessResquestDto drawingCodeProcessDto);
+
+        List<DrawingCodeProcessDto> getProcessesByOrderDetail(String orderDetailId);
+
+        void updateProcessStatus(String orderCode);
 
 }

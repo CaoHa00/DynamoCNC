@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,10 @@ public interface MachineRepository extends JpaRepository<Machine, Integer> {
 
     List<Machine> findAllByStatus(Integer status);
 
+    Optional<Machine> findByMachineName(String name);
+
+    boolean existsByMachineName(String name);
+
     @Query(value = "SELECT DISTINCT m.* " +
             "FROM machine m " +
             "JOIN machine_kpi k ON m.machine_id = k.machine_id " +
@@ -26,5 +31,45 @@ public interface MachineRepository extends JpaRepository<Machine, Integer> {
             @Param("groupId") String groupId,
             @Param("year") int year,
             @Param("month") int month);
+
+    @Query(value = """
+            WITH ordered_log AS (
+                SELECT
+                    log_id,
+                    machine_id,
+                    status,
+                    time_stamp,
+                    LEAD(time_stamp) OVER (PARTITION BY machine_id ORDER BY time_stamp) AS next_time_stamp
+                FROM log
+                WHERE machine_id = :machineId
+                  AND time_stamp BETWEEN :startTime AND :endTime
+            ),
+            durations AS (
+                SELECT
+                    status,
+                    SUM(next_time_stamp - time_stamp) AS total_duration_ms
+                FROM ordered_log
+                WHERE next_time_stamp IS NOT NULL
+                GROUP BY status
+            ),
+            all_statuses AS (
+                SELECT '0' AS status
+                UNION ALL SELECT 'R1'
+                UNION ALL SELECT 'R2'
+                UNION ALL SELECT 'S1'
+                UNION ALL SELECT 'S2'
+                UNION ALL SELECT 'E1'
+                UNION ALL SELECT 'E2'
+            )
+            SELECT
+                ROUND(COALESCE(d.total_duration_ms, 0) / 3600000.0, 2) AS totalDurationHr
+            FROM all_statuses a
+            LEFT JOIN durations d ON a.status = d.status
+            ORDER BY a.status
+            """, nativeQuery = true)
+    List<Float> calculateDurationsByStatusAndRange(
+            @Param("machineId") Integer machineId,
+            @Param("startTime") Long startTime,
+            @Param("endTime") Long endTime);
 
 }

@@ -70,4 +70,10 @@ public class GroupKpiController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/currentWeek")
+    public ResponseEntity<List<GroupKpiDto>> getGroupKpiByCurrentWeek() {
+        List<GroupKpiDto> groupKpis = groupKpiService.getGroupKpiByCurrentWeek();
+        return ResponseEntity.status(HttpStatus.OK).body(groupKpis);
+    }
+
 }

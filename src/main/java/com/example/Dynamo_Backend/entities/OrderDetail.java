@@ -42,7 +42,15 @@ public class OrderDetail {
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
     @Column(name = "pg_time_goal", nullable = true)
-    private Float pgTimeGoal;
+    private Integer pgTimeGoal;
+    @Column(name = "number_of_step", nullable = true)
+    private Integer numberOfStep;
+    @Column(name = "office", nullable = true)
+    private String office;
+    @Column(name = "status", nullable = true)
+    private Integer status;
+    @Column(name = "progress", nullable = true)
+    private Integer progress;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = true)
@@ -50,7 +58,7 @@ public class OrderDetail {
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "drawing_code_id", nullable = false)
+    @JoinColumn(name = "drawing_code_id", nullable = true)
     @JsonBackReference
     private DrawingCode drawingCode;
 

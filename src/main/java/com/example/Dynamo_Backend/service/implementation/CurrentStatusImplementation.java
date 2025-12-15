@@ -20,19 +20,24 @@ import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.OperateHistory;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
+import com.example.Dynamo_Backend.entities.TempStartTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
+import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
+import com.example.Dynamo_Backend.repository.TempStartTimeRepository;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.LogService;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -40,9 +45,11 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CurrentStatusImplementation implements CurrentStatusService {
     private final CurrentStatusRepository currentStatusRepository;
+    private final TempStartTimeRepository tempStartTimeRepository;
     private final CurrentStaffRepository currentStaffRepository;
     private final DrawingCodeProcessRepository drawingCodeProcessRepository;
     private final MachineRepository machineRepository;
+    private final MachineKpiRepository machineKpiRepository;
     private final @Lazy LogService logService;
 
     private final StaffRepository staffRepository;
@@ -64,27 +71,26 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setStaffId(null);
         }
-        List<DrawingCodeProcess> drawingCodeProcesses = drawingCodeProcessRepository
-                .findByMachine_MachineId(machineIdInt);
-        if (drawingCodeProcesses.size() > 0) {
-            for (DrawingCodeProcess drawingCodeProcess : drawingCodeProcesses) {
-                if (drawingCodeProcess.getStartTime() != null && drawingCodeProcess.getEndTime() != null
-                        && drawingCodeProcess.getStartTime() > drawingCodeProcess.getEndTime()) {
-                    currentStatus.setProcessId(drawingCodeProcess.getProcessId());
-                    break;
-                }
-            }
+        DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+                .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
+        if (drawingCodeProcess != null) {
+            currentStatus.setProcessId(drawingCodeProcess.getProcessId());
         } else {
             currentStatus.setProcessId(null);
         }
-
+        if (currentStatus.getStatus().equals("0")) {
+            TempStartTime tempTime = tempStartTimeRepository.findByMachineId(machineIdInt);
+            tempTime.setStartTime(System.currentTimeMillis());
+            tempStartTimeRepository.save(tempTime);
+        }
         currentStatus.setMachineId(machineIdInt);
         currentStatus.setStatus(arr[1]);
 
         if (arr.length < 3) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String nowStr = LocalDateTime.now().format(formatter);
             currentStatus.setTime(nowStr);
+
         } else {
             currentStatus.setTime(arr[2]);
         }
@@ -158,16 +164,21 @@ public class CurrentStatusImplementation implements CurrentStatusService {
 
         List<Machine> machines = machineRepository.findMachinesByGroupIdLatestOrCurrent(groupId, currentMonth,
                 currentYear);
+        List<MachineKpi> machineKpis = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(groupId, currentMonth,
+                currentYear);
         List<CurrentStatusResponseDto> result = new ArrayList<>();
 
         if (machines.isEmpty()) {
             return List.of(); // Return empty list
         }
-        for (Machine machine : machines) {
-            CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine.getMachineId());
+        for (MachineKpi machineKpi : machineKpis) {
+            Machine machine = machineRepository.findById(machineKpi.getMachine().getMachineId()).orElse(null);
+            CurrentStatus currentStatus = currentStatusRepository
+                    .findByMachineId(machineKpi.getMachine().getMachineId());
             if (currentStatus != null) {
 
-                CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machine.getMachineId());
+                CurrentStaff currentStaff = currentStaffRepository
+                        .findByMachine_MachineId(machineKpi.getMachine().getMachineId());
                 if (currentStaff != null && currentStaff.getStaff() != null) {
                     currentStaff.getStaff().setStaffKpis(null);
                 }
@@ -180,9 +191,9 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                                 .orElse(null)
                         : null;
                 String drawingCodeName = drawingCodeProcess != null
-                        ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
+                        ? drawingCodeProcess.getOrderDetail().getOrderCode()
                         : null;
-                Float pgTime = drawingCodeProcess != null
+                Integer pgTime = drawingCodeProcess != null
                         ? drawingCodeProcess.getPgTime()
                         : null;
                 Long startTime = drawingCodeProcess != null
@@ -243,9 +254,9 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                                     .orElse(null)
                             : null;
                     String drawingCodeName = drawingCodeProcess != null
-                            ? drawingCodeProcess.getOrderDetail().getDrawingCode().getDrawingCodeName()
+                            ? drawingCodeProcess.getOrderDetail().getOrderCode()
                             : null;
-                    Float pgTime = drawingCodeProcess != null
+                    Integer pgTime = drawingCodeProcess != null
                             ? drawingCodeProcess.getPgTime()
                             : null;
                     Long startTime = drawingCodeProcess != null
@@ -282,5 +293,14 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             res.add(dto);
         }
         return res;
+    }
+
+    @Override
+    public void addCurrentStatuswhileActive(Integer machine, String drawingCodeProcessId, String staffId) {
+        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machine + 1);
+        currentStatus.setProcessId(drawingCodeProcessId);
+        currentStatus.setStaffId(staffId);
+        currentStatusRepository.save(currentStatus);
+
     }
 }

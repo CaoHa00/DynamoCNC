@@ -35,6 +35,8 @@ public class Report {
     private Integer hourDiff;
     @Column(name = "created_date", nullable = false)
     private long createdDate;
+    @Column(name = "checked", nullable = false)
+    private int checked;
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
     @JsonBackReference

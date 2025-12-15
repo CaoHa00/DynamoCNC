@@ -10,6 +10,8 @@ import com.example.Dynamo_Backend.entities.CurrentStatus;
 public interface CurrentStatusService {
     void addCurrentStatus(String payload);
 
+    void addCurrentStatuswhileActive(Integer machine, String drawingCodeProcessId, String staffId);
+
     List<CurrentStatus> all();
 
     CurrentStatusDto addCurrentStatus(CurrentStatusDto currentStatusDto);
@@ -25,4 +27,5 @@ public interface CurrentStatusService {
     List<CurrentStatusResponseDto> getCurrentStatusByGroupId(String groupId);
 
     List<ListCurrentStaffStatusDto> getCurrentStaffStatusByGroupId(String groupId);
+
 }

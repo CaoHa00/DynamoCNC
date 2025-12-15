@@ -21,7 +21,8 @@ public class MachineDto {
     private String updatedDate;
     private MachineKpiDto machineKpiDtos;
 
-    public MachineDto(String machineName) {
+    public MachineDto(Integer machineId, String machineName) {
+        this.machineId = machineId;
         this.machineName = machineName;
     }
 

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
-import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 
 import lombok.AllArgsConstructor;
@@ -50,6 +49,13 @@ public class DrawingCodeProcessController {
     @GetMapping("/unplanned")
     public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllUnplannedDrawingCodes() {
         List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(0);
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
+    @GetMapping("/orderDetail/{orderDetailId}")
+    public ResponseEntity<List<DrawingCodeProcessDto>> getDrawingCodesByOrderDetail(
+            @PathVariable("orderDetailId") String orderDetailId) {
+        List<DrawingCodeProcessDto> drawingCodes = drawingCodeProcessService.getProcessesByOrderDetail(orderDetailId);
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
@@ -89,6 +95,14 @@ public class DrawingCodeProcessController {
         DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateProcessByOperator(
                 Id,
                 drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<DrawingCodeProcessDto> updateMachine(
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessDto updateDrawingCodeProcesses = drawingCodeProcessService
+                .updateDrawingCodeProcess(drawingCodeProcessDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
     }
 

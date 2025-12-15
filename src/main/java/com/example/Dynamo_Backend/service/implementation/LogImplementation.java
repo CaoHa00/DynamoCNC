@@ -43,10 +43,11 @@ public class LogImplementation implements LogService {
                                         .stream().findFirst().orElse(null);
                         if (lastLog != null && "R1".equals(lastLog.getStatus())) {
                                 long timeDiff = log.getTimeStamp() - lastLog.getTimeStamp();
-                                float hours = timeDiff / (1000f * 60f * 60f);
+                                Integer minutes = (int) timeDiff / (1000 * 60);
                                 operateHistory.setPgTime(
-                                                operateHistory.getPgTime() != null ? operateHistory.getPgTime() + hours
-                                                                : hours);
+                                                operateHistory.getPgTime() != null
+                                                                ? operateHistory.getPgTime() + minutes
+                                                                : minutes);
                                 operateHistoryRepository.save(operateHistory);
                         }
                 }

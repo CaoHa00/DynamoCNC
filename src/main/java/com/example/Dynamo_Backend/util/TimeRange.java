@@ -22,16 +22,17 @@ public class TimeRange {
         Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
         Long endTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getEndDate());
         long days = ChronoUnit.DAYS.between(start, end) + 1;
-        if (days < 1 || days > 31) {
-            throw new BusinessException("Invalid date range");
-        }
         if (days <= 7) {
             int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            int week = start.get(WeekFields.ISO.weekOfYear());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp);
+                    endTimestamp, week);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
             return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp);
+                    endTimestamp, null);
+        } else if (days == 365 || days == 366) {
+            return new TimePeriodInfo(false, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
+                    endTimestamp, 52);
         } else {
             throw new BusinessException("Invalid date range");
         }
@@ -49,11 +50,13 @@ public class TimeRange {
         }
         if (days <= 7) {
             int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+            int weekOfYear = start.get(WeekFields.ISO.weekOfYear());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp);
+                    endTimestamp, weekOfYear);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
+            int weekOfYear = end.get(WeekFields.ISO.weekOfYear());
             return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp);
+                    endTimestamp, null);
         } else {
             throw new BusinessException("Invalid date range");
         }
@@ -77,9 +80,9 @@ public class TimeRange {
                 previousYear--;
             }
             return new TimePeriodInfo(true, null, previousMonth, previousYear, dto.getDay(),
-                    previousStartTime, previousEndTime);
+                    previousStartTime, previousEndTime, null);
         } else {
-            int previousWeek = dto.getWeek() - 1;
+            int previousWeek = dto.getWeekOfYear() - 1;
             int previousMonth = dto.getMonth();
             int previousYear = dto.getYear();
             if (previousWeek < 1) {
@@ -88,13 +91,15 @@ public class TimeRange {
                     previousMonth = 12;
                     previousYear--;
                 }
+
                 LocalDate lastDayOfPrevMonth = LocalDate.of(previousYear, previousMonth, 1)
                         .withDayOfMonth(LocalDate.of(previousYear, previousMonth, 1).lengthOfMonth());
                 int maxWeek = lastDayOfPrevMonth.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
                 previousWeek = maxWeek;
             }
+            // tạm
             return new TimePeriodInfo(false, previousWeek, previousMonth, previousYear, dto.getDay(),
-                    previousStartTime, previousEndTime);
+                    previousStartTime, previousEndTime, previousWeek);
         }
     }
 
@@ -118,6 +123,6 @@ public class TimeRange {
         long startMillis = weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long endMillis = weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         return new TimePeriodInfo(false, week, monthInfo.getMonth(), monthInfo.getYear(),
-                (long) (weekEnd.toEpochDay() - weekStart.toEpochDay() + 1), startMillis, endMillis);
+                (long) (weekEnd.toEpochDay() - weekStart.toEpochDay() + 1), startMillis, endMillis, null);
     }
 }

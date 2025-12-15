@@ -46,6 +46,7 @@ public class ReportImplementation implements ReportService {
                                 .orElseThrow(() -> new ResourceNotFoundException("Admin is not found:" +
                                                 reportDto.getAdminId()));
                 report.setAdmin(admin);
+                report.setChecked(0);
 
                 report.setCreatedDate(createdTimestamp);
 
@@ -65,6 +66,7 @@ public class ReportImplementation implements ReportService {
                                                 reportDto.getAdminId()));
                 report.setAdmin(admin);
                 report.setGroup(group);
+                report.setChecked(0);
                 report.setHourDiff(reportDto.getHourDiff());
                 report.setOffice(reportDto.getOffice());
                 report.setReportType(reportDto.getReportType());

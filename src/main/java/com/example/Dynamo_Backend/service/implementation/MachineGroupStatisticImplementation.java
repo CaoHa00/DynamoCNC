@@ -27,6 +27,7 @@ import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.MachineGroupStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 import com.example.Dynamo_Backend.util.TimeRange;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,9 +53,13 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
     private LogRepository logRepository;
 
     @Autowired
+    private MachineRepository machineRepository;
+
+    @Autowired
     private GroupKpiRepository groupKpiRepository;
 
-    public MachineGroupStatisticDto calculateTotalTime(TimePeriodInfo timePeriodInfo, String groupId) {
+    public MachineGroupStatisticDto calculateTotalTime(TimePeriodInfo timePeriodInfo, String groupId, Long startDate,
+            Long endDate) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new BusinessException("Group not found when get machine group statistic"));
         List<MachineKpi> machineKpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
@@ -83,7 +88,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 .collect(Collectors.groupingBy(log -> log.getMachine().getMachineId()));
 
         for (Integer machineId : logsByMachine.keySet()) {
-            List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
+            List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineIdAndStatus(machineId, 1);
 
             // Group logs by process
             for (DrawingCodeProcess process : processes) {
@@ -102,42 +107,18 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                         : process.getProcessTime();
                 totalSpanTime += processTime.getSpanTime();
             }
-            boolean isLast = false;
-            for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
-                Log log = logsByMachine.get(machineId).get(i);
-                String status = log.getStatus();
 
-                isLast = (i + 1 >= logsByMachine.get(machineId).size());
-                Log next = isLast ? null : logsByMachine.get(machineId).get(i + 1);
-                if (log.getStatus().contains("E")) {
-                    totalErrorTime += isLast
-                            ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis()) - log.getTimeStamp())
-                            : (next.getTimeStamp() - log.getTimeStamp());
-                } else {
-                    switch (status) {
-                        case "R1":
-                            totalPgTime += isLast
-                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                            - log.getTimeStamp())
-                                    : (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                        case "R2":
-                            totalOffsetTime += isLast
-                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                            - log.getTimeStamp())
-                                    : (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                        default:
-                            totalStopTime += isLast
-                                    ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                            - log.getTimeStamp())
-                                    : (next.getTimeStamp() - log.getTimeStamp());
-                            break;
-                    }
-                }
-            }
+            List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
+                    machineId, startDate,
+                    endDate);
+            totalRunTime += activeTime.get(3) + activeTime.get(4);
+            totalPgTime += activeTime.get(3);
+            totalStopTime += activeTime.get(5) + activeTime.get(6);
+            // totalEmptyTime = activeTime.get(0);
+            totalErrorTime += activeTime.get(1) + activeTime.get(2);
+            totalOffsetTime += activeTime.get(4);
+
         }
-        totalRunTime = totalPgTime + totalOffsetTime;
         return new MachineGroupStatisticDto(groupId, "", totalRunTime, totalStopTime, totalPgTime,
                 totalOffsetTime, totalSpanTime, totalErrorTime, totalErrorTime, 0f, 0f,
                 0f, 0f, 0f, totalProcesses, 0f, machineKpiList.size(),
@@ -160,35 +141,14 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         Float totalSpanTimeRate = 0f;
         Float totalErrorTimeRate = 0f;
 
-        MachineGroupStatisticDto currentPeriodStats = calculateTotalTime(timePeriodInfo, requestDto.getGroupId());
-        MachineGroupStatisticDto previousPeriodStats = calculateTotalTime(previousTime, requestDto.getGroupId());
+        MachineGroupStatisticDto currentPeriodStats = calculateTotalTime(timePeriodInfo, requestDto.getGroupId(),
+                DateTimeUtil.convertStringToTimestamp(requestDto.getStartDate()),
+                DateTimeUtil.convertStringToTimestamp(requestDto.getEndDate()));
 
-        // List<MachineKpi> previousMachineKpiList =
-        // machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
-        // requestDto.getGroupId(), previousTime.getMonth(), previousTime.getYear());
+        MachineGroupStatisticDto previousPeriodStats = calculateTotalTime(previousTime, requestDto.getGroupId(),
+                previousTime.getStartDate(), previousTime.getEndDate());
+
         Group group = groupRepository.findById(requestDto.getGroupId()).orElse(null);
-        // if (previousMachineKpiList.isEmpty()) {
-        // currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime() /
-        // 3600000f);
-        // currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime()
-        // / 3600000f);
-        // currentPeriodStats.setTotalPgTime(currentPeriodStats.getTotalPgTime() /
-        // 3600000f);
-        // currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime() /
-        // 3600000f);
-        // currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime() /
-        // 3600000f);
-        // currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime() /
-        // 3600000f);
-        // return new MachineGroupStatisticDto(requestDto.getGroupId(), group != null ?
-        // group.getGroupName() : "",
-        // currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
-        // currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
-        // currentPeriodStats.getTotalSpanTime(),
-        // currentPeriodStats.getTotalErrorTime(), 0f, 0f, 0f, 0f, 0f,
-        // 0f, currentPeriodStats.getTotalProcesses(), 0f,
-        // previousMachineKpiList.stream().map(MachineKpiMapper::mapToMachineDto).toList());
-        // }
 
         if (previousPeriodStats.getTotalOffsetTime() != 0f) {
             totalOffsetTimeRate = ((currentPeriodStats.getTotalOffsetTime() - previousPeriodStats.getTotalOffsetTime())
@@ -225,19 +185,22 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                             / previousPeriodStats.getTotalProcesses()) * 100);
         }
 
-        currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime() / 3600000f);
-        currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime() / 3600000f);
-        currentPeriodStats.setTotalPgTime(currentPeriodStats.getTotalPgTime() / 3600000f);
-        currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime() / 3600000f);
-        currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime() / 3600000f);
-        currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime() / 3600000f);
+        currentPeriodStats.setTotalErrorTime(currentPeriodStats.getTotalErrorTime());
+        currentPeriodStats.setTotalOffsetTime(currentPeriodStats.getTotalOffsetTime());
+        currentPeriodStats.setTotalPgTime(currentPeriodStats.getTotalPgTime());
+        currentPeriodStats.setTotalStopTime(currentPeriodStats.getTotalStopTime());
+        currentPeriodStats.setTotalRunTime(currentPeriodStats.getTotalRunTime());
+        currentPeriodStats.setTotalSpanTime(currentPeriodStats.getTotalSpanTime());
         return new MachineGroupStatisticDto(group.getGroupId(), group.getGroupName(),
                 currentPeriodStats.getTotalRunTime(), currentPeriodStats.getTotalStopTime(),
                 currentPeriodStats.getTotalPgTime(), currentPeriodStats.getTotalOffsetTime(),
-                currentPeriodStats.getTotalSpanTime(), currentPeriodStats.getTotalErrorTime(), totalErrorTimeRate,
-                totalRunTimeRate,
-                totalStopTimeRate, totalPgTimeRate, totalOffsetTimeRate, totalSpanTimeRate,
-                currentPeriodStats.getTotalProcesses(), currentPeriodStats.getProcessRate(),
+                currentPeriodStats.getTotalSpanTime(), currentPeriodStats.getTotalErrorTime(),
+                (float) Math.round(totalErrorTimeRate * 100) / 100,
+                (float) Math.round(totalRunTimeRate * 100) / 100,
+                (float) Math.round(totalStopTimeRate * 100) / 100, (float) Math.round(totalPgTimeRate * 100) / 100,
+                (float) Math.round(totalOffsetTimeRate * 100) / 100, (float) Math.round(totalSpanTimeRate * 100) / 100,
+                currentPeriodStats.getTotalProcesses(),
+                (float) Math.round(currentPeriodStats.getProcessRate() * 100) / 100,
                 currentPeriodStats.getMachines().size(), currentPeriodStats.getMachines());
     }
 
@@ -287,8 +250,17 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             Float pgTimeExpected = 0f;
             Integer doneProcesssCount = 0;
 
+            List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(machineId,
+                    DateTimeUtil.convertStringToTimestamp(startDate), DateTimeUtil.convertStringToTimestamp(endDate));
+
+            totalRunTime = activeTime.get(3) + activeTime.get(4);
+            totalPgTime = activeTime.get(3);
+            totalStopTime = activeTime.get(5) + activeTime.get(6);
+            totalEmptyTime = activeTime.get(0);
+            totalErrorTime = activeTime.get(1) + activeTime.get(2);
+
             List<Log> logs = logsByMachine.get(machineId);
-            List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineId(machineId);
+            List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineIdAndStatus(machineId, 1);
             MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
             overviewDto.setMachineId(machineId);
             overviewDto.setMachineName(logs.get(0).getMachine().getMachineName());
@@ -309,53 +281,11 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 }
             }
             overviewDto.setNumberOfProcesses(doneProcesssCount);
-
-            boolean isLast = false;
-            for (int i = 0; i < logsByMachine.get(machineId).size(); i++) {
-                Log log = logsByMachine.get(machineId).get(i);
-                String status = log.getStatus();
-
-                isLast = (i + 1 >= logsByMachine.get(machineId).size());
-                Log next = isLast ? null : logsByMachine.get(machineId).get(i + 1);
-                if (log.getStatus().contains("E")) {
-                    totalErrorTime += isLast
-                            ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis()) - log.getTimeStamp())
-                            : (next.getTimeStamp() - log.getTimeStamp());
-                }
-                switch (status) {
-                    case "R1":
-                        totalPgTime += isLast
-                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                        - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    case "R2":
-                        totalRunTime += isLast
-                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                        - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    case "0":
-                        totalEmptyTime += isLast
-                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                        - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    default:
-                        totalStopTime += isLast
-                                ? (Math.min(timePeriodInfo.getEndDate(), System.currentTimeMillis())
-                                        - log.getTimeStamp())
-                                : (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                }
-            }
-
-            totalRunTime += totalPgTime;
-            overviewDto.setRunTime(totalRunTime / 3600000f);
-            overviewDto.setStopTime(totalStopTime / 3600000f);
-            overviewDto.setPgTime(totalPgTime / 3600000f);
-            overviewDto.setEmptyTime(totalEmptyTime / 3600000f);
-            overviewDto.setErrorTime(totalErrorTime / 3600000f);
+            overviewDto.setRunTime((totalRunTime));
+            overviewDto.setStopTime(totalStopTime);
+            overviewDto.setPgTime(totalPgTime);
+            overviewDto.setEmptyTime(totalEmptyTime);
+            overviewDto.setErrorTime(totalErrorTime);
             overviewDto.setPgTimeExpect(pgTimeExpected);
             overviewDto.setGroupTarget(groupKpi.getWorkingHourGoal() != null ? groupKpi.getWorkingHourGoal() : 0f);
             overviewList.add(overviewDto);
@@ -390,7 +320,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
         for (MachineKpi machineKpi : machineKpiList) {
 
             List<DrawingCodeProcess> drawingCodeProcesses = processRepository
-                    .findProcessesByMachineInRange(machineKpi.getMachine().getMachineId(),
+                    .findCompletedProcessesByMachineAndTime(machineKpi.getMachine().getMachineId(),
                             timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
             if (drawingCodeProcesses != null && !drawingCodeProcesses.isEmpty()) {
                 for (DrawingCodeProcess process : drawingCodeProcesses) {
@@ -416,37 +346,12 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
                 }
             }
 
-            List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(
+            List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
                     machineKpi.getMachine().getMachineId(), timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
-            if (logs == null || logs.isEmpty()) {
-                continue;
-            }
-            for (int i = 0; i < logs.size(); i++) {
-                Log log = logs.get(i);
-                String status = log.getStatus();
-
-                if (i + 1 >= logs.size())
-                    break;
-                Log next = logs.get(i + 1);
-                if (log.getStatus().contains("E")) {
-                    totalErrorTime += (next.getTimeStamp() - log.getTimeStamp());
-                }
-                switch (status) {
-                    case "R1":
-                        totalPgTime += (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    case "R2":
-                        totalOffsetTime += (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                    default:
-                        totalStopTime += (next.getTimeStamp() - log.getTimeStamp());
-                        break;
-                }
-            }
-            totalErrorTime /= 3600000f;
-            totalPgTime /= 3600000f;
-            totalOffsetTime /= 3600000f;
-            totalStopTime /= 3600000f;
+            totalErrorTime += activeTime.get(1) + activeTime.get(2);
+            totalPgTime += activeTime.get(3);
+            totalOffsetTime += activeTime.get(4);
+            totalStopTime += activeTime.get(5) + activeTime.get(6);
         }
         return new TotalRunTimeResponse(totalRunTimeMainProduct, runTimeOfRerun, runTimeOfLK, runTimeOfElectric,
                 totalRunTimeOfPreparation, totalPgTime, totalOffsetTime, totalStopTime, totalErrorTime);

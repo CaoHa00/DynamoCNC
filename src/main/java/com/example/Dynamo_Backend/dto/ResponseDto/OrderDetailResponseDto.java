@@ -20,8 +20,12 @@ public class OrderDetailResponseDto {
     private String orderType;
     private String createdDate;
     private String updatedDate;
-    private Float pgTimeGoal;
+    private Integer pgTimeGoal;
     private String managerGroupId;
     private String managerGroupName;
+    private String office;
+    private Integer progress;
+    private Integer numberOfSteps;
+
     private ProcessTimeSummaryDto processTimeSummaryDto;
 }

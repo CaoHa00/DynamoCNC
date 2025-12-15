@@ -31,7 +31,7 @@ public class OperateHistory {
     private Integer manufacturingPoint;
 
     @Column(name = "pg_time", nullable = true)
-    private Float pgTime;
+    private Integer pgTime;
 
     @Column(name = "start_time", nullable = false)
     private Long startTime;

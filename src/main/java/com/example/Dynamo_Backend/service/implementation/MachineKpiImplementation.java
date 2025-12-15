@@ -24,6 +24,7 @@ import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.MachineKpiService;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -187,6 +188,7 @@ public class MachineKpiImplementation implements MachineKpiService {
         }
     }
 
+    @Transactional
     @Scheduled(cron = "0 0 0 1 * ?") // Runs at 12:00 AM on the 1st of every month
     public void createMonthlyMachineKpis() {
         LocalDate now = LocalDate.now();
@@ -220,18 +222,15 @@ public class MachineKpiImplementation implements MachineKpiService {
             if (prevKpi != null) {
                 dto.setOee(prevKpi.getOee());
                 dto.setMachineMiningTarget(prevKpi.getMachineMiningTarget());
+                dto.setGroupId(prevKpi.getGroup().getGroupId());
             } else {
+                List<Group> group = groupRepository.findAll();
                 dto.setOee(0.0f);
                 dto.setMachineMiningTarget(0.0f);
+                dto.setGroupId(group.get(0).getGroupId());
             }
 
             // Get group from machine's groups (assume first one)
-            if (!machine.getMachineGroups().isEmpty()) {
-                dto.setGroupId(machine.getMachineGroups().get(0).getGroup().getGroupId());
-            } else {
-                continue; // Skip if no group
-            }
-
             try {
                 addMachineKpi(dto);
                 createdCount++;
@@ -240,7 +239,8 @@ public class MachineKpiImplementation implements MachineKpiService {
             }
         }
 
-        System.out.println("Monthly Machine KPI creation completed. Created " + createdCount + " new KPIs for " + year
+        System.out.println("Monthly Machine KPI creation completed. Created " +
+                createdCount + " new KPIs for " + year
                 + "-" + month);
     }
 
