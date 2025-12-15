@@ -15,7 +15,7 @@ public class ReportMapper {
         reportDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(report.getCreatedDate()));
         reportDto.setId(report.getId());
         reportDto.setGroupId(report.getGroup().getGroupId());
-        // reportDto.setAdminId(report.getAdmin().getId());
+        reportDto.setAdminId(report.getAdmin().getId());
         reportDto.setHourDiff(report.getHourDiff());
         reportDto.setOffice(report.getOffice());
         reportDto.setReportType(report.getReportType());
@@ -33,7 +33,6 @@ public class ReportMapper {
         report.setId(reportDto.getId());
         report.setOffice(reportDto.getOffice());
         report.setReportType(reportDto.getReportType());
-
         return report;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,32 @@ public class DrawingCodeProcessController {
 
     @GetMapping
     public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAlldrawingCodes() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getAllTodoProcesses();
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAll() {
         List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getAll();
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
+    @GetMapping("/planned")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllPlannedDrawingCodes() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(1);
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
+    @GetMapping("/unplanned")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllUnplannedDrawingCodes() {
+        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(0);
+        return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
+    }
+
+    @GetMapping("/orderDetail/{orderDetailId}")
+    public ResponseEntity<List<DrawingCodeProcessDto>> getDrawingCodesByOrderDetail(
+            @PathVariable("orderDetailId") String orderDetailId) {
+        List<DrawingCodeProcessDto> drawingCodes = drawingCodeProcessService.getProcessesByOrderDetail(orderDetailId);
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
@@ -62,11 +88,39 @@ public class DrawingCodeProcessController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/tablet/{drawingCodeProcess_id}")
+    public ResponseEntity<DrawingCodeProcessResponseDto> updateDataFromTablet(
+            @PathVariable("drawingCodeProcess_id") String Id,
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateProcessByOperator(
+                Id,
+                drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<DrawingCodeProcessDto> updateMachine(
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessDto updateDrawingCodeProcesses = drawingCodeProcessService
+                .updateDrawingCodeProcess(drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
+    }
+
     @PutMapping("/{drawingCodeProcess_id}")
     public ResponseEntity<DrawingCodeProcessResponseDto> updateDrawingCodeProcess(
             @PathVariable("drawingCodeProcess_id") String Id,
-            @RequestBody DrawingCodeProcessDto drawingCodeProcessDto) {
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
         DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateDrawingCodeProcess(
+                Id,
+                drawingCodeProcessDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
+    }
+
+    @PutMapping("/admin/{process_id}")
+    public ResponseEntity<DrawingCodeProcessResponseDto> updateDrawingCodeProcessByAdmin(
+            @PathVariable("process_id") String Id,
+            @RequestBody DrawingCodeProcessResquestDto drawingCodeProcessDto) {
+        DrawingCodeProcessResponseDto updateDrawingCodeProcesses = drawingCodeProcessService.updateProcessByAdmin(
                 Id,
                 drawingCodeProcessDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateDrawingCodeProcesses);
@@ -86,10 +140,70 @@ public class DrawingCodeProcessController {
     }
 
     @GetMapping("machine/{machineId}")
-    public ResponseEntity<DrawingCodeProcessDto> getDrawingCodeProcessByMachineId(
+    public ResponseEntity<Map<String, Object>> getDrawingCodeProcessByMachineId(
             @PathVariable("machineId") Integer Id) {
-        DrawingCodeProcessDto drawingCodeProcess = drawingCodeProcessService.getDrawingCodeProcessByMachineId(Id);
+        Map<String, Object> drawingCodeProcess = drawingCodeProcessService
+                .getDrawingCodeProcessByMachineId(Id);
         return ResponseEntity.ok(drawingCodeProcess);
+    }
+
+    @GetMapping("/staff")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getProcessesByStaffAndTime(
+            @RequestParam(name = "staff_id", required = false) String staffId,
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> drawingCodeProcess = drawingCodeProcessService.getProcessesByOperator(
+                staffId,
+                start, stop);
+        return ResponseEntity.ok(drawingCodeProcess);
+    }
+
+    @GetMapping("/machine")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getProcessesByMachineAndTime(
+            @RequestParam(name = "machine_id", required = false) Integer machineId,
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> drawingCodeProcess = drawingCodeProcessService.getProcessByMachine(
+                machineId,
+                start, stop);
+        return ResponseEntity.ok(drawingCodeProcess);
+    }
+
+    @GetMapping("/completed")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getCompletedProcess(
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> processes = drawingCodeProcessService.getCompletedProcess(3, start,
+                stop);
+        return ResponseEntity.status(HttpStatus.OK).body(processes);
+    }
+
+    @GetMapping("/completed-with-history")
+    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getCompletedProcessWithOperateHistoryData(
+            @RequestParam(name = "staff_id", required = false) String staffId,
+            @RequestParam(required = false) Long start,
+            @RequestParam(required = false) Long stop) {
+        if (start != null && start == 0)
+            start = null;
+        if (stop != null && stop == 0)
+            stop = null;
+        List<DrawingCodeProcessResponseDto> processes = drawingCodeProcessService
+                .getCompletedProcessWithOperateHistoryData(staffId, start,
+                        stop);
+        return ResponseEntity.status(HttpStatus.OK).body(processes);
     }
 
 }

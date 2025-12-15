@@ -14,14 +14,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class DrawingCodeProcessDto {
-
     private String processId;
     private Integer partNumber;
     private Integer stepNumber;
     private Integer manufacturingPoint;
     private String processType;
     private Integer processStatus;
-    private Long pgTime;
+    private Integer pgTime;
     // private Long totalRunningTime;
     // private Long totalStopTime;
     // private Long offsetRunTime;
@@ -35,5 +34,5 @@ public class DrawingCodeProcessDto {
     private Integer machineId;
     private List<OperateHistory> staffHistories;
     private List<Log> statstistics;
-    private List<Plan> plans;
+    private Plan plan;
 }

@@ -1,8 +1,12 @@
 package com.example.Dynamo_Backend.service;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.GroupDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 
 public interface GroupService {
     GroupDto addGroup(GroupDto groupDto);
@@ -16,4 +20,15 @@ public interface GroupService {
     List<GroupDto> getGroups();
 
     List<GroupDto> getStaffStatusGroup();
+
+    List<GroupDto> getGroupByGroupType(String groupType);
+
+    void importGroupFromExcel(MultipartFile file);
+
+    Map<String, Long> getGroupCountByGroupId(String groupId);
+
+    GroupResponseDto getGroupByMachineId(String payload);
+
+    GroupResponseDto getGroupByStaffId(String payload);
+
 }

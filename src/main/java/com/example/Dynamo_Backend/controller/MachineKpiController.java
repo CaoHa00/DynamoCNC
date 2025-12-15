@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
 
@@ -39,10 +41,10 @@ public class MachineKpiController {
 
     }
 
-    @PutMapping("/{machine_id}")
-    public ResponseEntity<MachineKpiDto> updateMachineKpi(@PathVariable("machine_id") Integer machineId,
+    @PutMapping("/{id}")
+    public ResponseEntity<MachineKpiDto> updateMachineKpi(@PathVariable("id") Integer Id,
             @RequestBody MachineKpiDto machineKpiDto) {
-        MachineKpiDto updateMachineKpis = machineKpiService.updateMachineKpiByMachineId(machineId, machineKpiDto);
+        MachineKpiDto updateMachineKpis = machineKpiService.updateMachineKpi(Id, machineKpiDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(updateMachineKpis);
     }
 
@@ -56,5 +58,11 @@ public class MachineKpiController {
     public ResponseEntity<MachineKpiDto> getMachineKpiById(@PathVariable("machineKpi_id") Integer Id) {
         MachineKpiDto machineKpi = machineKpiService.getMachineKpiById(Id);
         return ResponseEntity.ok(machineKpi);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Void> uploadMachineKpiFromExcel(@RequestParam("file") MultipartFile file) {
+        machineKpiService.importMachineKpiFromExcel(file);
+        return ResponseEntity.ok().build();
     }
 }

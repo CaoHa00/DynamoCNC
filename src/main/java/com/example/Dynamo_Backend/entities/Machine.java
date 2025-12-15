@@ -37,14 +37,18 @@ public class Machine {
     @Column(name = "machine_type", nullable = false)
     private String machineType;
 
+    // Consider as machineId, change name later
     @Column(name = "machine_group", nullable = true)
-    private String machineGroup;
+    private String machineWork;
 
     @Column(name = "machine_office", nullable = true)
     private String machineOffice;
 
     @Column(name = "status", nullable = true)
     private int status;
+    // 0:empty
+    // 1:running
+    // 2:stop
     @Column(name = "createdDate", nullable = false)
     private long createdDate;
     @Column(name = "updatedDate", nullable = false)
@@ -53,11 +57,6 @@ public class Machine {
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "machine-group")
     private List<MachineGroup> machineGroups;
-
-    @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    @JsonBackReference
-    private Group group;
 
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "machine-process")
@@ -70,4 +69,8 @@ public class Machine {
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Plan> plans;
+
+    @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "stats-machine")
+    private List<Log> logs;
 }

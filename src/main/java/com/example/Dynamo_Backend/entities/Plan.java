@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,24 +24,24 @@ public class Plan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
-    @Column(name = "start_time", nullable = false)
+    @Column(name = "start_time", nullable = true)
     private Long startTime;
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time", nullable = true)
     private Long endTime;
     @Column(name = "status", nullable = false)
     private Integer status;
     @Column(name = "in_progress", nullable = false)
     private Integer inProgress;
-    @Column(name = "remark", nullable = false)
+    @Column(name = "remark", nullable = true)
     private Float remark;
-    @Column(name = "remark_time", nullable = false)
+    @Column(name = "remark_time", nullable = true)
     private Long remarkTime;
     @Column(name = "created_date", nullable = false)
     private Long createdDate;
     @Column(name = "updated_date", nullable = false)
     private Long updatedDate;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "drawing_code_process_id", nullable = false)
     @JsonBackReference
     private DrawingCodeProcess drawingCodeProcess;
@@ -56,7 +57,7 @@ public class Plan {
     private Machine machine;
 
     @ManyToOne
-    @JoinColumn(name = "planner_id", nullable = false)
+    @JoinColumn(name = "planner_id", nullable = true)
     @JsonBackReference
     private Admin planner;
 }

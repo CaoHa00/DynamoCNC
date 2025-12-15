@@ -17,7 +17,7 @@ public class MachineKpiMapper {
     public static MachineKpi mapToMachineKpi(MachineKpiDto machineKpiDto) {
         MachineKpi machineKpi = new MachineKpi();
         // Machine machine = machineRepository.findById(machineKpiDto.getMachineId())
-        // .orElseThrow(() -> new RuntimeException("Machine is not found:" +
+        // .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
         // machineKpiDto.getMachineId()));
         // machineKpi.setMachine(machine);
         machineKpi.setMachineMiningTarget(machineKpiDto.getMachineMiningTarget());
@@ -35,17 +35,20 @@ public class MachineKpiMapper {
         machineKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
         machineKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(machineKpi.getCreatedDate()));
         machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());
+        machineKpiDto.setGroupId(machineKpi.getGroup().getGroupId());
+        machineKpiDto.setGroupName(machineKpi.getGroup().getGroupName());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
         machineKpiDto.setMachineMiningTarget(machineKpi.getMachineMiningTarget());
         machineKpiDto.setOee(machineKpi.getOee());
-
+        machineKpiDto.setMachineName(machineKpi.getMachine().getMachineName());
+        machineKpiDto.setMachineStatus(machineKpi.getMachine().getStatus());
         return machineKpiDto;
     }
 
     public static MachineKpiDto mapToMachineKpiDto(MachineRequestDto machineKpi) {
         MachineKpiDto machineKpiDto = new MachineKpiDto();
-
+        machineKpiDto.setGroupId(machineKpi.getGroupId());
         machineKpiDto.setMachineId(machineKpi.getMachineId());
         machineKpiDto.setYear(machineKpi.getYear());
         machineKpiDto.setMonth(machineKpi.getMonth());
@@ -54,4 +57,12 @@ public class MachineKpiMapper {
 
         return machineKpiDto;
     }
+
+    public static MachineKpiDto mapToMachineDto(MachineKpi machineKpi) {
+        MachineKpiDto machineKpiDto = new MachineKpiDto();
+        machineKpiDto.setMachineId(machineKpi.getMachine().getMachineId());
+        machineKpiDto.setMachineName(machineKpi.getMachine().getMachineName());
+        return machineKpiDto;
+    }
+
 }

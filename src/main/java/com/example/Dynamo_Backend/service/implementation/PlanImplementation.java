@@ -1,6 +1,6 @@
 package com.example.Dynamo_Backend.service.implementation;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -14,6 +14,7 @@ import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.Plan;
 import com.example.Dynamo_Backend.entities.Staff;
+import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.PlanMapper;
 import com.example.Dynamo_Backend.repository.AdminRepository;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
@@ -25,92 +26,111 @@ import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 @Service
 public class PlanImplementation implements PlanService {
-    @Autowired
-    private PlanRepository planRepository;
+        @Autowired
+        private PlanRepository planRepository;
 
-    @Autowired
-    DrawingCodeProcessRepository drawingCodeProcessRepository;
+        @Autowired
+        DrawingCodeProcessRepository drawingCodeProcessRepository;
 
-    @Autowired
-    StaffRepository staffRepository;
+        @Autowired
+        StaffRepository staffRepository;
 
-    @Autowired
-    MachineRepository machineRepository;
+        @Autowired
+        MachineRepository machineRepository;
 
-    @Autowired
-    private AdminRepository adminRepository;
+        @Autowired
+        private AdminRepository adminRepository;
 
-    @Override
-    public PlanDto addPlan(PlanDto planDto) {
-        Plan plan = PlanMapper.mapToPlan(planDto);
-        long createdTimestamp = System.currentTimeMillis();
-        DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(planDto.getProcessId())
-                .orElseThrow(() -> new RuntimeException(
-                        "DrawingCode Process is not found:" + planDto.getProcessId()));
-        Staff staff = staffRepository.findByStaffId(planDto.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff is not found:" + planDto.getStaffId()));
-        Machine machine = machineRepository.findById(planDto.getMachineId())
-                .orElseThrow(() -> new RuntimeException("Machine is not found:" + planDto.getMachineId()));
-        Admin admin = adminRepository.findById(planDto.getPlannerId())
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        @Override
+        public PlanDto addPlan(PlanDto planDto) {
+                Plan plan = PlanMapper.mapToPlan(planDto);
+                long createdTimestamp = System.currentTimeMillis();
+                DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(planDto.getProcessId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "DrawingCode Process is not found:" + planDto.getProcessId()));
+                Staff staff = staffRepository.findByStaffId(planDto.getStaffId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Staff is not found:" + planDto.getStaffId()));
+                Machine machine = machineRepository.findById(planDto.getMachineId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Machine is not found:" + planDto.getMachineId()));
 
-        plan.setDrawingCodeProcess(drawingCodeProcess);
-        plan.setMachine(machine);
-        plan.setStaff(staff);
-        plan.setPlanner(admin);
-        plan.setCreatedDate(createdTimestamp);
-        plan.setUpdatedDate(createdTimestamp);
-        Plan savedPlan = planRepository.save(plan);
+                // after security, check if admin login
+                if (planDto.getPlannerId() == null) {
+                        plan.setPlanner(null);
+                } else {
+                        Admin admin = adminRepository.findById(planDto.getPlannerId())
+                                        .orElse(null);
+                        plan.setPlanner(admin);
+                }
 
-        return PlanMapper.mapToPlanDto(savedPlan);
-    }
+                plan.setDrawingCodeProcess(drawingCodeProcess);
+                plan.setMachine(machine);
+                plan.setStaff(staff);
+                plan.setCreatedDate(createdTimestamp);
+                plan.setUpdatedDate(createdTimestamp);
+                plan.setStatus(1);
+                Plan savedPlan = planRepository.save(plan);
 
-    @Override
-    public PlanDto updatePlan(Integer planId, PlanDto planDto) {
-        Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new RuntimeException("Plan is not found:" + planId));
-        long updatedTimestamp = System.currentTimeMillis();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate startDate = LocalDate.parse(planDto.getStartTime(), formatter);
-        long startDateTimestamp = startDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                return PlanMapper.mapToPlanDto(savedPlan);
+        }
 
-        LocalDate endDate = LocalDate.parse(planDto.getEndTime(), formatter);
-        long endDateTimestamp = endDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(planDto.getProcessId())
-                .orElseThrow(() -> new RuntimeException(
-                        "DrawingCode Process is not found:" + planDto.getProcessId()));
+        @Override
+        public PlanDto updatePlan(Integer planId, PlanDto planDto) {
+                Plan plan = planRepository.findById(planId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Plan is not found:" + planId));
+                long updatedTimestamp = System.currentTimeMillis();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime startDateTime = LocalDateTime.parse(planDto.getStartTime(), formatter);
+                long startDateTimestamp = startDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-        plan.setDrawingCodeProcess(drawingCodeProcess);
-        plan.setInProgress(planDto.getInProgress());
-        plan.setStatus(planDto.getStatus());
-        plan.setStartTime(startDateTimestamp);
-        plan.setEndTime(endDateTimestamp);
-        plan.setRemark(planDto.getRemark());
-        plan.setRemarkTime(DateTimeUtil.convertStringToTimestamp(planDto.getRemarkTime()));
-        plan.setUpdatedDate(updatedTimestamp);
+                LocalDateTime endDate = LocalDateTime.parse(planDto.getEndTime(), formatter);
+                long endDateTimestamp = endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository.findById(planDto.getProcessId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "DrawingCode Process is not found:" + planDto.getProcessId()));
+                Staff staff = staffRepository.findByStaffId(planDto.getStaffId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Staff is not found:" + planDto.getStaffId()));
+                Machine machine = machineRepository.findById(planDto.getMachineId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Machine is not found:" + planDto.getMachineId()));
+                plan.setDrawingCodeProcess(drawingCodeProcess);
+                plan.setInProgress(planDto.getInProgress());
+                plan.setStatus(planDto.getStatus());
+                plan.setStartTime(startDateTimestamp);
+                plan.setEndTime(endDateTimestamp);
+                plan.setRemark(planDto.getRemark());
+                plan.setMachine(machine);
+                plan.setStaff(staff);
+                if (planDto.getRemarkTime() == null) {
+                        plan.setRemarkTime(null);
+                } else {
+                        plan.setRemarkTime(DateTimeUtil.convertStringToTimestamp(planDto.getRemarkTime()));
+                }
+                plan.setUpdatedDate(updatedTimestamp);
+                Plan updatedPlan = planRepository.save(plan);
+                return PlanMapper.mapToPlanDto(updatedPlan);
+        }
 
-        Plan updatedPlan = planRepository.save(plan);
-        return PlanMapper.mapToPlanDto(updatedPlan);
-    }
+        @Override
+        public PlanDto getPlanById(Integer planId) {
+                Plan plan = planRepository.findById(planId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Plan is not found:" + planId));
+                return PlanMapper.mapToPlanDto(plan);
+        }
 
-    @Override
-    public PlanDto getPlanById(Integer planId) {
-        Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new RuntimeException("Plan is not found:" + planId));
-        return PlanMapper.mapToPlanDto(plan);
-    }
+        @Override
+        public void deletePlan(Integer planId) {
+                Plan plan = planRepository.findById(planId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Plan is not found:" + planId));
+                planRepository.delete(plan);
+        }
 
-    @Override
-    public void deletePlan(Integer planId) {
-        Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new RuntimeException("Plan is not found:" + planId));
-        planRepository.delete(plan);
-    }
-
-    @Override
-    public List<PlanDto> getAllPlan() {
-        List<Plan> plans = planRepository.findAll();
-        return plans.stream().map(PlanMapper::mapToPlanDto).toList();
-    }
+        @Override
+        public List<PlanDto> getAllPlan() {
+                List<Plan> plans = planRepository.findAll();
+                return plans.stream().map(PlanMapper::mapToPlanDto).toList();
+        }
 
 }

@@ -12,9 +12,10 @@ public class GroupKpiMapper {
         groupKpi.setWeek(groupKpiDto.getWeek());
         groupKpi.setMonth(groupKpiDto.getMonth());
         groupKpi.setYear(groupKpiDto.getYear());
-        groupKpi.setWorkingHourGoal(groupKpiDto.getWorkingHourGoal());
-        groupKpi.setWorkingHourDifference(groupKpiDto.getWorkingHourDifference());
-        groupKpi.setWorkingHour(groupKpiDto.getWorkingHour());
+        groupKpi.setWorkingHourGoal(groupKpiDto.getWorkingHourGoal() != null ? groupKpiDto.getWorkingHourGoal() : 0);
+        groupKpi.setWorkingHourDifference(
+                groupKpiDto.getWorkingHourDifference() != null ? groupKpiDto.getWorkingHourDifference() : 0);
+        groupKpi.setWorkingHour(groupKpiDto.getWorkingHour() != null ? groupKpiDto.getWorkingHour() : 0);
         groupKpi.setIsMonth(groupKpiDto.getIsMonth());
         return groupKpi;
     }

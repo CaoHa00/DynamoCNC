@@ -10,11 +10,13 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,7 +41,7 @@ public class DrawingCodeProcess {
     @Column(name = "step_number", nullable = false)
     private Integer stepNumber;
 
-    @Column(name = "manufacturing_point", nullable = false)
+    @Column(name = "manufacturing_point", nullable = true)
     private Integer manufacturingPoint;
 
     // @Column(name = "total_running_time", nullable = false)
@@ -48,8 +50,8 @@ public class DrawingCodeProcess {
     // @Column(name = "total_stop_time", nullable = false)
     // private Long totalStopTime;
 
-    @Column(name = "pg_time", nullable = false)
-    private Long pgTime;
+    @Column(name = "pg_time", nullable = true)
+    private Integer pgTime;
 
     // @Column(name = "offset_run_time", nullable = false)
     // private Long offsetRunTime;
@@ -78,12 +80,12 @@ public class DrawingCodeProcess {
     @Column(name = "is_plan", nullable = false)
     private Integer isPlan;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "order_detail_id", nullable = false)
     @JsonBackReference
     private OrderDetail orderDetail;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "machine_id", nullable = true)
     @JsonBackReference(value = "machine-process")
     private Machine machine;
@@ -92,12 +94,16 @@ public class DrawingCodeProcess {
     @JsonManagedReference(value = "history-process")
     private List<OperateHistory> operateHistories;
 
-    @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "stats-process")
-    private List<Log> logs;
+    // @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
+    // @JsonManagedReference(value = "stats-process")
+    // private List<Log> logs;
 
-    @OneToMany(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Plan> plans;
+    private Plan plan;
+
+    @OneToOne(mappedBy = "drawingCodeProcess", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private ProcessTime processTime;
 
 }

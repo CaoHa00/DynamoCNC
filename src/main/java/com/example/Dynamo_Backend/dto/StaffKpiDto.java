@@ -1,14 +1,17 @@
 package com.example.Dynamo_Backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class StaffKpiDto {
-    private Integer Id;
+    private Integer kpiId;
     private Integer year;
     private Integer month;
     private Float pgTimeGoal;
@@ -19,5 +22,15 @@ public class StaffKpiDto {
     private Float kpi;
     private String createdDate;
     private String updatedDate;
-    private Integer staffId;
+    private String staffId;
+    private Integer Id;
+    private String staffName;
+    private String groupId;
+    private String groupName;
+    private Integer staffStatus;
+
+    public StaffKpiDto(Integer Id, String staffName) {
+        this.Id = Id;
+        this.staffName = staffName;
+    }
 }

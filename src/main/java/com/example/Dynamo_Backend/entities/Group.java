@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "group_")
+@Table(name = "_group")
 public class Group {
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -35,24 +35,13 @@ public class Group {
     @Column(name = "group_name")
     private String groupName;
 
-    @Column(name = "group_type")
-    private String groupType;
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "group-staff-kpi")
+    private List<StaffKpi> staffkpis;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Staff> staffs;
-
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Machine> machines;
-
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "group-staff")
-    private List<StaffGroup> staffGroups;
-
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "group-machine")
-    private List<MachineGroup> machineGroups;
+    @JsonManagedReference(value = "group-machine-kpi")
+    private List<MachineKpi> machineKpis;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     @JsonManagedReference

@@ -2,6 +2,7 @@ package com.example.Dynamo_Backend.mapper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 
 import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StaffRequestDto;
@@ -36,6 +37,13 @@ public class StaffMapper {
 
         }
 
+        public static StaffDto mapStaffNameDto(Staff staff) {
+                if (staff == null) {
+                        return null;
+                }
+                return new StaffDto(staff.getStaffName());
+        }
+
         public static StaffDto mapToStaffDto(Staff staff) {
                 StaffDto staffDto = new StaffDto();
                 staffDto.setId(staff.getId());
@@ -45,20 +53,47 @@ public class StaffMapper {
                 staffDto.setShortName(staff.getShortName());
                 staffDto.setStaffSection(staff.getStaffSection());
                 staffDto.setStatus(staff.getStatus());
-                staffDto.setGroupId(staff.getGroup().getGroupId());
-                staffDto.setGroupName(staff.getGroup().getGroupName());
                 staffDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getCreatedDate()));
                 staffDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staff.getUpdatedDate()));
+
                 String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MM"));
-                StaffKpi staffKpi = null;
-                for (StaffKpi mk : staff.getStaffKpis()) {
-                        if (currentMonth.equals(String.format("%02d", mk.getMonth()))) {
-                                staffKpi = mk;
+                String currentYear = String.valueOf(LocalDate.now().getYear());
+
+                if (staff.getStaffKpis() != null && !staff.getStaffKpis().isEmpty()) {
+                        // 1. Try current month/year
+                        StaffKpi staffKpi = staff.getStaffKpis().stream()
+                                        .filter(mk -> currentMonth.equals(String.format("%02d", mk.getMonth())) &&
+                                                        currentYear.equals(String.valueOf(mk.getYear())))
+                                        .findFirst()
+                                        .orElse(null);
+
+                        // 2. If not found, get the nearest previous month/year
+                        if (staffKpi == null) {
+                                staffKpi = staff.getStaffKpis().stream()
+                                                .filter(mk -> {
+                                                        // Only earlier than current date
+                                                        if (mk.getYear() < Integer.parseInt(currentYear))
+                                                                return true;
+                                                        if (mk.getYear() == Integer.parseInt(currentYear) &&
+                                                                        mk.getMonth() < Integer.parseInt(currentMonth))
+                                                                return true;
+                                                        return false;
+                                                })
+                                                .max(Comparator.comparingInt((StaffKpi mk) -> mk.getYear())
+                                                                .thenComparingInt(StaffKpi::getMonth))
+                                                .orElse(null);
                         }
+
+                        if (staffKpi != null) {
+                                staffDto.setStaffKpiDtos(StaffKpiMapper.mapToStaffKpiDto(staffKpi));
+                        } else {
+                                staffDto.setStaffKpiDtos(null);
+                        }
+                } else {
+                        staffDto.setStaffKpiDtos(null);
                 }
-                if (staffKpi != null) {
-                        staffDto.setStaffKpiDtos(StaffKpiMapper.mapToStaffKpiDto(staffKpi));
-                }
+
                 return staffDto;
         }
+
 }

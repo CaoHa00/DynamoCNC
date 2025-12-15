@@ -10,6 +10,7 @@ public class AdminMapper {
         Admin admin = new Admin();
         admin.setEmail(adminDto.getEmail());
         admin.setPassword(adminDto.getPassword());
+        admin.setFullname(adminDto.getFullname());
         return admin;
     }
 
@@ -17,9 +18,15 @@ public class AdminMapper {
         AdminResponseDto adminResponseDto = new AdminResponseDto();
         adminResponseDto.setEmail(admin.getEmail());
         adminResponseDto.setId(admin.getId());
+        adminResponseDto.setUsername(admin.getUsername());
+        adminResponseDto.setFullname(admin.getFullname());
+        adminResponseDto.setRole(admin.getRoles());
         adminResponseDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(admin.getCreatedDate()));
-        adminResponseDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(admin.getUpdatedDate()));
-
+        if (admin.getUpdatedDate() == 0) {
+            adminResponseDto.setUpdatedDate(null);
+        } else {
+            adminResponseDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(admin.getUpdatedDate()));
+        }
         return adminResponseDto;
     }
 }

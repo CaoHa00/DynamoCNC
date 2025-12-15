@@ -1,7 +1,12 @@
 package com.example.Dynamo_Backend.dto.ResponseDto;
 
+import java.util.List;
+
 import com.example.Dynamo_Backend.dto.MachineDto;
 import com.example.Dynamo_Backend.dto.OrderDetailDto;
+import com.example.Dynamo_Backend.dto.PlanDto;
+import com.example.Dynamo_Backend.dto.ProcessTimeDto;
+import com.example.Dynamo_Backend.dto.StaffDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,11 +22,7 @@ public class DrawingCodeProcessResponseDto {
     private Integer manufacturingPoint;
     private String processType;
     private Integer processStatus;
-    private Long pgTime;
-    // private Long totalRunningTime;
-    // private Long totalStopTime;
-    // private Long offsetRunTime;
-    // private Long pgRunTime;
+    private Integer pgTime;
     private String startTime;
     private String endTime;
     private String createdDate;
@@ -30,4 +31,7 @@ public class DrawingCodeProcessResponseDto {
     private Integer status;
     private OrderDetailDto orderDetailDto;
     private MachineDto machineDto;
+    private List<StaffDto> staffDtos;
+    private PlanDto planDto;
+    private ProcessTimeDto processTimeDto;
 }

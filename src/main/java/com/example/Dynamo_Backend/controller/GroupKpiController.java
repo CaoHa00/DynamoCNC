@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.GroupKpiDto;
 import com.example.Dynamo_Backend.service.GroupKpiService;
@@ -54,6 +56,24 @@ public class GroupKpiController {
     public ResponseEntity<GroupKpiDto> getGroupKpiById(@PathVariable("groupKpi_id") Integer Id) {
         GroupKpiDto groupKpi = groupKpiService.getGroupKpiById(Id);
         return ResponseEntity.ok(groupKpi);
+    }
+
+    @PostMapping("/upload/week")
+    public ResponseEntity<Void> uploadWeeklyGroupKpiExcel(@RequestParam("file") MultipartFile file) {
+        groupKpiService.importGroupKpiWeekFromExcel(file);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/upload/month")
+    public ResponseEntity<Void> uploadMonthlyGroupKpiExcel(@RequestParam("file") MultipartFile file) {
+        groupKpiService.importGroupKpiMonthFromExcel(file);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/currentWeek")
+    public ResponseEntity<List<GroupKpiDto>> getGroupKpiByCurrentWeek() {
+        List<GroupKpiDto> groupKpis = groupKpiService.getGroupKpiByCurrentWeek();
+        return ResponseEntity.status(HttpStatus.OK).body(groupKpis);
     }
 
 }

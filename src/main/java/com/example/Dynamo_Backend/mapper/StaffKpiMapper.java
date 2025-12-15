@@ -12,7 +12,7 @@ public class StaffKpiMapper {
     public static StaffKpi mapToStaffKpi(StaffKpiDto staffKpiDto) {
         StaffKpi staffKpi = new StaffKpi();
         // Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-        // .orElseThrow(() -> new RuntimeException("Staff is not found:" +
+        // .orElseThrow(() -> new ResourceNotFoundException("Staff is not found:" +
         // staffKpiDto.getStaffId()));
         // staffKpi.setStaff(staff);
         staffKpi.setYear(staffKpiDto.getYear());
@@ -28,28 +28,9 @@ public class StaffKpiMapper {
         return staffKpi;
     }
 
-    public static StaffKpiDto mapToStaffKpibyStaff(StaffRequestDto staffDto) {
-        StaffKpiDto staffKpi = new StaffKpiDto();
-        // Staff staff = staffRepository.findById(staffKpiDto.getStaffId())
-        // .orElseThrow(() -> new RuntimeException("Staff is not found:" +
-        // staffKpiDto.getStaffId()));
-        // staffKpi.setStaff(staff);
-        staffKpi.setYear(staffDto.getYear());
-        staffKpi.setMonth(staffDto.getMonth());
-        staffKpi.setPgTimeGoal(staffDto.getPgTimeGoal());
-        staffKpi.setKpi(staffDto.getKpi());
-        staffKpi.setOleGoal(staffDto.getOleGoal());
-        staffKpi.setWorkGoal(staffDto.getWorkGoal());
-        staffKpi.setMachineTimeGoal(staffDto.getMachineTimeGoal());
-        staffKpi.setManufacturingPoint(staffDto.getManufacturingPoint());
-        // staffKpi.setCreatedDate((long) 0);
-        // staffKpi.setUpdatedDate((long) 0);
-        return staffKpi;
-    }
-
     public static StaffKpiDto mapToStaffKpiDto(StaffRequestDto staffRequestDto) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
-        staffKpiDto.setStaffId(staffRequestDto.getStaffId());
+        staffKpiDto.setStaffId(staffRequestDto.getId());
         staffKpiDto.setYear(staffRequestDto.getYear());
         staffKpiDto.setMonth(staffRequestDto.getMonth());
         staffKpiDto.setPgTimeGoal(staffRequestDto.getPgTimeGoal());
@@ -59,15 +40,20 @@ public class StaffKpiMapper {
         staffKpiDto.setWorkGoal(staffRequestDto.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffRequestDto.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffRequestDto.getManufacturingPoint());
+        staffKpiDto.setGroupId(staffRequestDto.getGroupId());
         return staffKpiDto;
     }
 
     public static StaffKpiDto mapToStaffKpiDto(StaffKpi staffKpi) {
         StaffKpiDto staffKpiDto = new StaffKpiDto();
-        staffKpiDto.setId(staffKpi.getId());
+        staffKpiDto.setKpiId(staffKpi.getId());
+        staffKpiDto.setId(staffKpi.getStaff().getStaffId());
+        staffKpiDto.setStaffName(staffKpi.getStaff().getStaffName());
         staffKpiDto.setCreatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getCreatedDate()));
         staffKpiDto.setUpdatedDate(DateTimeUtil.convertTimestampToStringDate(staffKpi.getUpdatedDate()));
-        staffKpiDto.setStaffId(staffKpi.getStaff().getStaffId());
+        staffKpiDto.setStaffId(staffKpi.getStaff().getId());
+        staffKpiDto.setGroupId(staffKpi.getGroup().getGroupId());
+        staffKpiDto.setGroupName(staffKpi.getGroup().getGroupName());
         staffKpiDto.setYear(staffKpi.getYear());
         staffKpiDto.setMonth(staffKpi.getMonth());
         staffKpiDto.setPgTimeGoal(staffKpi.getPgTimeGoal());
@@ -76,7 +62,15 @@ public class StaffKpiMapper {
         staffKpiDto.setWorkGoal(staffKpi.getWorkGoal());
         staffKpiDto.setMachineTimeGoal(staffKpi.getMachineTimeGoal());
         staffKpiDto.setManufacturingPoint(staffKpi.getManufacturingPoint());
-
+        staffKpiDto.setStaffStatus(staffKpi.getStaff().getStatus());
         return staffKpiDto;
     }
+
+    public static StaffKpiDto mapToStaffDto(StaffKpi staffKpi) {
+        StaffKpiDto staffKpiDto = new StaffKpiDto();
+        staffKpiDto.setId(staffKpi.getStaff().getStaffId());
+        staffKpiDto.setStaffName(staffKpi.getStaff().getStaffName());
+        return staffKpiDto;
+    }
+
 }

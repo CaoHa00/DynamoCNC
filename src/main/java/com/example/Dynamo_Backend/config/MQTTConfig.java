@@ -1,8 +1,12 @@
 package com.example.Dynamo_Backend.config;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -19,27 +23,38 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import com.example.Dynamo_Backend.service.OperateHistoryService;
+import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
+import com.example.Dynamo_Backend.event.OperateHistoryMessageEvent;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
+import com.example.Dynamo_Backend.service.GroupService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 
 @Configuration
 @AllArgsConstructor
 public class MQTTConfig {
-    final CurrentStatusService currentStatusService;
-    final OperateHistoryService operateHistoryService;
+    private final CurrentStatusService currentStatusService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final GroupService groupService;
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
 
-        options.setServerURIs(new String[] { "tcp://127.0.0.1:1883" });
+        // options.setServerURIs(new String[] { "tcp://10.60.253.11:1883" });
+        // options.setServerURIs(new String[] { "tcp://172.21.200.20:1883" });
+        options.setServerURIs(new String[] {
+                "ssl://7b4d336ebd84424cb04e1c2900fe72d0.s1.eu.hivemq.cloud:8883" });
+        // 172.21.200.20
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);
+        options.setUserName("PLC1");
+        options.setPassword("PLC1".toCharArray());
         factory.setConnectionOptions(options);
-
         return factory;
     }
 
@@ -63,6 +78,7 @@ public class MQTTConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
+
         return new MessageHandler() {
 
             @Override
@@ -70,13 +86,47 @@ public class MQTTConfig {
                 String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
                 if (topic.equals("myTopic")) {
                     System.out.println(message.getPayload().toString());
-                    // currentStatusService.addCurrentStatus(message.getPayload().toString());
-                    operateHistoryService.addOperateHistory(message.getPayload().toString());
-                    // try {
-                    // MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
-                    // } catch (IOException e) {
-                    // e.printStackTrace();
-                    // }
+                    currentStatusService.addCurrentStatus(message.getPayload().toString());
+                    eventPublisher.publishEvent(new OperateHistoryMessageEvent(message.getPayload().toString()));
+                    GroupResponseDto groupDto = groupService.getGroupByMachineId(message.getPayload().toString());
+                    if (groupDto != null) {
+                        List<CurrentStatusResponseDto> statusList = currentStatusService
+                                .getCurrentStatusByGroupId(groupDto.getGroupId());
+
+                        GroupResponseDto groupDto1 = groupService.getGroupByStaffId(message.getPayload().toString());
+                        List<ListCurrentStaffStatusDto> listStaffStatus = new ArrayList<>();
+                        if (groupDto1 != null) {
+                            listStaffStatus = currentStatusService
+                                    .getCurrentStaffStatusByGroupId(groupDto1.getGroupId());
+                        }
+
+                        Map<String, Long> statusCount = groupService.getGroupCountByGroupId(groupDto.getGroupId());
+                        try {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            String jsonMessage = objectMapper.writeValueAsString(
+                                    new java.util.HashMap<String, Object>() {
+                                        {
+                                            put("type", groupDto.getGroupName().concat("-status"));
+                                            put("data", statusList);
+                                            put("countStatus", statusCount);
+                                        }
+                                    });
+                            MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
+                            MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+
+                            // String statusCountJson = objectMapper.writeValueAsString(
+                            // Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",
+                            // statusCount));
+                            // MyWebSocketHandler.sendGroupStatusToClients(statusCountJson);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        MyWebSocketHandler.sendMessageToClients(message.getPayload().toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 // String[] arr = message.getPayload().toString().split(",");

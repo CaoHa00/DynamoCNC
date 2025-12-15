@@ -2,6 +2,8 @@ package com.example.Dynamo_Backend.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.Dynamo_Backend.dto.GroupKpiDto;
 
 public interface GroupKpiService {
@@ -14,4 +16,10 @@ public interface GroupKpiService {
     void deleteGroupKpi(Integer Id);
 
     List<GroupKpiDto> getGroupKpis();
+
+    void importGroupKpiWeekFromExcel(MultipartFile file);
+
+    void importGroupKpiMonthFromExcel(MultipartFile file);
+
+    List<GroupKpiDto> getGroupKpiByCurrentWeek();
 }
