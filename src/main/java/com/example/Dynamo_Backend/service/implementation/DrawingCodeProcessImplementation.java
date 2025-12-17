@@ -577,18 +577,24 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         // reset lai currentStatus -- chua lam
         @Override
         public void doneProcess(String processId) {
+
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
                                 .findById(processId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "DrawingCodeProcess is not found:" + processId));
-                Long doneTime = System.currentTimeMillis();
                 OperateHistory operateHistory = operateHistoryRepository
                                 .findByDrawingCodeProcess_processId(drawingCodeProcess.getProcessId())
                                 .stream()
                                 .filter(operate -> operate.getInProgress() == 1)
                                 .findFirst()
                                 .orElseGet(OperateHistory::new);
+                Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
+                                                drawingCodeProcess.getMachine().getMachineId()));
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
                 drawingCodeProcess.setProcessStatus(3);
+                Long doneTime = System.currentTimeMillis();
                 drawingCodeProcess.setEndTime(doneTime);
                 drawingCodeProcess.setUpdatedDate(doneTime);
 
@@ -598,9 +604,6 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         operateHistoryRepository.save(operateHistory);
                 }
 
-                Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
-                                                drawingCodeProcess.getMachine().getMachineId()));
                 machine.setStatus(0);
 
                 // calculate processTime
@@ -629,8 +632,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 if (!sent) {
                         throw new BusinessException("Failed to send MQTT message");
                 }
-                currentStatusService.addCurrentStatus(
-                                (machine.getMachineId() - 1) + "-0");
+
         }
 
         @Override

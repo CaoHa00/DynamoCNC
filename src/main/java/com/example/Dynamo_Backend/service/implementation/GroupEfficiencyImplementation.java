@@ -78,9 +78,7 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
                     DateTimeUtil.convertStringToTimestamp(endDate));
             pg = 0f;
             for (DrawingCodeProcess process : processes) {
-                if (process.getEndTime() - process.getStartTime() > 86400000) {
-                    pg += process.getPgTime();
-                }
+                pg += process.getPgTime();
                 ProcessTime processTime = process.getProcessTime();
                 totalRunTime += processTime.getRunTime();
                 totalPgTime += processTime.getPgTime();
@@ -93,22 +91,27 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
             }
             workingHour += pg;
         }
+        float workingHourReal = 0;
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
+            workingHourReal = groupKpi.getWorkingHour();
         } else {
             int a = timePeriodInfo.getWeek();
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndYearAndWeekAndIsMonth(
                     requestDto.getGroupId(), timePeriodInfo.getYear(),
                     timePeriodInfo.getWeekOfYear(), (int) 0).orElseGet(GroupKpi::new);
             float kpi = groupKpi.getWorkingHour();
+            if (timePeriodInfo.getDay() == 1) {
+                workingHourReal = kpi / 7;
+            }
             System.out.println(kpi);
         }
         if (numberOfMachine > 0) {
 
             if (numberOfMachine > 0 && groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() > 0) {
-                operationalEfficiency = (totalRunTime / (numberOfMachine * groupKpi.getWorkingHour())) * 100;
+                operationalEfficiency = (totalRunTime / (numberOfMachine * workingHourReal)) * 100;
             }
             if (totalRunTime > 0) {
                 pgEfficiency = (totalPgTime / totalRunTime) * 100;

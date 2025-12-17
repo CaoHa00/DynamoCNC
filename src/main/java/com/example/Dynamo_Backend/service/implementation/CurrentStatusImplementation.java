@@ -78,14 +78,13 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setProcessId(null);
         }
-        if (currentStatus.getStatus().equals("0")) {
+        if (currentStatus.getStatus().equals("0") && arr[1].contains("R")) {
             TempStartTime tempTime = tempStartTimeRepository.findByMachineId(machineIdInt);
             tempTime.setStartTime(System.currentTimeMillis());
             tempStartTimeRepository.save(tempTime);
         }
         currentStatus.setMachineId(machineIdInt);
         currentStatus.setStatus(arr[1]);
-
         if (arr.length < 3) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String nowStr = LocalDateTime.now().format(formatter);
