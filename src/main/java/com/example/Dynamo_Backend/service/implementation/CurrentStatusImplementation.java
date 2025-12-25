@@ -19,6 +19,7 @@ import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
+import com.example.Dynamo_Backend.entities.MachineSegment;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.entities.TempStartTime;
@@ -34,6 +35,8 @@ import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.repository.TempStartTimeRepository;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.LogService;
+import com.example.Dynamo_Backend.service.MachineSegmentService;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -48,6 +51,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     private final MachineKpiRepository machineKpiRepository;
     private final @Lazy LogService logService;
     private final CurrentStatusMapper currentStatusMapper;
+    private final MachineSegmentService machineSegmentService;
 
     private final StaffRepository staffRepository;
 
@@ -59,9 +63,16 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         String machineId = arr[0];
         int machineIdInt = Integer.parseInt(machineId) + 1;
         CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
+        Machine machine = machineRepository.findById(machineIdInt)
+                .orElseThrow(() -> new BusinessException("Machine is not found when find machine for currentStatus"));
         if (currentStatus == null) {
             currentStatus = new CurrentStatus();
         }
+
+        machineSegmentService.addNewSegmet(payload, currentStatus.getStatus(),
+                DateTimeUtil.convertStringToTimestamp(currentStatus.getTime()));
+
+        //
         CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
         if (currentStaff != null && currentStaff.getStaff() != null) {
             currentStatus.setStaffId(currentStaff.getStaff().getId());
@@ -91,8 +102,8 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setTime(arr[2]);
         }
-        Machine machine = machineRepository.findById(machineIdInt)
-                .orElseThrow(() -> new BusinessException("Machine is not found when find machine for currentStatus"));
+
+        //
         logService.addLog(currentStatus, machine,
                 currentStaff != null ? currentStaff.getStaff() : null);
         currentStatusRepository.save(currentStatus);
