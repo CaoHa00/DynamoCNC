@@ -41,7 +41,7 @@ public class StaffMapper {
                 if (staff == null) {
                         return null;
                 }
-                return new StaffDto(staff.getStaffName());
+                return new StaffDto(staff.getShortName());
         }
 
         public static StaffDto mapToStaffDto(Staff staff) {

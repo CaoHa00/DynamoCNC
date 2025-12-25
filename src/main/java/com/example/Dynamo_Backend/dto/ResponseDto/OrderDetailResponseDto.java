@@ -28,4 +28,5 @@ public class OrderDetailResponseDto {
     private Integer numberOfSteps;
 
     private ProcessTimeSummaryDto processTimeSummaryDto;
+
 }

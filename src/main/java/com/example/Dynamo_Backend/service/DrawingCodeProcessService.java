@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
@@ -36,7 +37,7 @@ public interface DrawingCodeProcessService {
 
         List<DrawingCodeProcessResponseDto> getAll();
 
-        List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned);
+        Page<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned, int page, int size);
 
         void receiveProcessFromTablet(String drawingCodeProcessId, Integer machineId, String staffId);
 

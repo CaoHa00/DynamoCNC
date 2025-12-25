@@ -46,9 +46,9 @@ public class MQTTConfig {
         MqttConnectOptions options = new MqttConnectOptions();
 
         // options.setServerURIs(new String[] { "tcp://10.60.253.11:1883" });
-        options.setServerURIs(new String[] { "tcp://172.21.200.20:1883" });
-        // options.setServerURIs(new String[] {
-        // "ssl://7b4d336ebd84424cb04e1c2900fe72d0.s1.eu.hivemq.cloud:8883" });
+        // options.setServerURIs(new String[] { "tcp://172.21.200.20:1883" });
+        options.setServerURIs(new String[] {
+                "ssl://7b4d336ebd84424cb04e1c2900fe72d0.s1.eu.hivemq.cloud:8883" });
         // 172.21.200.20
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);

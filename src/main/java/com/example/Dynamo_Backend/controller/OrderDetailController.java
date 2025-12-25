@@ -2,6 +2,7 @@ package com.example.Dynamo_Backend.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,6 +30,14 @@ public class OrderDetailController {
     public final OrderDetailService orderDetailService;
 
     @GetMapping
+    public ResponseEntity<Page<OrderDetailResponseDto>> getAllOrderDetails(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<OrderDetailResponseDto> orderDetails = orderDetailService.getOrderDetails(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(orderDetails);
+    }
+
+    @GetMapping("/list")
     public ResponseEntity<List<OrderDetailResponseDto>> getAllOrderDetails() {
         List<OrderDetailResponseDto> orderDetails = orderDetailService.getOrderDetails();
         return ResponseEntity.status(HttpStatus.OK).body(orderDetails);
