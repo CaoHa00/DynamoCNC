@@ -8,7 +8,7 @@ import com.example.Dynamo_Backend.entities.GroupKpi;
 
 public interface GroupKpiRepository extends JpaRepository<GroupKpi, Integer> {
 
-        Optional<GroupKpi> findByGroup_GroupIdAndWeekAndMonthAndYear(String groupId, Integer week, Integer month,
+        Optional<GroupKpi> findByGroup_GroupIdAndWeekAndYear(String groupId, Integer week,
                         Integer year);
 
         Optional<GroupKpi> findByGroup_GroupIdAndIsMonthAndMonthAndYear(String groupId, Integer isMonth, Integer month,

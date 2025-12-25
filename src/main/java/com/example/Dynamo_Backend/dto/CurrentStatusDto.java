@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 public class CurrentStatusDto {
     private String id;
     private Integer machineId;
+    private String machineName;
     private String status;
     private String time;
+    private String processId;
 }

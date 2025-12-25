@@ -263,8 +263,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                         requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                                         .orElseGet(GroupKpi::new);
                 } else {
-                        groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndMonthAndYear(
-                                        requestDto.getGroupId(), timePeriodInfo.getWeek(), timePeriodInfo.getMonth(),
+                        groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndYear(
+                                        requestDto.getGroupId(), timePeriodInfo.getWeekOfYear(),
                                         timePeriodInfo.getYear())
                                         .orElseGet(GroupKpi::new);
                 }

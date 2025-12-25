@@ -20,6 +20,7 @@ import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.Log;
+import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
@@ -218,30 +219,26 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             return new ArrayList<>();
         }
 
-        List<Integer> machineIds = machineKpiList.stream()
-                .map(kpi -> kpi.getMachine().getMachineId())
-                .toList();
-
-        List<Log> allLogs = logRepository.findByMachine_machineIdInAndTimeStampBetweenOrderByTimeStampAsc(
-                machineIds, timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
-
-        Map<Integer, List<Log>> logsByMachine = allLogs.stream()
-                .collect(Collectors.groupingBy(log -> log.getMachine().getMachineId()));
-
         GroupKpi groupKpi;
+        float workingHourGoal = 0f;
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
+            workingHourGoal = groupKpi.getWorkingHourGoal();
         } else {
-            groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndMonthAndYear(
-                    requestDto.getGroupId(), timePeriodInfo.getWeek(), timePeriodInfo.getMonth(),
+            groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndYear(
+                    requestDto.getGroupId(), timePeriodInfo.getWeekOfYear(),
                     timePeriodInfo.getYear()).orElseGet(GroupKpi::new);
+            if (timePeriodInfo.getDay() == 1) {
+                workingHourGoal = groupKpi.getWorkingHourGoal() / 7;
+            }
         }
 
         List<MachineGroupOverviewDto> overviewList = new ArrayList<>();
 
-        for (Integer machineId : logsByMachine.keySet()) {
+        for (MachineKpi machine : machineKpiList) {
+            Integer machineId = machine.getMachine().getMachineId();
             Float totalRunTime = 0f;
             Float totalStopTime = 0f;
             Float totalPgTime = 0f;
@@ -259,11 +256,10 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             totalEmptyTime = activeTime.get(0);
             totalErrorTime = activeTime.get(1) + activeTime.get(2);
 
-            List<Log> logs = logsByMachine.get(machineId);
             List<DrawingCodeProcess> processes = processRepository.findByMachine_MachineIdAndStatus(machineId, 1);
             MachineGroupOverviewDto overviewDto = new MachineGroupOverviewDto();
-            overviewDto.setMachineId(machineId);
-            overviewDto.setMachineName(logs.get(0).getMachine().getMachineName());
+            overviewDto.setMachineId(machine.getMachine().getMachineId());
+            overviewDto.setMachineName(machine.getMachine().getMachineName());
 
             if (!processes.isEmpty()) {
                 for (DrawingCodeProcess process : processes) {
@@ -287,7 +283,7 @@ public class MachineGroupStatisticImplementation implements MachineGroupStatisti
             overviewDto.setEmptyTime(totalEmptyTime);
             overviewDto.setErrorTime(totalErrorTime);
             overviewDto.setPgTimeExpect(pgTimeExpected);
-            overviewDto.setGroupTarget(groupKpi.getWorkingHourGoal() != null ? groupKpi.getWorkingHourGoal() : 0f);
+            overviewDto.setGroupTarget(workingHourGoal);
             overviewList.add(overviewDto);
         }
         return overviewList;

@@ -3,6 +3,7 @@ package com.example.Dynamo_Backend.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,14 +42,19 @@ public class DrawingCodeProcessController {
     }
 
     @GetMapping("/planned")
-    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllPlannedDrawingCodes() {
-        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(1);
+    public ResponseEntity<Page<DrawingCodeProcessResponseDto>> getAllPlannedDrawingCodes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(1, page, size);
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 
     @GetMapping("/unplanned")
-    public ResponseEntity<List<DrawingCodeProcessResponseDto>> getAllUnplannedDrawingCodes() {
-        List<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(0);
+    public ResponseEntity<Page<DrawingCodeProcessResponseDto>> getAllUnplannedDrawingCodes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<DrawingCodeProcessResponseDto> drawingCodes = drawingCodeProcessService.getPlannedProcesses(0, page, size);
         return ResponseEntity.status(HttpStatus.OK).body(drawingCodes);
     }
 

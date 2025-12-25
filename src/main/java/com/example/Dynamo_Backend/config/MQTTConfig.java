@@ -52,8 +52,8 @@ public class MQTTConfig {
         // 172.21.200.20
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);
-        options.setUserName("PLC1");
-        options.setPassword("PLC1".toCharArray());
+        options.setUserName("iic_mqtt");
+        options.setPassword("Vsiic_2024".toCharArray());
         factory.setConnectionOptions(options);
         return factory;
     }

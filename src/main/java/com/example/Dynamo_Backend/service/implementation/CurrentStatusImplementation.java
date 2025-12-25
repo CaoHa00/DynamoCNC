@@ -6,8 +6,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +19,6 @@ import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
-import com.example.Dynamo_Backend.entities.OperateHistory;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.entities.TempStartTime;
@@ -37,7 +34,6 @@ import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.repository.TempStartTimeRepository;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.LogService;
-import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -51,6 +47,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     private final MachineRepository machineRepository;
     private final MachineKpiRepository machineKpiRepository;
     private final @Lazy LogService logService;
+    private final CurrentStatusMapper currentStatusMapper;
 
     private final StaffRepository staffRepository;
 
@@ -78,19 +75,19 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setProcessId(null);
         }
-        if (currentStatus.getStatus().equals("0")) {
-            TempStartTime tempTime = tempStartTimeRepository.findByMachineId(machineIdInt);
+        TempStartTime tempTime = tempStartTimeRepository.findByMachineId(machineIdInt);
+        if (currentStatus.getStatus().equals("0") && arr[1].contains("R")) {
             tempTime.setStartTime(System.currentTimeMillis());
-            tempStartTimeRepository.save(tempTime);
+        } else if (arr[1].contains("0")) {
+            tempTime.setStartTime((long) 0);
         }
+        tempStartTimeRepository.save(tempTime);
         currentStatus.setMachineId(machineIdInt);
         currentStatus.setStatus(arr[1]);
-
         if (arr.length < 3) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String nowStr = LocalDateTime.now().format(formatter);
             currentStatus.setTime(nowStr);
-
         } else {
             currentStatus.setTime(arr[2]);
         }
@@ -102,8 +99,11 @@ public class CurrentStatusImplementation implements CurrentStatusService {
 
         List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
         try {
-            MyWebSocketHandler.sendMachineStatusToClients(currentStatuses.stream()
-                    .map(CurrentStatusMapper::mapToCurrentStatusDto).toList());
+            // MyWebSocketHandler.sendMachineStatusToClients(currentStatuses.stream()
+            // .map(CurrentStatusMapper::mapToCurrentStatusDto).toList());
+            MyWebSocketHandler.sendMachineStatusToClients(
+                    currentStatuses.stream().map(currentStatusMapper::mapToCurrentStatusDto)
+                            .toList());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -123,7 +123,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         currentStatus.setTime(currentStatusDto.getTime());
         currentStatus.setMachineId(currentStatusDto.getMachineId());
         currentStatus = currentStatusRepository.save(currentStatus);
-        return CurrentStatusMapper.mapToCurrentStatusDto(currentStatus);
+        return currentStatusMapper.mapToCurrentStatusDto(currentStatus);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         currentStatus.setStatus(currentStatusDto.getStatus());
         currentStatus.setTime(currentStatusDto.getTime());
         currentStatus = currentStatusRepository.save(currentStatus);
-        return CurrentStatusMapper.mapToCurrentStatusDto(currentStatus);
+        return currentStatusMapper.mapToCurrentStatusDto(currentStatus);
     }
 
     @Override
@@ -146,14 +146,14 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     public CurrentStatusDto getCurrentStatusById(String id) {
         CurrentStatus currentStatus = currentStatusRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("CurrentStatus not found with id: " + id));
-        return CurrentStatusMapper.mapToCurrentStatusDto(currentStatus);
+        return currentStatusMapper.mapToCurrentStatusDto(currentStatus);
     }
 
     @Override
     public List<CurrentStatusDto> getAllCurrentStatus() {
         List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
         return currentStatuses.stream()
-                .map(CurrentStatusMapper::mapToCurrentStatusDto)
+                .map(currentStatusMapper::mapToCurrentStatusDto)
                 .toList();
     }
 

@@ -11,6 +11,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -149,13 +153,19 @@ public class OrderDetailImplementation implements OrderDetailService {
     }
 
     @Override
-    public List<OrderDetailResponseDto> getOrderDetails() {
-        return orderDetailRepository.findByStatusAndProgressNot(1, 3).stream()
-                .map(od -> {
-                    ProcessTimeSummaryDto summary = processTimeSummaryService.getByOrderDetailId(od.getOrderDetailId());
-                    return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
-                })
-                .toList();
+    public Page<OrderDetailResponseDto> getOrderDetails(int page, int size) {
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        Page<OrderDetail> pageEntity = orderDetailRepository.findByStatusAndProgressNot(1, 3, pageable);
+
+        return pageEntity.map(od -> {
+            ProcessTimeSummaryDto summary = processTimeSummaryService.getByOrderDetailId(od.getOrderDetailId());
+            return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
+        });
     }
 
     @Override
@@ -287,6 +297,16 @@ public class OrderDetailImplementation implements OrderDetailService {
         }
 
         return new ArrayList<>(map.values());
+    }
+
+    @Override
+    public List<OrderDetailResponseDto> getOrderDetails() {
+        return orderDetailRepository.findByStatusAndProgressNot(1, 3).stream()
+                .map(od -> {
+                    ProcessTimeSummaryDto summary = processTimeSummaryService.getByOrderDetailId(od.getOrderDetailId());
+                    return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
+                })
+                .toList();
     }
 
 }

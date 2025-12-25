@@ -149,25 +149,6 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         // int minutes = Math.round((totalWorkingHours - hours) * 60);
         // String workingHoursString = String.format("%dh%02dm", hours, minutes);
         // demo
-
-        if (processCount == 0) {
-            processCount = 15;
-        }
-        totalKpi = 60f;
-        staffCount = staffKpiList.size();
-        totalWorkingHours = 120f;
-        totalManufactoringPoints = 40;
-        previousTotalWorkingHours = 130f;
-        previousTotalManufactoringPoints = 50;
-        previousProcessCount = 12;
-        previousTotalKpi = 80f;
-
-        // demo
-        workingRate = -10f;
-        mpRate = -8f;
-        kpiRate = -9f;
-        processRate = -5f;
-
         return new StaffGroupStatisticDto(group.getGroupId(), group.getGroupName(), staffCount,
                 totalWorkingHours, workingRate, totalManufactoringPoints, mpRate,
                 processCount, processRate, totalKpi, kpiRate,
@@ -241,7 +222,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             overviewDtos.add(new StaffGroupOverviewDto(
                     staffKpi.getStaff().getId(),
                     staffKpi.getStaff().getStaffId(),
-                    staffKpi.getStaff().getStaffName(),
+                    staffKpi.getStaff().getShortName(),
                     staffKpi.getWorkGoal(),
                     (float) Math.round(totalWorkingHours * 100) / 100,
                     staffKpi.getManufacturingPoint(),

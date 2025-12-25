@@ -13,6 +13,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -58,6 +62,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         CurrentStatusRepository currentStatusRepository;
         OperateHistoryService operateHistoryService;
         AdminRepository adminRepository;
+        CurrentStatusMapper currentStatusMapper;
 
         TempProcessRepository tempProcessRepository;
 
@@ -370,6 +375,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 if (currentStatus.getStatus().contains("R") || currentStatus.getStatus().contains("S")) {
                         TempStartTime timeStartTime = tempStartTimeRepository.findByMachineId(machineId);
                         process.setStartTime(timeStartTime.getStartTime());
+                        currentStatus.setProcessId(drawingCodeProcessId);
+                        currentStatus.setStaffId(staffId);
+                        currentStatusRepository.save(currentStatus);
                 } else {
                         process.setStartTime(timestampNow);
                 }
@@ -411,7 +419,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
                 int currentYear = LocalDate.now().getYear();
                 Group group = groupRepository.findLatestByMachineId(machineId, currentMonth, currentYear).orElse(null);
-
+                List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
                 List<CurrentStatusResponseDto> statusList = currentStatusService
                                 .getCurrentStatusByGroupId(group.getGroupId());
                 List<ListCurrentStaffStatusDto> listStaffStatus = currentStatusService
@@ -428,6 +436,10 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                         });
                         MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
                         MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+                        MyWebSocketHandler.sendMachineStatusToClients(
+                                        currentStatuses.stream().map(currentStatusMapper::mapToCurrentStatusDto)
+                                                        .toList());
+
                 } catch (IOException e) {
                         e.printStackTrace();
                         throw new BusinessException("Failed to send to user");
@@ -577,18 +589,25 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         // reset lai currentStatus -- chua lam
         @Override
         public void doneProcess(String processId) {
+
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
                                 .findById(processId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "DrawingCodeProcess is not found:" + processId));
-                Long doneTime = System.currentTimeMillis();
                 OperateHistory operateHistory = operateHistoryRepository
                                 .findByDrawingCodeProcess_processId(drawingCodeProcess.getProcessId())
                                 .stream()
                                 .filter(operate -> operate.getInProgress() == 1)
                                 .findFirst()
                                 .orElseGet(OperateHistory::new);
+                Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
+                                                drawingCodeProcess.getMachine().getMachineId()));
+                currentStatusService.addCurrentStatus(
+                                (machine.getMachineId() - 1) + "-0");
+
                 drawingCodeProcess.setProcessStatus(3);
+                Long doneTime = System.currentTimeMillis();
                 drawingCodeProcess.setEndTime(doneTime);
                 drawingCodeProcess.setUpdatedDate(doneTime);
 
@@ -598,9 +617,6 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         operateHistoryRepository.save(operateHistory);
                 }
 
-                Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
-                                                drawingCodeProcess.getMachine().getMachineId()));
                 machine.setStatus(0);
 
                 // calculate processTime
@@ -629,15 +645,22 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 if (!sent) {
                         throw new BusinessException("Failed to send MQTT message");
                 }
-                currentStatusService.addCurrentStatus(
-                                (machine.getMachineId() - 1) + "-0");
+
         }
 
         @Override
-        public List<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned) {
-                List<DrawingCodeProcess> all = drawingCodeProcessRepository
-                                .findByIsPlanAndProcessStatusNotAndStatus(planned, 3, 1);
-                return returnProcessDto(all);
+        public Page<DrawingCodeProcessResponseDto> getPlannedProcesses(Integer planned, int page, int size) {
+                Pageable pageable = PageRequest.of(
+                                page,
+                                size,
+                                Sort.by(Sort.Direction.DESC, "createdDate"));
+                Page<DrawingCodeProcess> pageEntity = drawingCodeProcessRepository
+                                .findByIsPlanAndProcessStatusNotAndStatus(
+                                                planned,
+                                                3, // processStatus != 3
+                                                1, // status = 1
+                                                pageable);
+                return returnProcessDto(pageEntity);
         }
 
         @Override
@@ -730,6 +753,42 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         return DrawingCodeProcessMapper.toDto(orderDetailDto, machineDto, process, staffDtos, planDto,
                                         processTimeDto);
                 }).toList();
+        }
+
+        public Page<DrawingCodeProcessResponseDto> returnProcessDto(
+                        Page<DrawingCodeProcess> processes) {
+
+                return processes.map(process -> {
+
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapOrderCodeDto(process.getOrderDetail());
+
+                        MachineDto machineDto = process.getMachine() != null
+                                        ? MachineMapper.mapOnlyMachineName(process.getMachine())
+                                        : null;
+
+                        PlanDto planDto = process.getPlan() != null
+                                        ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+
+                        ProcessTimeDto processTimeDto = process.getProcessTime() != null
+                                        ? ProcessTimeMapper.mapToProcessTimeDto(process.getProcessTime())
+                                        : null;
+
+                        List<StaffDto> staffDtos = process.getOperateHistories() != null
+                                        ? process.getOperateHistories().stream()
+                                                        .map(operate -> StaffMapper.mapStaffNameDto(operate.getStaff()))
+                                                        .distinct()
+                                                        .toList()
+                                        : List.of();
+
+                        return DrawingCodeProcessMapper.toDto(
+                                        orderDetailDto,
+                                        machineDto,
+                                        process,
+                                        staffDtos,
+                                        planDto,
+                                        processTimeDto);
+                });
         }
 
         @Override
