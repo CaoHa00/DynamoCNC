@@ -47,7 +47,6 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         MachineRepository machineRepository;
         DrawingCodeProcessRepository drawingCodeProcessRepository;
         private MessageChannel mqttOutboundChannel;
-        TempStartTimeRepository tempStartTimeRepository;
         StaffRepository staffRepository;
         PlanService planService;
         OperateHistoryRepository operateHistoryRepository;
@@ -371,16 +370,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 machineRepository.save(machine);
                 process.setMachine(machine);
                 process.setProcessStatus(2);
-                CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineId);
-                if (currentStatus.getStatus().contains("R") || currentStatus.getStatus().contains("S")) {
-                        TempStartTime timeStartTime = tempStartTimeRepository.findByMachineId(machineId);
-                        process.setStartTime(timeStartTime.getStartTime());
-                        currentStatus.setProcessId(drawingCodeProcessId);
-                        currentStatus.setStaffId(staffId);
-                        currentStatusRepository.save(currentStatus);
-                } else {
-                        process.setStartTime(timestampNow);
-                }
+
+                process.setStartTime(timestampNow);
 
                 process.setEndTime((long) 0);
 
@@ -419,6 +410,8 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
                 int currentYear = LocalDate.now().getYear();
                 Group group = groupRepository.findLatestByMachineId(machineId, currentMonth, currentYear).orElse(null);
+                currentStatusService.addCurrentStatuswhileActive(
+                                (machine.getMachineId() - 1), process.getProcessId(), currentStaffDto.getStaffId());
                 List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
                 List<CurrentStatusResponseDto> statusList = currentStatusService
                                 .getCurrentStatusByGroupId(group.getGroupId());
@@ -447,8 +440,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 if (!sent) {
                         throw new BusinessException("Failed to send MQTT message");
                 }
-                currentStatusService.addCurrentStatuswhileActive(
-                                (machine.getMachineId() - 1), process.getProcessId(), currentStaffDto.getStaffId());
+
         }
 
         @Override

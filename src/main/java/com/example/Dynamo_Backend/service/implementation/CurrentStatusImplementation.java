@@ -21,7 +21,6 @@ import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
-import com.example.Dynamo_Backend.entities.TempStartTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.CurrentStaffRepository;
@@ -31,7 +30,6 @@ import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
-import com.example.Dynamo_Backend.repository.TempStartTimeRepository;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.LogService;
 
@@ -41,7 +39,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CurrentStatusImplementation implements CurrentStatusService {
     private final CurrentStatusRepository currentStatusRepository;
-    private final TempStartTimeRepository tempStartTimeRepository;
     private final CurrentStaffRepository currentStaffRepository;
     private final DrawingCodeProcessRepository drawingCodeProcessRepository;
     private final MachineRepository machineRepository;
@@ -75,13 +72,6 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         } else {
             currentStatus.setProcessId(null);
         }
-        TempStartTime tempTime = tempStartTimeRepository.findByMachineId(machineIdInt);
-        if (currentStatus.getStatus().equals("0") && arr[1].contains("R")) {
-            tempTime.setStartTime(System.currentTimeMillis());
-        } else if (arr[1].contains("0")) {
-            tempTime.setStartTime((long) 0);
-        }
-        tempStartTimeRepository.save(tempTime);
         currentStatus.setMachineId(machineIdInt);
         currentStatus.setStatus(arr[1]);
         if (arr.length < 3) {
