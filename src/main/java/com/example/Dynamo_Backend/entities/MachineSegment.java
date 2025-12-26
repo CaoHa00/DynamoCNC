@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.entities;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,16 +26,19 @@ public class MachineSegment {
 
     @Column(name = "machine_id", nullable = false)
     private Integer machineId;
-    @Column(name = "machine_name", nullable = false)
+
+    @Column(name = "work_date")
+    private LocalDate workDate;
+    @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "machine_name", nullable = false)
+    @Column(name = "start_time", nullable = false)
     private Long startTime;
-    @Column(name = "machine_name", nullable = false)
+    @Column(name = "end_time", nullable = false)
     private Long endTime;
-    @Column(name = "machine_name", nullable = false)
+    @Column(name = "duration", nullable = false)
     private Long duration;
-    @Column(name = "machine_name", nullable = false)
+    @Column(name = "shift", nullable = false)
     private String shift;
 
 }

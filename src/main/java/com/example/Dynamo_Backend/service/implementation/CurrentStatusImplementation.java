@@ -19,7 +19,6 @@ import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
-import com.example.Dynamo_Backend.entities.MachineSegment;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.entities.TempStartTime;
@@ -69,7 +68,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             currentStatus = new CurrentStatus();
         }
 
-        machineSegmentService.addNewSegmet(payload, currentStatus.getStatus(),
+        machineSegmentService.addNewSegmet(payload, currentStatus.getStatus(), System.currentTimeMillis(),
                 DateTimeUtil.convertStringToTimestamp(currentStatus.getTime()));
 
         //
