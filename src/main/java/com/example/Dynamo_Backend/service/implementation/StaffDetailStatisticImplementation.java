@@ -34,6 +34,7 @@ import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
 import com.example.Dynamo_Backend.repository.*;
+import com.example.Dynamo_Backend.service.ReportService;
 import com.example.Dynamo_Backend.service.StaffDetailStatisticService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 import com.example.Dynamo_Backend.util.TimeRange;
@@ -57,6 +58,9 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
 
     @Autowired
     CurrentStatusRepository currentStatusRepository;
+
+    @Autowired
+    ReportService reportService;
 
     @Override
     public StaffDetailStatisticDto getStaffDetailStatistic(StatisticRequestDto requestDto) {
@@ -153,8 +157,8 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
                 historyProcessDto.setStepNumber(operateHistory.getDrawingCodeProcess().getStepNumber());
                 historyProcessDto.setStartTime(DateTimeUtil.convertTimestampToString(operateHistory.getStartTime()));
                 historyProcessDto.setEndTime(DateTimeUtil.convertTimestampToString(operateHistory.getStopTime()));
-                historyProcessDto.setStaffIdNumber(staff.getStaffId());
-                historyProcessDto.setStaffName(staff.getStaffName());
+                // historyProcessDto.setStaffIdNumber(staff.getStaffId());
+                // historyProcessDto.setStaffName(staff.getStaffName());
                 String status = "";
                 if (operateHistory.getDrawingCodeProcess().getProcessStatus() == 3
                         || operateHistory.getInProgress() == 0) {
@@ -197,7 +201,6 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
                             "Machine not found when get detail statistic with ID: "
                                     + requestDto.getId()));
         } else {
-
             staff = staffRepository.findByStaffId(requestDto.getId())
                     .orElseThrow(() -> new BusinessException(
                             "Staff not found when get detail statistic with ID: "
@@ -210,6 +213,10 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
         }
 
         GroupKpi groupKpi;
+        float workingHourReal = 0;
+        int reportTime = 0;
+        Long fromDate = timePeriodInfo.getStartDate();
+        Long toDate = timePeriodInfo.getEndDate();
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
@@ -219,6 +226,11 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
                     requestDto.getGroupId(), timePeriodInfo.getWeekOfYear(),
                     timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
+        }
+        reportTime = reportService.calculateReport(fromDate, toDate);
+        workingHourReal = groupKpi.getWorkingHour() + reportTime;
+        if (timePeriodInfo.getDay() == 1) {
+            workingHourReal = workingHourReal / 7;
         }
         float totalWorkingHours = 0f;
         int totalManufactoringPoints = 0;
@@ -244,7 +256,7 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
             kpi = totalManufactoringPoints * 6 / totalPgTime;
         }
         if (groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() != 0f) {
-            ole = ((totalManufactoringPoints * 10) / 60) / groupKpi.getWorkingHour();
+            ole = ((totalManufactoringPoints * 10) / 60) / workingHourReal;
         }
         if (staffKpi == null) {
             return new StaffWorkingStatisticDto(

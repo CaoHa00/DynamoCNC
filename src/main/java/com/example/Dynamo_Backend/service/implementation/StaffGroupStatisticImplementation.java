@@ -36,6 +36,7 @@ import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
 import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.service.GroupStatisticService;
+import com.example.Dynamo_Backend.service.ReportService;
 import com.example.Dynamo_Backend.util.TimeRange;
 
 @Service
@@ -52,7 +53,11 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
     @Autowired
     OperateHistoryRepository operateHistoryRepository;
 
+    @Autowired
+    ReportService reportService;
+
     @Override
+
     public StaffGroupStatisticDto getGroupStatistic(GroupEfficiencyRequestDto requestDto) {
         String startDate = requestDto.getStartDate().concat(" 00:00:00"); // Should be "2025-07-21"
         String endDate = requestDto.getEndDate().concat(" 23:59:59");
@@ -143,12 +148,6 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             mpRate = ((totalManufactoringPoints - previousTotalManufactoringPoints)
                     / (float) previousTotalManufactoringPoints) * 100;
         }
-
-        // transfer totalWorkingHours to String form "4h40m"
-        // int hours = totalWorkingHours.intValue();
-        // int minutes = Math.round((totalWorkingHours - hours) * 60);
-        // String workingHoursString = String.format("%dh%02dm", hours, minutes);
-        // demo
         return new StaffGroupStatisticDto(group.getGroupId(), group.getGroupName(), staffCount,
                 totalWorkingHours, workingRate, totalManufactoringPoints, mpRate,
                 processCount, processRate, totalKpi, kpiRate,
@@ -168,9 +167,14 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         if (staffKpiList.isEmpty()) {
             return List.of();
         }
+
         Group group = groupRepository.findById(requestDto.getGroupId())
                 .orElseThrow(() -> new BusinessException("Group not found when get staff group overview"));
         GroupKpi groupKpi;
+        float workingHourReal = 0;
+        int reportTime = 0;
+        Long fromDate = timePeriodInfo.getStartDate();
+        Long toDate = timePeriodInfo.getEndDate();
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     group.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
@@ -180,17 +184,11 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                     group.getGroupId(), timePeriodInfo.getYear(), timePeriodInfo.getWeekOfYear(), 0)
                     .orElseThrow(() -> new BusinessException("GroupKPI not found when get staff group overview"));
         }
-
-        Integer reportCount = group.getReports() != null ? group.getReports().size() : 0;
-        if (reportCount != 0) {
-            Float workingHoursDiff = 0f;
-            for (Report report : group.getReports()) {
-                workingHoursDiff += report.getHourDiff() != null ? report.getHourDiff() : 0f;
-            }
-            groupKpi.setWorkingHour(groupKpi.getWorkingHourGoal() + workingHoursDiff);
-            groupKpiRepository.save(groupKpi);
+        reportTime = reportService.calculateReport(fromDate, toDate);
+        workingHourReal = groupKpi.getWorkingHour() + reportTime;
+        if (timePeriodInfo.getDay() == 1) {
+            workingHourReal = workingHourReal / 7;
         }
-
         List<StaffGroupOverviewDto> overviewDtos = new ArrayList<>();
 
         for (StaffKpi staffKpi : staffKpiList) {
@@ -234,7 +232,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         }
         for (StaffGroupOverviewDto dto : overviewDtos) {
             if (groupKpi.getWorkingHour() != 0) {
-                dto.setOle(((dto.getTotalManufacturingPoint() * 10) / 60) / groupKpi.getWorkingHour());
+                dto.setOle(((dto.getTotalManufacturingPoint() * 10) / 60) / workingHourReal);
             }
         }
         return overviewDtos;

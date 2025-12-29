@@ -15,21 +15,20 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineDetailStatisticDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineEfficiencyResponseDto;
-import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
-import com.example.Dynamo_Backend.entities.Log;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
+import com.example.Dynamo_Backend.entities.OperateHistory;
 import com.example.Dynamo_Backend.entities.ProcessTime;
-import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
@@ -37,9 +36,12 @@ import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
+import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
+import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
 import com.example.Dynamo_Backend.service.MachineDetailStatisticService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
+import com.example.Dynamo_Backend.service.ReportService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 import com.example.Dynamo_Backend.util.TimeRange;
 
@@ -64,6 +66,13 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
 
         @Autowired
         private GroupRepository groupRepository;
+        @Autowired
+        private OperateHistoryRepository operateHistoryRepository;
+
+        @Autowired
+        private DrawingCodeProcessRepository drawingCodeProcessRepository;
+        @Autowired
+        private ReportService reportService;
 
         public MachineDetailStatisticDto calculateMachineTime(Integer machineId, TimePeriodInfo timePeriodInfo) {
 
@@ -147,25 +156,25 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail history with ID: "
                                                                 + requestDto.getId()));
-                List<DrawingCodeProcess> processes = machine.getDrawingCodeProcesses().stream()
-                                .filter(process -> process.getStartTime() <= timePeriodInfo.getEndDate()
-                                                && process.getEndTime() >= timePeriodInfo.getStartDate())
-                                .toList();
+
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository
+                                .findCompletedProcessesByMachineAndTime(machine.getMachineId(),
+                                                timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
 
                 List<HistoryProcessDto> historyProcessDtos = new ArrayList<>();
                 for (DrawingCodeProcess process : processes) {
-                        String status = "";
-                        if (process.getProcessStatus() == 3) {
-                                status = "Completed";
-                        } else if (process.getProcessStatus() == 2) {
-                                CurrentStatus currentStatus = currentStatusRepository
-                                                .findByMachineId(process.getMachine().getMachineId());
-                                if (currentStatus != null) {
-                                        status = currentStatus.getStatus();
-                                }
+                        System.out.println(process.getProcessId());
+                        List<StaffDto> dto = new ArrayList<>();
+                        String status = "Completed";
+                        List<OperateHistory> histories = operateHistoryRepository
+                                        .findByDrawingCodeProcess_processId(process.getProcessId());
+                        for (OperateHistory operateHistory : histories) {
+                                StaffDto staffDto = new StaffDto();
+                                staffDto.setStaffId(operateHistory.getStaff().getStaffId());
+                                staffDto.setStaffName(operateHistory.getStaff().getShortName());
+                                dto.add(staffDto);
                         }
-                        Staff staff = process.getOperateHistories().get(process.getOperateHistories().size() - 1)
-                                        .getStaff();
+
                         String endTime = process.getEndTime() < process.getStartTime()
                                         ? DateTimeUtil.convertTimestampToString(
                                                         System.currentTimeMillis())
@@ -177,8 +186,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                         DateTimeUtil.convertTimestampToString(process.getStartTime()),
                                         endTime,
                                         machine.getMachineName(),
-                                        staff.getStaffId(),
-                                        staff.getStaffName(),
+                                        dto,
                                         status);
                         historyProcessDtos.add(history);
                 }
@@ -205,10 +213,10 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 Float mainAndElectricProductPgTime = 0f;
                 Float otherProductPgTime = 0f;
                 GroupKpi groupKpi = null;
-
                 Machine machine = null;
                 MachineKpi machineKpi = null;
                 List<MachineKpi> machines = null;
+                Float processPgTime = 0f;
 
                 if (requestDto.getId() == null) {
                         machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
@@ -231,73 +239,66 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                                 timePeriodInfo.getYear());
                         }
                 }
-
-                // MachineKpi machineKpi =
-                // machineKpiRepository.findByMachine_machineIdAndMonthAndYear(
-                // machine.getMachineId(), timePeriodInfo.getMonth(), timePeriodInfo.getYear());
-                // List<MachineKpi> machines =
-                // machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
-                // machineKpi.getGroup().getGroupId(), timePeriodInfo.getMonth(),
-                // timePeriodInfo.getYear());
-
-                List<DrawingCodeProcess> processes = machine.getDrawingCodeProcesses();
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository
+                                .findCompletedProcessesByMachineAndTime(machine.getMachineId(),
+                                                timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
                 for (DrawingCodeProcess process : processes) {
-                        if (process.getStartTime() <= timePeriodInfo.getEndDate() &&
-                                        process.getEndTime() >= timePeriodInfo.getStartDate()) {
-                                ProcessTime processTime = process.getProcessTime();
-                                if (processTime == null)
-                                        processTime = processTimeService.calculateProcessTime(process);
-                                totalRunTime += processTime.getRunTime();
-                                totalPgTime += processTime.getPgTime();
-                                totalOffsetTime += processTime.getOffsetTime();
-                                if (process.getProcessType().equals("SP_Chính")
-                                                || process.getProcessType().equals("Điện cực")) {
-                                        mainAndElectricProductPgTime += processTime.getPgTime();
-                                } else {
-                                        otherProductPgTime += processTime.getPgTime();
-                                }
+
+                        ProcessTime processTime = process.getProcessTime();
+                        if (processTime == null)
+                                processTime = processTimeService.calculateProcessTime(process);
+                        processPgTime += processTime.getPgTime();
+                        if (process.getProcessType().equals("SP_Chính")
+                                        || process.getProcessType().equals("Điện cực")) {
+                                mainAndElectricProductPgTime += processTime.getPgTime();
+                        } else {
+                                otherProductPgTime += processTime.getPgTime();
                         }
                 }
+                List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
+                                machine.getMachineId(), timePeriodInfo.getStartDate(),
+                                timePeriodInfo.getEndDate());
+                totalPgTime = activeTime.get(3);
+                totalOffsetTime = activeTime.get(4);
+                totalRunTime = activeTime.get(3) + totalOffsetTime;
+                float workingHourReal = 0;
+                int reportTime = 0;
+                Long fromDate = timePeriodInfo.getStartDate();
+                Long toDate = timePeriodInfo.getEndDate();
                 if (timePeriodInfo.isMonth()) {
                         groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                                         requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                                         .orElseGet(GroupKpi::new);
+
                 } else {
                         groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndYear(
                                         requestDto.getGroupId(), timePeriodInfo.getWeekOfYear(),
                                         timePeriodInfo.getYear())
                                         .orElseGet(GroupKpi::new);
                 }
+                reportTime = reportService.calculateReport(fromDate, toDate);
+                workingHourReal = groupKpi.getWorkingHour() + reportTime;
+                if (timePeriodInfo.getDay() == 1) {
+                        workingHourReal = workingHourReal / 7;
+                }
                 if (groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() > 0) {
-                        operationalEfficiency = (totalRunTime / groupKpi.getWorkingHour()) * 100;
+                        operationalEfficiency = (totalRunTime / workingHourReal) * 100;
                 }
                 if (totalRunTime > 0) {
                         pgEfficiency = (totalPgTime / totalRunTime) * 100;
                         offsetLoss = totalOffsetTime / totalRunTime * 100;
                 }
                 if (mainAndElectricProductPgTime > 0) {
-                        valueEfficiency = (totalPgTime / mainAndElectricProductPgTime) * 100;
+                        valueEfficiency = (mainAndElectricProductPgTime / processPgTime) * 100;
                 }
                 if (totalPgTime > 0) {
-                        otherLoss = otherProductPgTime / totalPgTime * 100;
+                        otherLoss = otherProductPgTime / processPgTime * 100;
                 }
                 if (operationalEfficiency > 0 && pgEfficiency > 0 && valueEfficiency > 0) {
                         oee = operationalEfficiency * pgEfficiency * valueEfficiency / 10000;
                 }
                 if (machines == null)
                         machines = new ArrayList<>();
-                if (operationalEfficiency == 0.0) {
-                        operationalEfficiency = 60f;
-                }
-                if (oee == 0.0) {
-                        oee = 60f;
-                }
-                if (offsetLoss == 0.0) {
-                        offsetLoss = 6.0f;
-                }
-                if (otherLoss == 0.0) {
-                        otherLoss = 2.0f;
-                }
 
                 return new MachineEfficiencyResponseDto(machine.getMachineId(), machine.getMachineName(),
                                 operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss,

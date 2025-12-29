@@ -24,7 +24,9 @@ import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
+import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.GroupEfficiencyService;
+import com.example.Dynamo_Backend.service.ReportService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 import com.example.Dynamo_Backend.util.TimeRange;
 
@@ -37,10 +39,16 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
     GroupKpiRepository groupKpiRepository;
 
     @Autowired
+    private MachineRepository machineRepository;
+
+    @Autowired
     DrawingCodeProcessRepository drawingCodeProcessRepository;
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private ReportService reportService;
 
     @Override
     public GroupEfficiencyResponseDto getGroupEfficiency(GroupEfficiencyRequestDto requestDto) {
@@ -68,48 +76,58 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         Float mainAndElectricProductPgTime = 0f;
         Float otherProductPgTime = 0f;
         GroupKpi groupKpi = null;
+        Float processPgTime = 0f;
         Group group = groupRepository.findById(requestDto.getGroupId())
                 .orElseThrow(() -> new BusinessException("Group not found with id: " + requestDto.getGroupId()));
-        float workingHour = 0;
-        float pg = 0f;
+
         for (MachineKpi kpi : kpiList) {
             List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findCompletedProcessesByMachineAndTime(
                     kpi.getMachine().getMachineId(), DateTimeUtil.convertStringToTimestamp(startDate),
                     DateTimeUtil.convertStringToTimestamp(endDate));
-            pg = 0f;
             for (DrawingCodeProcess process : processes) {
-                pg += process.getPgTime();
                 ProcessTime processTime = process.getProcessTime();
-                totalRunTime += processTime.getRunTime();
-                totalPgTime += processTime.getPgTime();
-                totalOffsetTime += processTime.getOffsetTime();
+                processPgTime += processTime.getPgTime();
                 if (process.getProcessType().contains("Chính") || process.getProcessType().contains("Điện")) {
                     mainAndElectricProductPgTime += processTime.getPgTime();
                 } else {
                     otherProductPgTime += processTime.getPgTime();
                 }
             }
-            workingHour += pg;
+
+            List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
+                    kpi.getMachine().getMachineId(), timePeriodInfo.getStartDate(),
+                    timePeriodInfo.getEndDate());
+            totalPgTime += activeTime.get(3);
+            totalOffsetTime += activeTime.get(4);
+            totalRunTime += activeTime.get(3) + totalOffsetTime;
+            System.out.println(kpi.getMachine().getMachineId());
+            System.out.println(processes.size());
         }
+
         float workingHourReal = 0;
+        int reportTime = 0;
+        Long fromDate = timePeriodInfo.getStartDate();
+        Long toDate = timePeriodInfo.getEndDate();
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
-            workingHourReal = groupKpi.getWorkingHour();
+
         } else {
             int a = timePeriodInfo.getWeek();
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndYearAndWeekAndIsMonth(
                     requestDto.getGroupId(), timePeriodInfo.getYear(),
                     timePeriodInfo.getWeekOfYear(), (int) 0).orElseGet(GroupKpi::new);
-            float kpi = groupKpi.getWorkingHour();
-            if (timePeriodInfo.getDay() == 1) {
-                workingHourReal = kpi / 7;
-            }
-            System.out.println(kpi);
+            reportTime = reportService.calculateReport(fromDate, toDate);
+            workingHourReal = groupKpi.getWorkingHourGoal() + reportTime;
+
+        }
+        reportTime = reportService.calculateReport(fromDate, toDate);
+        workingHourReal = groupKpi.getWorkingHourGoal() + reportTime;
+        if (timePeriodInfo.getDay() == 1) {
+            workingHourReal = workingHourReal / 7;
         }
         if (numberOfMachine > 0) {
-
             if (numberOfMachine > 0 && groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() > 0) {
                 operationalEfficiency = (totalRunTime / (numberOfMachine * workingHourReal)) * 100;
             }
@@ -118,10 +136,10 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
                 offsetLoss = totalOffsetTime / totalRunTime * 100;
             }
             if (mainAndElectricProductPgTime > 0) {
-                valueEfficiency = (mainAndElectricProductPgTime / totalPgTime) * 100;
+                valueEfficiency = (mainAndElectricProductPgTime / processPgTime) * 100;
             }
             if (totalPgTime > 0) {
-                otherLoss = otherProductPgTime / totalPgTime * 100;
+                otherLoss = otherProductPgTime / processPgTime * 100;
             }
             if (operationalEfficiency > 0 && pgEfficiency > 0 && valueEfficiency > 0) {
                 oee = operationalEfficiency * pgEfficiency * valueEfficiency / 10000;

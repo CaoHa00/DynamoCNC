@@ -150,4 +150,11 @@ public class ReportImplementation implements ReportService {
                                         "Failed to import report from Excel file: " + e.getMessage());
                 }
         }
+
+        @Override
+        public Integer calculateReport(Long startDate, Long endDate) {
+                Integer reportTime = 0;
+                reportTime = reportRepository.getTotalHourDiff(startDate, endDate);
+                return reportTime;
+        }
 }

@@ -17,6 +17,8 @@ public interface ReportService {
 
     List<ReportDto> getAllReport();
 
+    Integer calculateReport(Long startDate, Long endDate);
+
     void importReportFromExcel(MultipartFile file);
 
 }

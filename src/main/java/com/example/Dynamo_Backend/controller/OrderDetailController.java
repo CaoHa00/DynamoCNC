@@ -3,6 +3,9 @@ package com.example.Dynamo_Backend.controller;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,9 +34,10 @@ public class OrderDetailController {
 
     @GetMapping
     public ResponseEntity<Page<OrderDetailResponseDto>> getAllOrderDetails(
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<OrderDetailResponseDto> orderDetails = orderDetailService.getOrderDetails(page, size);
+        Page<OrderDetailResponseDto> orderDetails = orderDetailService.getOrderDetails(keyword, page, size);
         return ResponseEntity.status(HttpStatus.OK).body(orderDetails);
     }
 
@@ -76,9 +80,12 @@ public class OrderDetailController {
     }
 
     @GetMapping("/orderStatus")
-    public ResponseEntity<List<ListOrderDetailStatus>> getOrderStatus() {
-        List<ListOrderDetailStatus> dto = orderDetailService.getListOrderStatus();
+    public ResponseEntity<Page<ListOrderDetailStatus>> getOrderStatus(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ListOrderDetailStatus> dto = orderDetailService.getListOrderStatus(pageable, keyword);
         return ResponseEntity.ok(dto);
     }
-
 }

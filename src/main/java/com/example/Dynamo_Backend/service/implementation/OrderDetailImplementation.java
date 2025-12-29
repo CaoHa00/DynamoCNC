@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -152,21 +153,23 @@ public class OrderDetailImplementation implements OrderDetailService {
         drawingCodeProcessService.updateProcessStatus(orderDetail.getOrderDetailId());
     }
 
-    @Override
-    public Page<OrderDetailResponseDto> getOrderDetails(int page, int size) {
+    // @Override
+    // public Page<OrderDetailResponseDto> getOrderDetails(int page, int size) {
 
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "createdDate"));
+    // Pageable pageable = PageRequest.of(
+    // page,
+    // size,
+    // Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Page<OrderDetail> pageEntity = orderDetailRepository.findByStatusAndProgressNot(1, 3, pageable);
+    // Page<OrderDetail> pageEntity =
+    // orderDetailRepository.findByStatusAndProgressNot(1, 3, pageable);
 
-        return pageEntity.map(od -> {
-            ProcessTimeSummaryDto summary = processTimeSummaryService.getByOrderDetailId(od.getOrderDetailId());
-            return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
-        });
-    }
+    // return pageEntity.map(od -> {
+    // ProcessTimeSummaryDto summary =
+    // processTimeSummaryService.getByOrderDetailId(od.getOrderDetailId());
+    // return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
+    // });
+    // }
 
     @Override
     public void updateOrderCode(String drawingCodeId, String orderId) {
@@ -276,8 +279,16 @@ public class OrderDetailImplementation implements OrderDetailService {
     }
 
     @Override
-    public List<ListOrderDetailStatus> getListOrderStatus() {
-        List<PartProgressDto> raw = drawingCodeProcessRepository.getPartProgress();
+    public Page<ListOrderDetailStatus> getListOrderStatus(Pageable pageable, String keyword) {
+        Page<String> idPage = orderDetailRepository.findOrderDetailIds(keyword, pageable);
+
+        if (idPage.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        List<PartProgressDto> raw = drawingCodeProcessRepository.getPartProgressByOrderDetailIds(
+                idPage.getContent());
+
         HashMap<String, ListOrderDetailStatus> map = new LinkedHashMap<>();
 
         for (PartProgressDto dto : raw) {
@@ -296,7 +307,10 @@ public class OrderDetailImplementation implements OrderDetailService {
                             dto.getDoingStep().intValue()));
         }
 
-        return new ArrayList<>(map.values());
+        return new PageImpl<>(
+                new ArrayList<>(map.values()),
+                pageable,
+                idPage.getTotalElements());
     }
 
     @Override
@@ -307,6 +321,21 @@ public class OrderDetailImplementation implements OrderDetailService {
                     return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
                 })
                 .toList();
+    }
+
+    @Override
+    public Page<OrderDetailResponseDto> getOrderDetails(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("createdDate").descending());
+        Page<OrderDetail> pageEntity = orderDetailRepository.search(
+                (keyword == null || keyword.isBlank()) ? null : keyword,
+                pageable);
+        return pageEntity.map(od -> {
+            ProcessTimeSummaryDto summary = processTimeSummaryService.getByOrderDetailId(od.getOrderDetailId());
+            return OrderDetailMapper.mapToOrderDetailResponseDto(od, summary);
+        });
     }
 
 }

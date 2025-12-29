@@ -361,6 +361,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 .orElse(null);
                 if (orderDetail.getProgress() == 1) {
                         orderDetail.setProgress(2);
+                        orderDetail.setUpdatedDate(timestampNow);
                         orderDetailRepository.save(orderDetail);
                 }
                 // check: just the empty machine(status=0) can start
@@ -1097,8 +1098,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 List<DrawingCodeProcess> drawingCodeProcesses = drawingCodeProcessRepository
                                 .findByOrderDetail_OrderDetailIdAndStatusAndProcessStatusNot(orderDetailId, 1, 0);
                 for (DrawingCodeProcess drawingCodeProcess : drawingCodeProcesses) {
-                        drawingCodeProcess.setStatus(0);
-                        drawingCodeProcessRepository.save(drawingCodeProcess);
+                        if (drawingCodeProcess.getProcessStatus() == 1) {
+                                drawingCodeProcessRepository.delete(drawingCodeProcess);
+                        }
                 }
 
         }

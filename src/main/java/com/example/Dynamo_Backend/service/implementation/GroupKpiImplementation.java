@@ -337,50 +337,61 @@ public class GroupKpiImplementation implements GroupKpiService {
                 + "-Week" + week);
     }
 
-    @Scheduled(cron = "0 0 7 * * ?") // Runs every day at midnight to update workingHour based on report hourDiff
-    public void updateDailyWorkingHours() {
-        LocalDate now = LocalDate.now();
-        int year = now.getYear();
-        int month = now.getMonthValue();
-        int week = now.get(WeekFields.ISO.weekOfYear());
+    // @Scheduled(cron = "0 0 7 * * ?") // Runs every day at midnight to update
+    // workingHour based on report hourDiff
+    // public void updateDailyWorkingHours() {
+    // LocalDate now = LocalDate.now();
+    // int year = now.getYear();
+    // int month = now.getMonthValue();
+    // int week = now.get(WeekFields.ISO.weekOfYear());
 
-        List<Group> groups = groupRepository.findAll();
+    // List<Group> groups = groupRepository.findAll();
 
-        for (Group group : groups) {
-            // Calculate total hourDiff from reports for this group for the current day
-            long startOfDay = now.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-            long endOfDay = now.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+    // for (Group group : groups) {
+    // // Calculate total hourDiff from reports for this group for the current day
+    // long startOfDay =
+    // now.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+    // long endOfDay =
+    // now.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
 
-            Integer totalHourDiff = group.getReports().stream()
-                    .filter(report -> report.getDateTime() >= startOfDay && report.getDateTime() < endOfDay)
-                    .map(Report::getHourDiff)
-                    .reduce(0, Integer::sum);
+    // Integer totalHourDiff = group.getReports().stream()
+    // .filter(report -> report.getDateTime() >= startOfDay && report.getDateTime()
+    // < endOfDay)
+    // .map(Report::getHourDiff)
+    // .reduce(0, Integer::sum);
 
-            // Update monthly GroupKpi
-            GroupKpi monthlyKpi = groupKpiRepository
-                    .findByGroup_GroupIdAndMonthAndYearAndIsMonth(group.getGroupId(), month, year, 1)
-                    .orElse(null);
-            if (monthlyKpi != null) {
-                monthlyKpi.setWorkingHour(monthlyKpi.getWorkingHour() + totalHourDiff.floatValue());
-                monthlyKpi.setWorkingHourDifference(monthlyKpi.getWorkingHourGoal() - monthlyKpi.getWorkingHour());
-                monthlyKpi.setUpdatedDate(System.currentTimeMillis());
-                groupKpiRepository.save(monthlyKpi);
-            }
+    // // Update monthly GroupKpi
+    // GroupKpi monthlyKpi = groupKpiRepository
+    // .findByGroup_GroupIdAndMonthAndYearAndIsMonth(group.getGroupId(), month,
+    // year, 1)
+    // .orElse(null);
+    // if (monthlyKpi != null) {
+    // monthlyKpi.setWorkingHour(monthlyKpi.getWorkingHour() +
+    // totalHourDiff.floatValue());
+    // monthlyKpi.setWorkingHourDifference(monthlyKpi.getWorkingHourGoal() -
+    // monthlyKpi.getWorkingHour());
+    // monthlyKpi.setUpdatedDate(System.currentTimeMillis());
+    // groupKpiRepository.save(monthlyKpi);
+    // }
 
-            // Update weekly GroupKpi
-            GroupKpi weeklyKpi = groupKpiRepository
-                    .findByGroup_GroupIdAndYearAndWeekAndIsMonth(group.getGroupId(), year, week, 0)
-                    .orElse(null);
-            if (weeklyKpi != null) {
-                weeklyKpi.setWorkingHour(weeklyKpi.getWorkingHour() + totalHourDiff.floatValue());
-                weeklyKpi.setWorkingHourDifference(weeklyKpi.getWorkingHourGoal() - weeklyKpi.getWorkingHour());
-                weeklyKpi.setUpdatedDate(System.currentTimeMillis());
-                groupKpiRepository.save(weeklyKpi);
-            }
-        }
+    // // Update weekly GroupKpi
+    // GroupKpi weeklyKpi = groupKpiRepository
+    // .findByGroup_GroupIdAndYearAndWeekAndIsMonth(group.getGroupId(), year, week,
+    // 0)
+    // .orElse(null);
+    // if (weeklyKpi != null) {
+    // weeklyKpi.setWorkingHour(weeklyKpi.getWorkingHour() +
+    // totalHourDiff.floatValue());
+    // weeklyKpi.setWorkingHourDifference(weeklyKpi.getWorkingHourGoal() -
+    // weeklyKpi.getWorkingHour());
+    // weeklyKpi.setUpdatedDate(System.currentTimeMillis());
+    // groupKpiRepository.save(weeklyKpi);
+    // }
+    // }
 
-        System.out.println("Daily working hours updated for all groups for date: " + now.toString());
-    }
+    // System.out.println("Daily working hours updated for all groups for date: " +
+    // now.toString());
+    // }
 
     @Override
     public List<GroupKpiDto> getGroupKpiByCurrentWeek() {
