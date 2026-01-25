@@ -3,12 +3,15 @@ package com.example.Dynamo_Backend.service.implementation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -26,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.Dynamo_Backend.config.MyWebSocketHandler;
 import com.example.Dynamo_Backend.dto.*;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
+import com.example.Dynamo_Backend.dto.RequestDto.UpdatedProcessDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.CurrentStatusResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.ListCurrentStaffStatusDto;
@@ -36,6 +40,7 @@ import com.example.Dynamo_Backend.mapper.*;
 import com.example.Dynamo_Backend.repository.*;
 import com.example.Dynamo_Backend.service.*;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
+import com.example.Dynamo_Backend.util.ShiftUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
@@ -55,6 +60,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         PlanRepository planRepository;
         private CurrentStatusService currentStatusService;
         GroupRepository groupRepository;
+
         ProcessTimeSummaryService processTimeSummaryService;
         ProcessTimeService processTimeService;
         CurrentStaffRepository currentStaffRepository;
@@ -62,6 +68,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         OperateHistoryService operateHistoryService;
         AdminRepository adminRepository;
         CurrentStatusMapper currentStatusMapper;
+        ProcessTimeShiftService processTimeShiftService;
 
         TempProcessRepository tempProcessRepository;
 
@@ -118,7 +125,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 Staff staff = staffRepository.findByStaffId(drawingCodeProcessDto.getStaffId())
                                 .orElseThrow(() -> new BusinessException(
                                                 "Staff is not found:" + drawingCodeProcessDto.getStaffId()));
-
+                // check lại xem để làm gì??
                 if (drawingCodeProcessDto.getMachineId() != null && drawingCodeProcessDto.getMachineId() > 9) {
                         CurrentStaffDto oldCurrentStaff = currentStaffService.getCurrentStaffByMachineId(
                                         drawingCodeProcess.getMachine().getMachineId());
@@ -134,10 +141,13 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                         operateHistory.setStopTime(updatedTimestamp);
                                         operateHistory.setInProgress(0);
                                         operateHistoryRepository.save(operateHistory);
+                                        ShiftInfo shiftInfo = ShiftUtil.resolveShift(
+                                                        DateTimeUtil.convertLongToLocalDateTime(updatedTimestamp));
                                         OperateHistory newOperateHistory = new OperateHistory(null,
                                                         drawingCodeProcess.getManufacturingPoint(),
                                                         drawingCodeProcess.getPgTime(),
-                                                        updatedTimestamp, 0L, 1, staff, drawingCodeProcess);
+                                                        updatedTimestamp, 0L, 1, shiftInfo.getLogDate(), staff,
+                                                        drawingCodeProcess);
                                         operateHistoryRepository.save(newOperateHistory);
                                 }
                         }
@@ -197,65 +207,113 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         // get all process by machineId for **tablet**
         @Override
         public Map<String, Object> getDrawingCodeProcessByMachineId(Integer machineId) {
-                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByMachineOrPlanMachine(machineId);
+                // List<DrawingCodeProcess> processes =
+                // drawingCodeProcessRepository.findByMachineOrPlanMachine(machineId);
+                // List<DrawingCodeProcessResponseDto> todoList = new ArrayList<>();
+                // DrawingCodeProcessResponseDto inProgress = null;
+                // OrderDetailDto orderDetailDto;
+                // PlanDto planDto;
+                // Map<String, Object> result = new HashMap<>();
+                // for (DrawingCodeProcess process : processes) {
+                // if (process.getProcessStatus() == 1) {
+                // if (process.getIsPlan() == 0 || process.getIsPlan() == 1) {
+                // orderDetailDto = OrderDetailMapper
+                // .mapToOrderDetailDto(process.getOrderDetail());
+                // planDto = (process.getPlan() != null)
+                // ? PlanMapper.mapToPlanDto(process.getPlan())
+                // : null;
+                // List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                // ? process.getOperateHistories().stream().map(operate -> {
+                // Staff staff = staffRepository
+                // .findById(operate.getStaff().getId())
+                // .orElseThrow(() -> new BusinessException(
+                // "Staff is not found for process: "
+                // + operate.getStaff()
+                // .getId()));
+                // return StaffMapper.mapStaffNameDto(staff);
+                // }).toList()
+                // : null;
+                // todoList.add(DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
+                // staffDtos, planDto, null));
+                // }
+                // }
+                // if (process.getProcessStatus() == 2
+                // && process.getMachine().getMachineId().equals(machineId)) {
+                // orderDetailDto = OrderDetailMapper
+                // .mapToOrderDetailDto(process.getOrderDetail());
+                // planDto = (process.getPlan() != null)
+                // ? PlanMapper.mapToPlanDto(process.getPlan())
+                // : null;
+                // List<StaffDto> staffDtos = (process.getOperateHistories() != null)
+                // ? process.getOperateHistories().stream().map(operate -> {
+                // Staff staff = staffRepository
+                // .findById(operate.getStaff().getId())
+                // .orElseThrow(() -> new BusinessException(
+                // "Staff is not found for process: "
+                // + operate.getStaff()
+                // .getId()));
+                // return StaffMapper.mapStaffNameDto(staff);
+                // }).toList()
+                // : null;
+                // TempProcess tempProcess =
+                // tempProcessRepository.findByProcessId(process.getProcessId());
+
+                // inProgress = DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
+                // staffDtos, planDto, null);
+                // inProgress.setManufacturingPoint(tempProcess.getPoint());
+                // inProgress.setPgTime(tempProcess.getPgTime());
+
+                // }
+
+                // result.put("todo", todoList);
+                // result.put("inProgress", inProgress);
+                // }
+                // return result;
+
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findProcessWithAllData(machineId);
+
                 List<DrawingCodeProcessResponseDto> todoList = new ArrayList<>();
                 DrawingCodeProcessResponseDto inProgress = null;
-                OrderDetailDto orderDetailDto;
-                PlanDto planDto;
-                Map<String, Object> result = new HashMap<>();
+
                 for (DrawingCodeProcess process : processes) {
+
+                        OrderDetailDto orderDetailDto = OrderDetailMapper.mapToOrderDetailDto(process.getOrderDetail());
+
+                        PlanDto planDto = process.getPlan() != null
+                                        ? PlanMapper.mapToPlanDto(process.getPlan())
+                                        : null;
+
+                        List<StaffDto> staffDtos = process.getOperateHistories() == null
+                                        ? List.of()
+                                        : process.getOperateHistories().stream()
+                                                        .map(oh -> StaffMapper.mapStaffNameDto(oh.getStaff()))
+                                                        .toList();
+
                         if (process.getProcessStatus() == 1) {
-                                if (process.getIsPlan() == 0 || process.getIsPlan() == 1) {
-                                        orderDetailDto = OrderDetailMapper
-                                                        .mapToOrderDetailDto(process.getOrderDetail());
-                                        planDto = (process.getPlan() != null)
-                                                        ? PlanMapper.mapToPlanDto(process.getPlan())
-                                                        : null;
-                                        List<StaffDto> staffDtos = (process.getOperateHistories() != null)
-                                                        ? process.getOperateHistories().stream().map(operate -> {
-                                                                Staff staff = staffRepository
-                                                                                .findById(operate.getStaff().getId())
-                                                                                .orElseThrow(() -> new BusinessException(
-                                                                                                "Staff is not found for process: "
-                                                                                                                + operate.getStaff()
-                                                                                                                                .getId()));
-                                                                return StaffMapper.mapStaffNameDto(staff);
-                                                        }).toList()
-                                                        : null;
-                                        todoList.add(DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
-                                                        staffDtos, planDto, null));
-                                }
+                                todoList.add(
+                                                DrawingCodeProcessMapper.toDto(
+                                                                orderDetailDto, null, process, staffDtos, planDto,
+                                                                null));
                         }
+
                         if (process.getProcessStatus() == 2
                                         && process.getMachine().getMachineId().equals(machineId)) {
-                                orderDetailDto = OrderDetailMapper
-                                                .mapToOrderDetailDto(process.getOrderDetail());
-                                planDto = (process.getPlan() != null)
-                                                ? PlanMapper.mapToPlanDto(process.getPlan())
-                                                : null;
-                                List<StaffDto> staffDtos = (process.getOperateHistories() != null)
-                                                ? process.getOperateHistories().stream().map(operate -> {
-                                                        Staff staff = staffRepository
-                                                                        .findById(operate.getStaff().getId())
-                                                                        .orElseThrow(() -> new BusinessException(
-                                                                                        "Staff is not found for process: "
-                                                                                                        + operate.getStaff()
-                                                                                                                        .getId()));
-                                                        return StaffMapper.mapStaffNameDto(staff);
-                                                }).toList()
-                                                : null;
+
                                 TempProcess tempProcess = tempProcessRepository.findByProcessId(process.getProcessId());
 
-                                inProgress = DrawingCodeProcessMapper.toDto(orderDetailDto, null, process,
-                                                staffDtos, planDto, null);
-                                inProgress.setManufacturingPoint(tempProcess.getPoint());
-                                inProgress.setPgTime(tempProcess.getPgTime());
+                                inProgress = DrawingCodeProcessMapper.toDto(
+                                                orderDetailDto, null, process, staffDtos, planDto, null);
 
+                                if (tempProcess != null) {
+                                        inProgress.setManufacturingPoint(tempProcess.getPoint());
+                                        inProgress.setPgTime(tempProcess.getPgTime());
+                                }
                         }
-
-                        result.put("todo", todoList);
-                        result.put("inProgress", inProgress);
                 }
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("todo", todoList);
+                result.put("inProgress", inProgress);
                 return result;
         }
 
@@ -396,12 +454,12 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 machine.getMachineId(),
                                 DateTimeUtil.convertTimestampToStringDate(timestampNow));
                 currentStaffService.addCurrentStaff(currentStaffDto);
-
                 if (machine.getMachineId() > 9) {
-                        OperateHistory operateHistory = new OperateHistory(null,
-                                        process.getManufacturingPoint(), 0,
-                                        timestampNow, 0L, 1, staff, process);
-                        operateHistoryRepository.save(operateHistory);
+                        operateHistoryService.handleOperate(machineId, process);
+                        // OperateHistory operateHistory = new OperateHistory(null,
+                        // process.getManufacturingPoint(), 0,
+                        // timestampNow, 0L, 1, shiftInfo.getLogDate(), staff, process);
+                        // operateHistoryRepository.save(operateHistory);
                 }
 
                 boolean sent = sendMessageToMqtt(process, machine, staff);
@@ -493,12 +551,12 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
                 machine.setStatus(1);
                 machineRepository.save(machine);
-
+                ShiftInfo shiftInfo = ShiftUtil.resolveShift(DateTimeUtil.convertLongToLocalDateTime(createdTimestamp));
                 if (machine.getMachineId() > 9) {
                         OperateHistory operateHistory = new OperateHistory(null,
                                         savedrawingCodeProcess.getManufacturingPoint(),
                                         savedrawingCodeProcess.getPgTime(),
-                                        createdTimestamp, 0L, 1, staff, savedrawingCodeProcess);
+                                        createdTimestamp, 0L, 1, shiftInfo.getLogDate(), staff, savedrawingCodeProcess);
                         operateHistoryRepository.save(operateHistory);
                 }
 
@@ -582,7 +640,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
         // reset lai currentStatus -- chua lam
         @Override
         public void doneProcess(String processId) {
-
+                Long doneTime = System.currentTimeMillis();
                 DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
                                 .findById(processId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -596,11 +654,13 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 Machine machine = machineRepository.findById(drawingCodeProcess.getMachine().getMachineId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Machine is not found:" +
                                                 drawingCodeProcess.getMachine().getMachineId()));
+
+                // test thời gian
                 currentStatusService.addCurrentStatus(
                                 (machine.getMachineId() - 1) + "-0");
 
                 drawingCodeProcess.setProcessStatus(3);
-                Long doneTime = System.currentTimeMillis();
+
                 drawingCodeProcess.setEndTime(doneTime);
                 drawingCodeProcess.setUpdatedDate(doneTime);
 
@@ -609,11 +669,16 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         operateHistory.setInProgress(0);
                         operateHistoryRepository.save(operateHistory);
                 }
+                LocalDateTime now = DateTimeUtil.convertLongToLocalDateTime(doneTime);
+                ShiftInfo shiftInfo = ShiftUtil.resolveShift(now);
+                drawingCodeProcess.setLogDate(shiftInfo.getLogDate());
+                drawingCodeProcess.setShiftCode(shiftInfo.getShiftCode());
 
                 machine.setStatus(0);
 
                 // calculate processTime
-                processTimeService.calculateProcessTime(drawingCodeProcess);
+                ProcessTime processTime = processTimeService.calculateProcessTime(drawingCodeProcess);
+                processTimeShiftService.calculateAfterProcessDone(processTime, drawingCodeProcess);
 
                 processTimeSummaryService
                                 .sumTimesByOrderDetailId(drawingCodeProcess.getOrderDetail().getOrderDetailId());
@@ -675,10 +740,18 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                 process.setPgTime(drawingCodeProcess.getPgTime());
                 process.setIsPlan(1);
                 process.setProcessStatus(process.getProcessStatus());
-                PlanDto planDto = DrawingCodeProcessMapper.mapToPlanDto(drawingCodeProcessId, drawingCodeProcessDto);
-                drawingCodeProcessRepository.save(process);
                 Plan plan = planRepository.findByDrawingCodeProcess_ProcessId(drawingCodeProcessId);
-                planService.updatePlan(plan.getId(), planDto);
+                PlanDto planDto = null;
+                if (plan == null) {
+                        planDto = DrawingCodeProcessMapper.mapToPlanDto(drawingCodeProcessId,
+                                        drawingCodeProcessDto);
+                        planService.addPlan(planDto);
+                } else {
+                        planDto = DrawingCodeProcessMapper.mapToPlanDto(drawingCodeProcessId,
+                                        drawingCodeProcessDto);
+                        planService.updatePlan(plan.getId(), planDto);
+                }
+                drawingCodeProcessRepository.save(process);
                 ProcessTimeDto processTimeDto = (drawingCodeProcess.getProcessTime() != null)
                                 ? ProcessTimeMapper.mapToProcessTimeDto(drawingCodeProcess.getProcessTime())
                                 : null;
@@ -829,12 +902,9 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                 machine.getMachineId(),
                                 DateTimeUtil.convertTimestampToStringDate(timestampNow));
                 currentStaffService.addCurrentStaff(currentStaffDto);
-
+                // check lại
                 if (machine.getMachineId() > 9) {
-                        OperateHistory operateHistory = new OperateHistory(null,
-                                        process.getManufacturingPoint(), process.getPgTime(),
-                                        timestampNow, 0L, 1, staff, process);
-                        operateHistoryRepository.save(operateHistory);
+                        operateHistoryService.handleOperate(machine.getMachineId(), process);
                 }
 
                 boolean sent = sendMessageToMqtt(process, machine, staff);
@@ -1105,4 +1175,78 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
 
         }
 
+        @Override
+        public void updateProcessTime(List<UpdatedProcessDto> dtos) {
+                for (UpdatedProcessDto dto : dtos) {
+                        DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+                                        .findById(dto.getProcessId())
+                                        .orElseThrow(() -> new BusinessException(
+                                                        "DrawingCode Process is not found:" + dto.getProcessId()));
+                        drawingCodeProcess.setStartTime(dto.getStartTime());
+                        drawingCodeProcess.setEndTime(dto.getEndTime());
+                        drawingCodeProcessRepository.save(drawingCodeProcess);
+                        ProcessTime processTime = processTimeRepository
+                                        .findByDrawingCodeProcess_ProcessId(drawingCodeProcess.getProcessId());
+                        processTimeService.calculateProcessTime1(drawingCodeProcess, processTime);
+                }
+
+        }
+
+        @Override
+        public List<Map<String, Object>> importDrawingCodeFromExcel(MultipartFile file) {
+                try {
+                        Workbook workbook = new XSSFWorkbook(file.getInputStream());
+                        Sheet sheet = workbook.getSheetAt(0);
+
+                        List<Map<String, Object>> result = new ArrayList<>();
+
+                        for (int i = 1; i <= sheet.getLastRowNum(); i++) { // bỏ header
+                                Row row = sheet.getRow(i);
+                                if (row == null)
+                                        continue;
+
+                                String processId = getString(row, 0); // cột process_id
+                                Long startTime = getLong(row, 9); // cột start_time (Unnamed: 9 trong file)
+                                Long endTime = getLong(row, 2); // cột end_time
+
+                                if (processId == null || processId.isEmpty())
+                                        continue;
+
+                                Map<String, Object> obj = new HashMap<>();
+                                obj.put("processId", processId);
+                                obj.put("startTime", startTime);
+                                obj.put("endTime", endTime);
+
+                                result.add(obj);
+                        }
+
+                        workbook.close();
+                        return result;
+
+                } catch (Exception e) {
+                        throw new BusinessException(e.getMessage());
+                }
+
+        }
+
+        private String getString(Row row, int index) {
+                Cell cell = row.getCell(index);
+                return cell == null ? null : cell.toString().trim();
+        }
+
+        private Long getLong(Row row, int index) {
+                Cell cell = row.getCell(index);
+                if (cell == null)
+                        return null;
+                return (long) cell.getNumericCellValue();
+        }
+
+        @Override
+        public void updateProcessShift() {
+                List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findByProcessStatus(3);
+
+                for (DrawingCodeProcess process : processes) {
+                        processTimeShiftService.reCalculateProcess(process);
+                }
+        }
 }

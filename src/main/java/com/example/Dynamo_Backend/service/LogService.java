@@ -8,7 +8,7 @@ import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.Staff;
 
 public interface LogService {
-    void addLog(CurrentStatus currrentStatus, Machine machine, Staff staff);
+    void addLog(CurrentStatus currrentStatus, Machine machine, Staff staff, Long timestamp);
 
     // LogDto updateLog(String statsId, LogDto statsDto);
 
@@ -17,4 +17,6 @@ public interface LogService {
     void deleteLog(String statsId);
 
     List<LogDto> getAllLog();
+
+    void reSegment();
 }

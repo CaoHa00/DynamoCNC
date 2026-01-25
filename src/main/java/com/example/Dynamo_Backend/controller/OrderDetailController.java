@@ -79,6 +79,12 @@ public class OrderDetailController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/upload1")
+    public ResponseEntity<Void> uploadMonthlyGroupKpiExcel1(@RequestParam("file") MultipartFile file) {
+        orderDetailService.importExcel1(file);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/orderStatus")
     public ResponseEntity<Page<ListOrderDetailStatus>> getOrderStatus(
             @RequestParam(required = false) String keyword,

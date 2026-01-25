@@ -3,9 +3,12 @@ package com.example.Dynamo_Backend.service;
 import java.util.List;
 
 import com.example.Dynamo_Backend.dto.OperateHistoryDto;
+import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 
 public interface OperateHistoryService {
-    OperateHistoryDto addOperateHistory(String payload);
+    void addOperateHistory(String payload);
+
+    void handleOperate(Integer machineId, DrawingCodeProcess drawingCodeProcess);
 
     // OperateHistoryDto addOperateHistory(OperateHistoryDto operateHistoryDto);
 

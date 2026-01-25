@@ -27,6 +27,8 @@ public interface OrderDetailService {
 
     void importExcel(MultipartFile file);
 
+    void importExcel1(MultipartFile file);
+
     Page<ListOrderDetailStatus> getListOrderStatus(Pageable pageable, String keyword);
 
 }

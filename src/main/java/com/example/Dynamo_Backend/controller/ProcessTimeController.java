@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Dynamo_Backend.dto.ProcessTimeDto;
+import com.example.Dynamo_Backend.service.MachineDailyService;
 import com.example.Dynamo_Backend.service.ProcessTimeService;
+import com.example.Dynamo_Backend.service.ProcessTimeShiftService;
 
 import lombok.AllArgsConstructor;
 
@@ -23,6 +25,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/process-time")
 public class ProcessTimeController {
     public final ProcessTimeService processTimeService;
+    public final MachineDailyService service;
 
     @PostMapping
     public ResponseEntity<ProcessTimeDto> addProcessTime(@RequestBody ProcessTimeDto processTimeDto) {
@@ -54,4 +57,11 @@ public class ProcessTimeController {
         processTimeService.deleteProcessTime(Id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/daily")
+    public ResponseEntity<Void> processTime() {
+        service.updateDaily();
+        return ResponseEntity.ok().build();
+    }
+
 }

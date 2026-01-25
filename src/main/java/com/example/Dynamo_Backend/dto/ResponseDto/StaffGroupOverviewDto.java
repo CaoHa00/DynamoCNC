@@ -13,9 +13,9 @@ public class StaffGroupOverviewDto {
     private String staffFullName;
     private Float workingHourGoal;
     private Float totalWorkingHour;
-    private Float manufacturingPointGoal;
-    private Integer totalManufacturingPoint;
-    private Integer totalOperationNumber;// số nguyên công
+    private Long manufacturingPointGoal;
+    private Long totalManufacturingPoint;
+    private Long totalOperationNumber;// số nguyên công
     private Float oleGoal;
     private Float ole;
     private Float kpiGoal;
@@ -24,5 +24,5 @@ public class StaffGroupOverviewDto {
     private Float machineTime;
 
     private Float pgTimeGoal;
-    private Float pgTime;
+    private Long pgTime;
 }

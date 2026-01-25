@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class StaffWorkingStatisticDto {
     private Integer staffId;
     private String staffName;
-    private Integer manufacturingPoints;
+    private Long manufacturingPoints;
     private Float manufacturingPointsGoal;
     private Float pgTime;
     private Float pgTimeGoal;

@@ -12,9 +12,9 @@ public class StaffDetailStatisticDto {
     private String staffName;
     private Float workingHours;
     private Float workingRate;
-    private Integer manufacturingPoints;
+    private Long manufacturingPoints;
     private Float mpRate;
-    private Integer processCount;
+    private Long processCount;
     private Float processRate;
     private Float kpi;
     private Float kpiRate;

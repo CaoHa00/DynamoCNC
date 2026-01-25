@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
+import com.example.Dynamo_Backend.dto.RequestDto.UpdatedProcessDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 
 public interface DrawingCodeProcessService {
@@ -64,5 +65,11 @@ public interface DrawingCodeProcessService {
         List<DrawingCodeProcessDto> getProcessesByOrderDetail(String orderDetailId);
 
         void updateProcessStatus(String orderCode);
+
+        void updateProcessTime(List<UpdatedProcessDto> dtos);
+
+        List<Map<String, Object>> importDrawingCodeFromExcel(MultipartFile file);
+
+        void updateProcessShift();
 
 }

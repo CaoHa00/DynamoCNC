@@ -23,8 +23,11 @@ import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.StaffDetailStatisticDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.StaffGroupStatisticDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.StaffSummary;
 import com.example.Dynamo_Backend.dto.ResponseDto.StaffWorkingStatisticDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
+import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
@@ -64,10 +67,6 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
 
     @Override
     public StaffDetailStatisticDto getStaffDetailStatistic(StatisticRequestDto requestDto) {
-        String startDate = requestDto.getStartDate().concat(" 00:00:00");
-        String endDate = requestDto.getEndDate().concat(" 23:59:59");
-        requestDto.setStartDate(startDate);
-        requestDto.setEndDate(endDate);
 
         TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
         TimePeriodInfo previousTimePeriodInfo = TimeRange.getPreviousTimeRange(timePeriodInfo);
@@ -75,47 +74,57 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
         Staff staff = staffRepository.findByStaffId(requestDto.getId())
                 .orElseThrow(() -> new BusinessException("Staff not found when get staff detail statistic"));
 
-        float totalWorkingHours = 0f, previousWorkingHours = 0f;
-        int totalManufactoringPoints = 0, previousManufactoringPoints = 0;
-        Float totalPgTime = 0f, previousPgTime = 0f;
-        Set<String> uniqueProcesses = new HashSet<>();
-        Set<String> previousUniqueProcesses = new HashSet<>();
+        Long processCount = 0L;
+        Float totalKpi = 0f;
+        Float totalWorkingHours = 0f;
+        Long totalManufactoringPoints = 0L;
+        Float previousTotalWorkingHours = 0f;
+        Long previousTotalManufactoringPoints = 0l;
+        Long previousProcessCount = 0l;
+        Float previousTotalKpi = 0f;
+        Long totalPgTime = 0l;
+        Long previousTotalPgTime = 0l;
+        List<String> ids = new ArrayList<>();
+        ids.add(staff.getId());
+        StaffSummary summary = operateHistoryRepository.getStaffKpi(timePeriodInfo.getStart(), timePeriodInfo.getEnd(),
+                ids);
+        totalPgTime = summary.getTotalPgTime() / 60;
+        processCount = summary.getTotalProcess();
+        totalWorkingHours = summary.getTotalDurationSeconds() / 3600f;
+        totalManufactoringPoints = summary.getTotalManufacturingPoint();
 
-        List<OperateHistory> operateHistories = operateHistoryRepository
-                .findByStaff_Id(staff.getId());
-        if (!operateHistories.isEmpty()) {
-            for (OperateHistory operateHistory : operateHistories) {
-                if (operateHistory.getStopTime() >= timePeriodInfo.getStartDate()
-                        && operateHistory.getStopTime() <= timePeriodInfo.getEndDate()) {
-                    totalManufactoringPoints += operateHistory.getManufacturingPoint();
-                    totalPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
-                    totalWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime()) / 3600000f;
-                    uniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
-                }
-                if (operateHistory.getStopTime() >= previousTimePeriodInfo.getStartDate()
-                        && operateHistory.getStopTime() <= previousTimePeriodInfo.getEndDate()) {
-                    previousManufactoringPoints += operateHistory.getManufacturingPoint();
-                    previousPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
-                    previousWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime()) / 3600000f;
-                    previousUniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
-                }
-            }
+        totalKpi = (float) ((totalManufactoringPoints * 6) + totalPgTime);
+
+        summary = operateHistoryRepository.getStaffKpi(previousTimePeriodInfo.getStart(),
+                previousTimePeriodInfo.getEnd(),
+                ids);
+        if (summary.getTotalPgTime() != null) {
+            previousTotalPgTime = summary.getTotalPgTime() / 60;
+            previousProcessCount = summary.getTotalProcess();
+            previousTotalWorkingHours = summary.getTotalDurationSeconds() / 3600f;
+            previousTotalManufactoringPoints = summary.getTotalManufacturingPoint();
+            previousTotalKpi = (float) ((previousTotalManufactoringPoints * 6))
+                    + previousTotalPgTime;
         }
-        Float kpi = 0f, previousKpi = 0f;
-        if (totalPgTime != 0f) {
-            kpi = totalManufactoringPoints * 6 / totalPgTime;
+
+        Float workingRate = 0f;
+        Float mpRate = 0f;
+        Float kpiRate = 0f;
+        Float processRate = 0f;
+        if (previousTotalKpi != 0) {
+            kpiRate = ((totalKpi - previousTotalKpi) / previousTotalKpi) * 100;
         }
-        if (previousPgTime != 0f) {
-            previousKpi = previousManufactoringPoints * 6 / previousPgTime;
+        if (previousProcessCount != 0) {
+            processRate = (float) ((processCount - previousProcessCount) / previousProcessCount) * 100;
         }
-        Float workingRate = previousWorkingHours == 0f ? 0f
-                : (totalWorkingHours - previousWorkingHours) / previousWorkingHours * 100;
-        Float mpRate = previousManufactoringPoints == 0 ? 0f
-                : (totalManufactoringPoints - previousManufactoringPoints) / (float) previousManufactoringPoints * 100;
-        Float processRate = previousUniqueProcesses.size() == 0 ? 0f
-                : (uniqueProcesses.size() - previousUniqueProcesses.size()) / (float) previousUniqueProcesses.size()
-                        * 100;
-        Float kpiRate = previousKpi == 0f ? 0f : (kpi - previousKpi) / previousKpi * 100;
+        if (previousTotalWorkingHours != 0) {
+            workingRate = ((totalWorkingHours - previousTotalWorkingHours) / previousTotalWorkingHours) * 100;
+        }
+        if (previousTotalManufactoringPoints != 0) {
+            mpRate = ((totalManufactoringPoints - previousTotalManufactoringPoints)
+                    / (float) previousTotalManufactoringPoints) * 100;
+        }
+
         StaffDetailStatisticDto staffDetailStatisticDto = new StaffDetailStatisticDto(
                 staff.getStaffId(),
                 staff.getStaffName(),
@@ -123,69 +132,58 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
                 Math.round(workingRate * 100.0) / 100.0f,
                 totalManufactoringPoints,
                 Math.round(mpRate * 100.0) / 100.0f,
-                uniqueProcesses.size(),
+                processCount,
                 Math.round(processRate * 100.0) / 100.0f,
-                Math.round(kpi * 100.0) / 100.0f,
+                totalKpi,
                 Math.round(kpiRate * 100.0) / 100.0f);
         return staffDetailStatisticDto;
+
     }
 
     @Override
     public List<HistoryProcessDto> getStaffHistoryProcesses(StatisticRequestDto requestDto) {
-        String startDate = requestDto.getStartDate().concat(" 00:00:00");
-        String endDate = requestDto.getEndDate().concat(" 23:59:59");
-        requestDto.setStartDate(startDate);
-        requestDto.setEndDate(endDate);
-
         TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
         Staff staff = staffRepository.findByStaffId(requestDto.getId())
                 .orElseThrow(() -> new BusinessException("Staff not found when get history processes"));
         List<OperateHistory> operateHistories = operateHistoryRepository
-                .findByStaff_Id(staff.getId());
+                .findByStaffIdAndLogDate(staff.getId(), timePeriodInfo.getStart(), timePeriodInfo.getEnd());
         List<HistoryProcessDto> historyProcessDtos = new ArrayList<>();
         if (operateHistories.isEmpty()) {
             return List.of();
         }
         for (OperateHistory operateHistory : operateHistories) {
-            if (operateHistory.getStopTime() >= timePeriodInfo.getStartDate()
-                    && operateHistory.getStartTime() <= timePeriodInfo.getEndDate()
-                    || operateHistory.getInProgress() == 1) {
-                HistoryProcessDto historyProcessDto = new HistoryProcessDto();
-                historyProcessDto.setMachineName(operateHistory.getDrawingCodeProcess().getMachine().getMachineName());
-                historyProcessDto.setOrderCode(operateHistory.getDrawingCodeProcess().getOrderDetail().getOrderCode());
-                historyProcessDto.setPartNumber(operateHistory.getDrawingCodeProcess().getPartNumber());
-                historyProcessDto.setStepNumber(operateHistory.getDrawingCodeProcess().getStepNumber());
-                historyProcessDto.setStartTime(DateTimeUtil.convertTimestampToString(operateHistory.getStartTime()));
-                historyProcessDto.setEndTime(DateTimeUtil.convertTimestampToString(operateHistory.getStopTime()));
-                // historyProcessDto.setStaffIdNumber(staff.getStaffId());
-                // historyProcessDto.setStaffName(staff.getStaffName());
-                String status = "";
-                if (operateHistory.getDrawingCodeProcess().getProcessStatus() == 3
-                        || operateHistory.getInProgress() == 0) {
-                    status = "Completed";
-                } else if (operateHistory.getInProgress() == 1) {
-                    CurrentStatus currentStatus = currentStatusRepository
-                            .findByMachineId(operateHistory.getDrawingCodeProcess().getMachine().getMachineId());
-                    if (currentStatus != null) {
-                        status = currentStatus.getStatus();
-                    }
-                    historyProcessDto.setEndTime(DateTimeUtil.convertTimestampToString(
-                            System.currentTimeMillis()));
+
+            HistoryProcessDto historyProcessDto = new HistoryProcessDto();
+            historyProcessDto.setMachineName(operateHistory.getDrawingCodeProcess().getMachine().getMachineName());
+            historyProcessDto.setOrderCode(operateHistory.getDrawingCodeProcess().getOrderDetail().getOrderCode());
+            historyProcessDto.setPartNumber(operateHistory.getDrawingCodeProcess().getPartNumber());
+            historyProcessDto.setStepNumber(operateHistory.getDrawingCodeProcess().getStepNumber());
+            historyProcessDto.setStartTime(DateTimeUtil.convertTimestampToString(operateHistory.getStartTime()));
+            historyProcessDto.setEndTime(DateTimeUtil.convertTimestampToString(operateHistory.getStopTime()));
+            // historyProcessDto.setStaffIdNumber(staff.getStaffId());
+            // historyProcessDto.setStaffName(staff.getStaffName());
+            String status = "";
+            if (operateHistory.getDrawingCodeProcess().getProcessStatus() == 3
+                    || operateHistory.getInProgress() == 0) {
+                status = "Completed";
+            } else if (operateHistory.getInProgress() == 1) {
+                CurrentStatus currentStatus = currentStatusRepository
+                        .findByMachineId(operateHistory.getDrawingCodeProcess().getMachine().getMachineId());
+                if (currentStatus != null) {
+                    status = currentStatus.getStatus();
                 }
-                historyProcessDto.setStatus(status);
-                historyProcessDtos.add(historyProcessDto);
+                historyProcessDto.setEndTime(DateTimeUtil.convertTimestampToString(
+                        System.currentTimeMillis()));
             }
+            historyProcessDto.setStatus(status);
+            historyProcessDtos.add(historyProcessDto);
+
         }
         return historyProcessDtos;
     }
 
     @Override
     public StaffWorkingStatisticDto getStaffWorkingStatistic(StatisticRequestDto requestDto) {
-        String startDate = requestDto.getStartDate().concat(" 00:00:00");
-        String endDate = requestDto.getEndDate().concat(" 23:59:59");
-        requestDto.setStartDate(startDate);
-        requestDto.setEndDate(endDate);
-
         TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
 
         Staff staff = null;
@@ -215,49 +213,50 @@ public class StaffDetailStatisticImplementation implements StaffDetailStatisticS
         GroupKpi groupKpi;
         float workingHourReal = 0;
         int reportTime = 0;
-        Long fromDate = timePeriodInfo.getStartDate();
-        Long toDate = timePeriodInfo.getEndDate();
+        Long fromDate = DateTimeUtil.convertLocalDateToLong(timePeriodInfo.getStart());
+        Long toDate = DateTimeUtil.convertLocalDateToLong(timePeriodInfo.getEnd());
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
         } else {
+            int a = timePeriodInfo.getWeekOfYear();
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndWeekAndYear(
                     requestDto.getGroupId(), timePeriodInfo.getWeekOfYear(),
                     timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
         }
-        reportTime = reportService.calculateReport(fromDate, toDate);
+        // check lại
+        reportTime = reportService.calculateReport(fromDate, toDate, "FULL");
+        reportTime = 0;
         workingHourReal = groupKpi.getWorkingHour() + reportTime;
         if (timePeriodInfo.getDay() == 1) {
             workingHourReal = workingHourReal / 7;
         }
+        Long uniqueProcesses = 0l;
         float totalWorkingHours = 0f;
-        int totalManufactoringPoints = 0;
-        Float totalPgTime = 0f;
-        Set<String> uniqueProcesses = new HashSet<>();
+        long totalManufactoringPoints = 0l;
+        Long totalPgTime = 0L;
+        List<String> ids = new ArrayList<>();
+        ids.add(staffKpi.getStaff().getId());
+        float kpi = 0f;
+        float ole = 0f;
 
-        List<OperateHistory> operateHistories = operateHistoryRepository
-                .findByStaff_Id(staff.getId());
-        if (!operateHistories.isEmpty()) {
-            for (OperateHistory operateHistory : operateHistories) {
-                if (operateHistory.getStopTime() >= timePeriodInfo.getStartDate()
-                        && operateHistory.getStopTime() <= timePeriodInfo.getEndDate()) {
-                    totalManufactoringPoints += operateHistory.getManufacturingPoint();
-                    totalPgTime += operateHistory.getPgTime() != null ? operateHistory.getPgTime() : 0f;
-                    totalWorkingHours += (operateHistory.getStopTime() - operateHistory.getStartTime()) / 3600000f;
-                    uniqueProcesses.add(operateHistory.getDrawingCodeProcess().getProcessId());
-                }
+        StaffSummary summary = operateHistoryRepository.getStaffKpi(timePeriodInfo.getStart(),
+                timePeriodInfo.getEnd(), ids);
+        if (summary.getTotalDurationSeconds() != null) {
+            totalManufactoringPoints = summary.getTotalManufacturingPoint();
+            totalPgTime = summary.getTotalPgTime() / 60;
+            totalWorkingHours = summary.getTotalDurationSeconds() / 3600f;
+
+            uniqueProcesses = summary.getTotalProcess();
+
+            if (totalPgTime != 0f) {
+                kpi = (float) (totalManufactoringPoints * 6 + totalPgTime);
             }
+            ole = (((summary.getTotalManufacturingPoint() * 10) / 60) / workingHourReal);
         }
-        Float kpi = 0f;
-        Float ole = 0f;
-        if (totalPgTime != 0f) {
-            kpi = totalManufactoringPoints * 6 / totalPgTime;
-        }
-        if (groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() != 0f) {
-            ole = ((totalManufactoringPoints * 10) / 60) / workingHourReal;
-        }
+
         if (staffKpi == null) {
             return new StaffWorkingStatisticDto(
                     staff.getStaffId(),

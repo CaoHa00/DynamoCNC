@@ -18,6 +18,7 @@ public class ReportMapper {
         reportDto.setAdminId(report.getAdmin().getId());
         reportDto.setHourDiff(report.getHourDiff());
         reportDto.setOffice(report.getOffice());
+        reportDto.setShiftCode(report.getShiftCode());
         reportDto.setReportType(report.getReportType());
 
         return reportDto;
@@ -30,6 +31,7 @@ public class ReportMapper {
         long timestamp = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         report.setDateTime(timestamp);
         report.setHourDiff(reportDto.getHourDiff());
+        report.setShiftCode(reportDto.getShiftCode());
         report.setId(reportDto.getId());
         report.setOffice(reportDto.getOffice());
         report.setReportType(reportDto.getReportType());

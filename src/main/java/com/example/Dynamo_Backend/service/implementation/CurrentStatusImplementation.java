@@ -32,6 +32,8 @@ import com.example.Dynamo_Backend.repository.StaffKpiRepository;
 import com.example.Dynamo_Backend.repository.StaffRepository;
 import com.example.Dynamo_Backend.service.CurrentStatusService;
 import com.example.Dynamo_Backend.service.LogService;
+import com.example.Dynamo_Backend.service.MachineSegmentServiceImplementation;
+import com.example.Dynamo_Backend.util.DateTimeUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -46,57 +48,76 @@ public class CurrentStatusImplementation implements CurrentStatusService {
     private final @Lazy LogService logService;
     private final CurrentStatusMapper currentStatusMapper;
 
+    private final MachineSegmentServiceImplementation machineSegmentService;
+
     private final StaffRepository staffRepository;
 
     private final StaffKpiRepository staffKpiRepository;
 
     @Override
     public void addCurrentStatus(String payload) {
-        String[] arr = payload.split("-");
-        String machineId = arr[0];
-        int machineIdInt = Integer.parseInt(machineId) + 1;
-        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
-        if (currentStatus == null) {
-            currentStatus = new CurrentStatus();
-        }
-        CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
-        if (currentStaff != null && currentStaff.getStaff() != null) {
-            currentStatus.setStaffId(currentStaff.getStaff().getId());
-        } else {
-            currentStatus.setStaffId(null);
-        }
-        DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
-                .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
-        if (drawingCodeProcess != null) {
-            currentStatus.setProcessId(drawingCodeProcess.getProcessId());
-        } else {
-            currentStatus.setProcessId(null);
-        }
-        currentStatus.setMachineId(machineIdInt);
-        currentStatus.setStatus(arr[1]);
-        if (arr.length < 3) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String nowStr = LocalDateTime.now().format(formatter);
-            currentStatus.setTime(nowStr);
-        } else {
-            currentStatus.setTime(arr[2]);
-        }
-        Machine machine = machineRepository.findById(machineIdInt)
-                .orElseThrow(() -> new BusinessException("Machine is not found when find machine for currentStatus"));
-        logService.addLog(currentStatus, machine,
-                currentStaff != null ? currentStaff.getStaff() : null);
-        currentStatusRepository.save(currentStatus);
+        if (!payload.contains("*")) {
+            LocalDateTime now = LocalDateTime.now();
+            String[] arr = payload.split("-");
+            String machineId = arr[0];
+            // Long f = Long.parseLong(arr[2]);
+            // LocalDateTime now = DateTimeUtil.convertLongToLocalDateTime(f);
+            int machineIdInt = Integer.parseInt(machineId) + 1;
+            Machine machine = machineRepository.findById(machineIdInt)
+                    .orElseThrow(
+                            () -> new BusinessException("Machine is not found when find machine for currentStatus"));
+            CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
+            if (currentStatus == null) {
+                currentStatus = new CurrentStatus();
+            }
 
-        List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
-        try {
-            // MyWebSocketHandler.sendMachineStatusToClients(currentStatuses.stream()
-            // .map(CurrentStatusMapper::mapToCurrentStatusDto).toList());
-            MyWebSocketHandler.sendMachineStatusToClients(
-                    currentStatuses.stream().map(currentStatusMapper::mapToCurrentStatusDto)
-                            .toList());
-        } catch (IOException e) {
-            e.printStackTrace();
+            CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
+            if (currentStaff != null && currentStaff.getStaff() != null) {
+                currentStatus.setStaffId(currentStaff.getStaff().getId());
+            } else {
+                currentStatus.setStaffId(null);
+            }
+            DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+                    .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
+            if (drawingCodeProcess != null) {
+                currentStatus.setProcessId(drawingCodeProcess.getProcessId());
+            } else {
+                currentStatus.setProcessId(null);
+            }
+            currentStatus.setMachineId(machineIdInt);
+            currentStatus.setStatus(arr[1]);
+            if (arr.length < 3) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String nowStr = now.now().format(formatter);
+                currentStatus.setTime(nowStr);
+            } else {
+                currentStatus.setTime(arr[2]);
+            }
+
+            logService.addLog(currentStatus, machine,
+                    currentStaff != null ? currentStaff.getStaff() : null,
+                    DateTimeUtil.convertLocalDateTimeToLong(now));
+            currentStatusRepository.save(currentStatus);
+            if (drawingCodeProcess != null) {
+                machineSegmentService.handleNewEvent(machine.getMachineId(), currentStatus.getStatus(), now,
+                        drawingCodeProcess.getProcessId(), drawingCodeProcess.getProcessType());
+            } else {
+                machineSegmentService.handleNewEvent(machine.getMachineId(), currentStatus.getStatus(), now, null,
+                        null);
+            }
+
+            List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
+            try {
+                // MyWebSocketHandler.sendMachineStatusToClients(currentStatuses.stream()
+                // .map(CurrentStatusMapper::mapToCurrentStatusDto).toList());
+                MyWebSocketHandler.sendMachineStatusToClients(
+                        currentStatuses.stream().map(currentStatusMapper::mapToCurrentStatusDto)
+                                .toList());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     @Override

@@ -37,6 +37,7 @@ public class Report {
     private long createdDate;
     @Column(name = "checked", nullable = false)
     private int checked;
+    private String shiftCode;
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
     @JsonBackReference

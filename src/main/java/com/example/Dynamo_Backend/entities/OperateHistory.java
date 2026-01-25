@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.entities;
 
+import java.time.LocalDate;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -41,6 +43,8 @@ public class OperateHistory {
 
     @Column(name = "in_progress", nullable = false)
     private Integer inProgress;
+
+    private LocalDate logDate;
 
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = false)

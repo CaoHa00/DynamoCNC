@@ -11,8 +11,13 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
                 SELECT COALESCE(SUM(hour_diff), 0)
                 FROM Report
                 WHERE date_time BETWEEN :fromTime AND :toTime
+                 AND (
+                            :shiftType = 'FULL'
+                            OR shift_code = :shiftType
+                        )
             """, nativeQuery = true)
     Integer getTotalHourDiff(
             @Param("fromTime") Long fromTime,
-            @Param("toTime") Long toTime);
+            @Param("toTime") Long toTime,
+            @Param("shiftType") String shiftType);
 }

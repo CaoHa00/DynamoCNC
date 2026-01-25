@@ -73,4 +73,10 @@ public interface LogRepository extends JpaRepository<Log, String> {
         @Query("SELECT l FROM Log l WHERE l.machine.machineId = :machineId AND l.timeStamp < :timestamp ORDER BY l.timeStamp DESC")
         List<Log> findTopByMachineIdAndTimeStampBeforeOrderByTimeStampDesc(@Param("machineId") Integer machineId,
                         @Param("timestamp") Long timestamp);
+
+        List<Log> findByMachine_machineIdOrderByTimeStampAsc(Integer machineId);
+
+        List<Log> findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampDesc(Integer machineId, Long startTime,
+                        Long endTime);
+
 }

@@ -18,4 +18,6 @@ public interface ProcessTimeService {
     List<ProcessTimeDto> getAllProcessTime();
 
     ProcessTime calculateProcessTime(DrawingCodeProcess drawingCodeProcess);
+
+    void calculateProcessTime1(DrawingCodeProcess drawingCodeProcess, ProcessTime processTime);
 }

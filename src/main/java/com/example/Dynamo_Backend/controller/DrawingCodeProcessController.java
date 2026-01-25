@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.DrawingCodeProcessDto;
 import com.example.Dynamo_Backend.dto.RequestDto.DrawingCodeProcessResquestDto;
+import com.example.Dynamo_Backend.dto.RequestDto.UpdatedProcessDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.DrawingCodeProcessResponseDto;
 import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 
@@ -210,6 +212,27 @@ public class DrawingCodeProcessController {
                 .getCompletedProcessWithOperateHistoryData(staffId, start,
                         stop);
         return ResponseEntity.status(HttpStatus.OK).body(processes);
+    }
+
+    @PostMapping("/process")
+    public ResponseEntity<Void> cal(@RequestBody List<UpdatedProcessDto> dtos) {
+        drawingCodeProcessService.updateProcessTime(dtos);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<List<Map<String, Object>>> uploadMonthlyGroupKpiExcel1(
+            @RequestParam("file") MultipartFile file) {
+        List<Map<String, Object>> result = drawingCodeProcessService.importDrawingCodeFromExcel(file);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/recall")
+    public ResponseEntity<Void> recall() {
+        drawingCodeProcessService.updateProcessShift();
+
+        return ResponseEntity.ok().build();
     }
 
 }

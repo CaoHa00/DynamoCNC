@@ -1,5 +1,6 @@
 package com.example.Dynamo_Backend.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -8,115 +9,174 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessFlatDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.PartProgressDto;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
-import com.example.Dynamo_Backend.entities.OrderDetail;
 
 public interface DrawingCodeProcessRepository extends JpaRepository<DrawingCodeProcess, String> {
-  List<DrawingCodeProcess> findByMachine_MachineIdAndStatus(Integer machineId, Integer status);
+        List<DrawingCodeProcess> findByMachine_MachineIdAndStatus(Integer machineId, Integer status);
 
-  List<DrawingCodeProcess> findByOrderDetail_OrderDetailIdAndStatusAndProcessStatusNot(String orderDetailId,
-      int status,
-      int process);
+        List<DrawingCodeProcess> findByOrderDetail_OrderDetailIdAndStatusAndProcessStatusNot(String orderDetailId,
+                        int status,
+                        int process);
 
-  List<DrawingCodeProcess> findByStatus(Integer status);
+        List<DrawingCodeProcess> findByStatus(Integer status);
 
-  DrawingCodeProcess findByMachine_MachineIdAndProcessStatus(Integer machineId, Integer processStatus);
+        DrawingCodeProcess findByMachine_MachineIdAndProcessStatus(Integer machineId, Integer processStatus);
 
-  Page<DrawingCodeProcess> findByIsPlanAndProcessStatusNotAndStatus(
-      Integer isPlan,
-      Integer processStatusNot,
-      Integer status,
-      Pageable pageable);
+        Page<DrawingCodeProcess> findByIsPlanAndProcessStatusNotAndStatus(
+                        Integer isPlan,
+                        Integer processStatusNot,
+                        Integer status,
+                        Pageable pageable);
 
-  List<DrawingCodeProcess> findByProcessStatus(Integer processStatus);
+        List<DrawingCodeProcess> findByProcessStatus(Integer processStatus);
 
-  @Query("SELECT p FROM DrawingCodeProcess p " +
-      "LEFT JOIN p.plan pl " +
-      "LEFT JOIN p.machine m " +
-      "WHERE (m.machineId = :machineId OR pl.machine.machineId = :machineId) and p.status = 1")
-  List<DrawingCodeProcess> findByMachineOrPlanMachine(@Param("machineId") Integer machineId);
+        @Query("SELECT p FROM DrawingCodeProcess p " +
+                        "LEFT JOIN p.plan pl " +
+                        "LEFT JOIN p.machine m " +
+                        "WHERE (m.machineId = :machineId OR pl.machine.machineId = :machineId) and p.status = 1")
+        List<DrawingCodeProcess> findByMachineOrPlanMachine(@Param("machineId") Integer machineId);
 
-  @Query("SELECT p FROM DrawingCodeProcess p WHERE p.startTime <= :endTime AND p.endTime >= :startTime")
-  List<DrawingCodeProcess> findProcessesInRange(@Param("startTime") Long startTime,
-      @Param("endTime") Long endTime);
+        @Query("""
+                            SELECT DISTINCT p FROM DrawingCodeProcess p
+                            LEFT JOIN FETCH p.orderDetail od
+                            LEFT JOIN FETCH p.machine m
+                            LEFT JOIN FETCH p.plan pl
+                            LEFT JOIN FETCH pl.machine pm
+                            LEFT JOIN FETCH p.operateHistories oh
+                            LEFT JOIN FETCH oh.staff s
+                            WHERE (m.machineId = :machineId OR pm.machineId = :machineId)
+                              AND p.processStatus IN (1,2)
+                        """)
+        List<DrawingCodeProcess> findProcessWithAllData(@Param("machineId") Integer machineId);
 
-  @Query("""
-          SELECT oh.drawingCodeProcess
-          FROM OperateHistory oh
-          WHERE (:staffId IS NULL OR oh.staff.id = :staffId)
-          AND oh.drawingCodeProcess.processStatus = 3
-          AND (:start IS NULL OR :stop IS NULL OR (oh.startTime BETWEEN :start AND :stop))
-      """)
-  List<DrawingCodeProcess> findProcessesByStaffAndTimeRange(
-      @Param("staffId") String staffId,
-      @Param("start") Long start,
-      @Param("stop") Long stop);
+        @Query("SELECT p FROM DrawingCodeProcess p WHERE p.startTime <= :endTime AND p.endTime >= :startTime")
+        List<DrawingCodeProcess> findProcessesInRange(@Param("startTime") Long startTime,
+                        @Param("endTime") Long endTime);
 
-  @Query("""
-          SELECT dcp
-          FROM DrawingCodeProcess dcp
-          WHERE (:machineId IS NULL OR dcp.machine.machineId = :machineId)
-            AND (:start IS NULL OR :stop IS NULL OR (dcp.endTime BETWEEN :start AND :stop))
-            AND dcp.processStatus = 3
-      """)
-  List<DrawingCodeProcess> findCompletedProcessesByMachineAndTime(
-      @Param("machineId") Integer machineId,
-      @Param("start") Long start,
-      @Param("stop") Long stop);
+        @Query("""
+                            SELECT oh.drawingCodeProcess
+                            FROM OperateHistory oh
+                            WHERE (:staffId IS NULL OR oh.staff.id = :staffId)
+                            AND oh.drawingCodeProcess.processStatus = 3
+                            AND (:start IS NULL OR :stop IS NULL OR (oh.startTime BETWEEN :start AND :stop))
+                        """)
+        List<DrawingCodeProcess> findProcessesByStaffAndTimeRange(
+                        @Param("staffId") String staffId,
+                        @Param("start") Long start,
+                        @Param("stop") Long stop);
 
-  @Query("""
-      SELECT dcp
-      FROM DrawingCodeProcess dcp
-      WHERE dcp.processStatus = :status
-        AND (:start IS NULL OR :stop IS NULL OR (dcp.startTime BETWEEN :start AND :stop))
-      """)
-  List<DrawingCodeProcess> findByStatusAndTimeRange(
-      @Param("status") Integer status,
-      @Param("start") Long start,
-      @Param("stop") Long stop);
+        @Query("""
+                            SELECT dcp
+                            FROM DrawingCodeProcess dcp
+                            WHERE (:machineId IS NULL OR dcp.machine.machineId = :machineId)
+                              AND (:start IS NULL OR :stop IS NULL OR (dcp.endTime BETWEEN :start AND :stop))
+                              AND dcp.processStatus = 3
+                        """)
+        List<DrawingCodeProcess> findCompletedProcessesByMachineAndTime(
+                        @Param("machineId") Integer machineId,
+                        @Param("start") Long start,
+                        @Param("stop") Long stop);
 
-  // find DrawingCodeProcess by machineId and in range
-  @Query("SELECT p FROM DrawingCodeProcess p WHERE p.machine.machineId = :machineId AND p.startTime <= :endTime AND p.endTime >= :startTime")
-  List<DrawingCodeProcess> findProcessesByMachineInRange(@Param("machineId") Integer machineId,
-      @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+        // @Query("""
+        // SELECT dcp
+        // FROM DrawingCodeProcess dcp
+        // WHERE (:machineId IS NULL OR dcp.machine.machineId = :machineId)
+        // AND (:start IS NULL OR :stop IS NULL OR (dcp.logDate BETWEEN :start AND
+        // :stop))
+        // AND dcp.processStatus = 3
+        // AND (
+        // :shiftType = 'FULL'
+        // OR dcp.shiftCode = :shiftType
+        // )
+        // """)
+        // List<DrawingCodeProcess> findCompletedProcessesByMachineAndTimeAndShiftCode(
+        // Integer machineId,
+        // LocalDate start,
+        // LocalDate stop,
+        // String shiftType);
 
-  // find DrawingCodeProcess by managerGroup of orderDetail and in range
-  @Query("SELECT p FROM DrawingCodeProcess p WHERE p.orderDetail.managerGroup.groupId = :groupId AND p.startTime <= :endTime AND p.endTime >= :startTime")
-  List<DrawingCodeProcess> findProcessesByManagerGroupInRange(@Param("groupId") String groupId,
-      @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+        @Query("""
+                            SELECT new com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessFlatDto(
+                                p.processId,
+                                od.orderCode,
+                                p.partNumber,
+                                p.stepNumber,
+                                p.startTime,
+                                p.endTime,
+                                m.machineName,
+                                s.staffId,
+                                s.shortName
+                            )
+                            FROM DrawingCodeProcess p
+                            JOIN p.orderDetail od
+                            JOIN p.machine m
+                            LEFT JOIN p.operateHistories oh
+                            LEFT JOIN oh.staff s
+                            WHERE m.machineId = :machineId
+                              AND p.logDate BETWEEN :start AND :end
+                              AND (:shiftCode = 'FULL' OR p.shiftCode = :shiftCode)
+                            ORDER BY p.startTime
+                        """)
+        List<HistoryProcessFlatDto> findHistoryFlat(
+                        Integer machineId,
+                        LocalDate start,
+                        LocalDate end,
+                        String shiftCode);
 
-  // @Query("""
-  // SELECT new com.example.Dynamo_Backend.dto.ResponseDto.PartProgressDto(
-  // od.orderDetailId,
-  // od.orderCode,
-  // dcp.partNumber,
-  // COUNT(dcp.processId),
-  // SUM(CASE WHEN dcp.processStatus = 3 THEN 1 ELSE 0 END),
-  // SUM(CASE WHEN dcp.processStatus = 2 THEN 1 ELSE 0 END)
-  // )
-  // FROM DrawingCodeProcess dcp
-  // JOIN dcp.orderDetail od
-  // GROUP BY od.orderDetailId, od.orderCode, dcp.partNumber
-  // ORDER BY od.orderDetailId, dcp.partNumber
-  // """)
-  // List<PartProgressDto> getPartProgress();
+        @Query("""
+                        SELECT dcp
+                        FROM DrawingCodeProcess dcp
+                        WHERE dcp.processStatus = :status
+                          AND (:start IS NULL OR :stop IS NULL OR (dcp.startTime BETWEEN :start AND :stop))
+                        """)
+        List<DrawingCodeProcess> findByStatusAndTimeRange(
+                        @Param("status") Integer status,
+                        @Param("start") Long start,
+                        @Param("stop") Long stop);
 
-  @Query("""
-          SELECT new com.example.Dynamo_Backend.dto.ResponseDto.PartProgressDto(
-              od.orderDetailId,
-              od.orderCode,
-              dcp.partNumber,
-              COUNT(dcp.processId),
-              SUM(CASE WHEN dcp.processStatus = 3 THEN 1 ELSE 0 END),
-              SUM(CASE WHEN dcp.processStatus = 2 THEN 1 ELSE 0 END)
-          )
-          FROM DrawingCodeProcess dcp
-          JOIN dcp.orderDetail od
-          WHERE od.orderDetailId IN :ids
-          GROUP BY od.orderDetailId, od.orderCode, dcp.partNumber
-          ORDER BY od.orderDetailId, dcp.partNumber
-      """)
-  List<PartProgressDto> getPartProgressByOrderDetailIds(
-      @Param("ids") List<String> ids);
+        // find DrawingCodeProcess by machineId and in range
+        @Query("SELECT p FROM DrawingCodeProcess p WHERE p.machine.machineId = :machineId AND p.startTime <= :endTime AND p.endTime >= :startTime")
+        List<DrawingCodeProcess> findProcessesByMachineInRange(@Param("machineId") Integer machineId,
+                        @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
+        // find DrawingCodeProcess by managerGroup of orderDetail and in range
+        @Query("SELECT p FROM DrawingCodeProcess p WHERE p.orderDetail.managerGroup.groupId = :groupId AND p.startTime <= :endTime AND p.endTime >= :startTime")
+        List<DrawingCodeProcess> findProcessesByManagerGroupInRange(@Param("groupId") String groupId,
+                        @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
+        // @Query("""
+        // SELECT new com.example.Dynamo_Backend.dto.ResponseDto.PartProgressDto(
+        // od.orderDetailId,
+        // od.orderCode,
+        // dcp.partNumber,
+        // COUNT(dcp.processId),
+        // SUM(CASE WHEN dcp.processStatus = 3 THEN 1 ELSE 0 END),
+        // SUM(CASE WHEN dcp.processStatus = 2 THEN 1 ELSE 0 END)
+        // )
+        // FROM DrawingCodeProcess dcp
+        // JOIN dcp.orderDetail od
+        // GROUP BY od.orderDetailId, od.orderCode, dcp.partNumber
+        // ORDER BY od.orderDetailId, dcp.partNumber
+        // """)
+        // List<PartProgressDto> getPartProgress();
+
+        @Query("""
+                            SELECT new com.example.Dynamo_Backend.dto.ResponseDto.PartProgressDto(
+                                od.orderDetailId,
+                                od.orderCode,
+                                dcp.partNumber,
+                                COUNT(dcp.processId),
+                                SUM(CASE WHEN dcp.processStatus = 3 THEN 1 ELSE 0 END),
+                                SUM(CASE WHEN dcp.processStatus = 2 THEN 1 ELSE 0 END)
+                            )
+                            FROM DrawingCodeProcess dcp
+                            JOIN dcp.orderDetail od
+                            WHERE od.orderDetailId IN :ids
+                            GROUP BY od.orderDetailId, od.orderCode, dcp.partNumber
+                            ORDER BY od.orderDetailId, dcp.partNumber
+                        """)
+        List<PartProgressDto> getPartProgressByOrderDetailIds(
+                        @Param("ids") List<String> ids);
 }

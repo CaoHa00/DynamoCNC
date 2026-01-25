@@ -12,6 +12,7 @@ public class ReportDto {
     private String dateTime;
     private String office;
     private String reportType;
+    private String shiftCode;
     private Integer hourDiff;
     private String createdDate;
     private String groupId;

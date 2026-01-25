@@ -12,4 +12,5 @@ public class StatisticRequestDto {
     private Integer id;
     private String startDate;
     private String endDate;
+    private String shiftCode;
 }

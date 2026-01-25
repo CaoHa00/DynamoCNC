@@ -10,6 +10,7 @@ import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.entities.CurrentStaff;
 import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.OperateHistory;
+import com.example.Dynamo_Backend.entities.ShiftInfo;
 import com.example.Dynamo_Backend.entities.Staff;
 import com.example.Dynamo_Backend.entities.TempProcess;
 import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
@@ -25,6 +26,7 @@ import com.example.Dynamo_Backend.service.DrawingCodeProcessService;
 import com.example.Dynamo_Backend.service.OperateHistoryService;
 import com.example.Dynamo_Backend.service.StaffService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
+import com.example.Dynamo_Backend.util.ShiftUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -38,27 +40,38 @@ public class OperateHistoryImplementation implements OperateHistoryService {
         TempProcessRepository tempProcessRepository;
 
         @Override
-        public OperateHistoryDto addOperateHistory(String payload) {
-                String[] arr = payload.split("-");
-                String machineId = arr[0];
-                String status = arr[1];
-                int machineIdInt = Integer.parseInt(machineId) + 1;
-                DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
-                                .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
-                DrawingCodeProcessDto drawingCodeProcessDto = null;
-                if (drawingCodeProcess != null) {
-                        drawingCodeProcessDto = DrawingCodeProcessMapper
-                                        .mapToDrawingCodeProcessDto(drawingCodeProcess);
+        public void addOperateHistory(String payload) {
+                if (!payload.contains("*")) {
+                        String[] arr = payload.split("-");
+                        String machineId = arr[0];
+                        String status = arr[1];
+                        if (status.contains("R")) {
+
+                                int machineIdInt = Integer.parseInt(machineId) + 1;
+
+                                DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+                                                .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
+                                handleOperate(machineIdInt, drawingCodeProcess);
+
+                        }
                 }
 
-                OperateHistory operateHistory = null;
+        }
 
-                long currentTimestamp = System.currentTimeMillis();
-                CurrentStaff currentStaff = currentStaffRepository
-                                .findByMachine_MachineId(machineIdInt);
-                if (currentStaff != null) {
-                        // nếu máy chạy thì cập nhật
-                        if (status.contains("R")) {
+        @Override
+        public void handleOperate(Integer machineId, DrawingCodeProcess drawingCodeProcess) {
+                DrawingCodeProcessDto drawingCodeProcessDto = null;
+                if (drawingCodeProcess != null) {
+
+                        drawingCodeProcessDto = DrawingCodeProcessMapper
+                                        .mapToDrawingCodeProcessDto(drawingCodeProcess);
+
+                        OperateHistory operateHistory = null;
+
+                        long currentTimestamp = System.currentTimeMillis();
+                        CurrentStaff currentStaff = currentStaffRepository
+                                        .findByMachine_MachineId(machineId);
+                        if (currentStaff != null) {
                                 List<OperateHistory> operateHistories = operateHistoryRepository
                                                 .findByDrawingCodeProcess_processId(
                                                                 drawingCodeProcessDto.getProcessId());
@@ -78,19 +91,23 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                                                         .mapToDrawingCodeProcess(
                                                                                         drawingCodeProcessDto));
                                         operateHistory.setStartTime(currentTimestamp);
+                                        ShiftInfo shift = ShiftUtil.resolveShift(DateTimeUtil
+                                                        .convertLongToLocalDateTime(currentTimestamp));
+                                        operateHistory.setLogDate(shift.getLogDate());
                                         operateHistory.setStopTime((long) 0);
                                         operateHistory.setPgTime(0);
                                         operateHistory.setInProgress(1);
                                         operateHistory.setPgTime(drawingCodeProcessDto.getPgTime());
-                                        OperateHistory saveOperateHistory = operateHistoryRepository
+                                        operateHistoryRepository
                                                         .save(operateHistory);
-                                        return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
+
                                 } else {
                                         if (!operateHistory.getStaff().getId()
                                                         .equals(currentStaff.getStaff().getId())) {
 
                                                 TempProcess tempProcess = tempProcessRepository
-                                                                .findByProcessId(drawingCodeProcessDto.getProcessId());
+                                                                .findByProcessId(drawingCodeProcessDto
+                                                                                .getProcessId());
                                                 Integer pgTime = operateHistory.getPgTime()
                                                                 - tempProcess.getPgTime();
                                                 Integer point = operateHistory.getManufacturingPoint()
@@ -103,8 +120,14 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                                 operateHistoryRepository.save(operateHistory);
 
                                                 operateHistory = new OperateHistory();
-                                                operateHistory.setDrawingCodeProcess(DrawingCodeProcessMapper
-                                                                .mapToDrawingCodeProcess(drawingCodeProcessDto));
+                                                ShiftInfo shift = ShiftUtil.resolveShift(
+                                                                DateTimeUtil.convertLongToLocalDateTime(
+                                                                                currentTimestamp));
+                                                operateHistory.setLogDate(shift.getLogDate());
+                                                operateHistory.setDrawingCodeProcess(
+                                                                DrawingCodeProcessMapper
+                                                                                .mapToDrawingCodeProcess(
+                                                                                                drawingCodeProcessDto));
                                                 operateHistory.setStaff(currentStaff.getStaff());
                                                 operateHistory.setManufacturingPoint(
                                                                 tempProcess.getPoint());
@@ -115,14 +138,15 @@ public class OperateHistoryImplementation implements OperateHistoryService {
                                                 operateHistory.setStartTime(currentTimestamp);
                                                 operateHistory.setStopTime((long) 0);
                                                 operateHistory.setInProgress(1);
-                                                OperateHistory saveOperateHistory = operateHistoryRepository
+                                                operateHistoryRepository
                                                                 .save(operateHistory);
-                                                return OperateHistoryMapper.mapToOperateHistoryDto(saveOperateHistory);
+
                                         }
                                 }
+
                         }
+
                 }
-                return new OperateHistoryDto(null, 0, 0, null, null, 0, null, null);
         }
 
         // @Override

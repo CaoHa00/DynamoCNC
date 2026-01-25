@@ -11,20 +11,19 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.dto.MachineDailySummaryByMachine;
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.GroupEfficiencyResponseDto;
-import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.MachineKpi;
-import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
+import com.example.Dynamo_Backend.repository.MachineDailyRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
-import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.GroupEfficiencyService;
 import com.example.Dynamo_Backend.service.ReportService;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
@@ -39,9 +38,6 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
     GroupKpiRepository groupKpiRepository;
 
     @Autowired
-    private MachineRepository machineRepository;
-
-    @Autowired
     DrawingCodeProcessRepository drawingCodeProcessRepository;
 
     @Autowired
@@ -50,13 +46,12 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
     @Autowired
     private ReportService reportService;
 
+    @Autowired
+    private MachineDailyRepository machineDailyRepository;
+
+    // report??
     @Override
     public GroupEfficiencyResponseDto getGroupEfficiency(GroupEfficiencyRequestDto requestDto) {
-        String startDate = requestDto.getStartDate().concat(" 00:00:00"); // Should be "2025-07-21"
-        String endDate = requestDto.getEndDate().concat(" 23:59:59");
-        requestDto.setStartDate(startDate);
-        requestDto.setEndDate(endDate);
-
         TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
         List<MachineKpi> kpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
                 requestDto.getGroupId(),
@@ -70,60 +65,80 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
         Float oee = 0f;
         Float offsetLoss = 0f;
         Float otherLoss = 0f;
-        Float totalRunTime = 0f;
-        Float totalPgTime = 0f;
-        Float totalOffsetTime = 0f;
-        Float mainAndElectricProductPgTime = 0f;
-        Float otherProductPgTime = 0f;
+        Float totalRunTime = 0f; // daily.getRunPg+ daily.getoffset
+        Float totalPgTime = 0f; // daily.getRunPg
+        Float totalOffsetTime = 0f; // daily.getoffset
+        Float mainAndElectricProductPgTime = 0f; // daily.getPGMainRun + daily+getPGElectric
+        Float otherProductPgTime = 0f; // daily.getother
         GroupKpi groupKpi = null;
-        Float processPgTime = 0f;
+        Float processPgTime = 0f; // daily.getPGMainRun + daily+getPGElectric + daily.getother
+
         Group group = groupRepository.findById(requestDto.getGroupId())
                 .orElseThrow(() -> new BusinessException("Group not found with id: " + requestDto.getGroupId()));
 
-        for (MachineKpi kpi : kpiList) {
-            List<DrawingCodeProcess> processes = drawingCodeProcessRepository.findCompletedProcessesByMachineAndTime(
-                    kpi.getMachine().getMachineId(), DateTimeUtil.convertStringToTimestamp(startDate),
-                    DateTimeUtil.convertStringToTimestamp(endDate));
-            for (DrawingCodeProcess process : processes) {
-                ProcessTime processTime = process.getProcessTime();
-                processPgTime += processTime.getPgTime();
-                if (process.getProcessType().contains("Chính") || process.getProcessType().contains("Điện")) {
-                    mainAndElectricProductPgTime += processTime.getPgTime();
-                } else {
-                    otherProductPgTime += processTime.getPgTime();
-                }
-            }
+        List<Integer> machineIds = kpiList.stream()
+                .map(kpi -> kpi.getMachine().getMachineId())
+                .distinct()
+                .toList();
+        MachineDailySummaryByMachine sum = machineDailyRepository.sumByMachines(machineIds, timePeriodInfo.getStart(),
+                timePeriodInfo.getEnd(),
+                requestDto.getShiftCode());
 
-            List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
-                    kpi.getMachine().getMachineId(), timePeriodInfo.getStartDate(),
-                    timePeriodInfo.getEndDate());
-            totalPgTime += activeTime.get(3);
-            totalOffsetTime += activeTime.get(4);
-            totalRunTime += activeTime.get(3) + totalOffsetTime;
-            System.out.println(kpi.getMachine().getMachineId());
-            System.out.println(processes.size());
-        }
+        processPgTime = (sum.mainProductPgSeconds() / 3600f) + (sum.electricPgSeconds() / 3600f)
+                + (sum.otherSeconds() / 3600f);
+        mainAndElectricProductPgTime = (sum.mainProductPgSeconds() / 3600f) + (sum.electricPgSeconds() / 3600f);
+        otherProductPgTime = (sum.otherSeconds() / 3600f);
+
+        totalPgTime = sum.runPgSeconds() / 3600f;
+        totalOffsetTime = sum.runOffsetSeconds() / 3600f;
+        totalRunTime = totalPgTime + totalOffsetTime;
+
+        // for (MachineKpi kpi : kpiList) {
+        // List<DrawingCodeProcess> processes =
+        // drawingCodeProcessRepository.findCompletedProcessesByMachineAndTime(
+        // kpi.getMachine().getMachineId(),
+        // DateTimeUtil.convertStringToTimestamp(startDate),
+        // DateTimeUtil.convertStringToTimestamp(endDate));
+        // for (DrawingCodeProcess process : processes) {
+        // ProcessTime processTime = process.getProcessTime();
+        // processPgTime += processTime.getPgTime();
+        // if (process.getProcessType().contains("Chính") ||
+        // process.getProcessType().contains("Điện")) {
+        // mainAndElectricProductPgTime += processTime.getPgTime();
+        // } else {
+        // otherProductPgTime += processTime.getPgTime();
+        // }
+        // }
+
+        // List<Float> activeTime =
+        // machineRepository.calculateDurationsByStatusAndRange(
+        // kpi.getMachine().getMachineId(), timePeriodInfo.getStartDate(),
+        // timePeriodInfo.getEndDate());
+        // totalPgTime += activeTime.get(3);
+        // totalOffsetTime += activeTime.get(4);
+        // totalRunTime += activeTime.get(3) + totalOffsetTime;
+        // }
 
         float workingHourReal = 0;
         int reportTime = 0;
-        Long fromDate = timePeriodInfo.getStartDate();
-        Long toDate = timePeriodInfo.getEndDate();
+        // fromDate và startDate check sau report
+        Long fromDate = DateTimeUtil.convertLocalDateToLong(timePeriodInfo.getStart());
+        Long toDate = DateTimeUtil.convertLocalDateToLong(timePeriodInfo.getEnd());
         if (timePeriodInfo.isMonth()) {
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndIsMonthAndMonthAndYear(
                     requestDto.getGroupId(), 1, timePeriodInfo.getMonth(), timePeriodInfo.getYear())
                     .orElseGet(GroupKpi::new);
 
         } else {
-            int a = timePeriodInfo.getWeek();
             groupKpi = groupKpiRepository.findByGroup_GroupIdAndYearAndWeekAndIsMonth(
                     requestDto.getGroupId(), timePeriodInfo.getYear(),
                     timePeriodInfo.getWeekOfYear(), (int) 0).orElseGet(GroupKpi::new);
-            reportTime = reportService.calculateReport(fromDate, toDate);
-            workingHourReal = groupKpi.getWorkingHourGoal() + reportTime;
+            reportTime = reportService.calculateReport(fromDate, toDate, requestDto.getShiftCode());
+            workingHourReal = groupKpi.getWorkingHour() + reportTime;
 
         }
-        reportTime = reportService.calculateReport(fromDate, toDate);
-        workingHourReal = groupKpi.getWorkingHourGoal() + reportTime;
+        reportTime = reportService.calculateReport(fromDate, toDate, requestDto.getShiftCode());
+        workingHourReal = groupKpi.getWorkingHour() + reportTime;
         if (timePeriodInfo.getDay() == 1) {
             workingHourReal = workingHourReal / 7;
         }
@@ -150,9 +165,10 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
                 operationalEfficiency, pgEfficiency, valueEfficiency, oee, offsetLoss, otherLoss);
     }
 
+    // checksau
     @Override
     public TimePeriodInfo getRangeTypeAndWeek(GroupEfficiencyRequestDto dto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
         LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
         long days = ChronoUnit.DAYS.between(start, end) + 1;
@@ -165,10 +181,12 @@ public class GroupEfficiencyImplementation implements GroupEfficiencyService {
             int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
             int weekOfYear = start.get(WeekFields.ISO.weekOfYear());
             return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp, weekOfYear);
+                    endTimestamp, start,
+                    end, weekOfYear);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
             return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp, null);
+                    endTimestamp, start,
+                    end, null);
         } else {
             throw new BusinessException("Invalid date range");
         }

@@ -1,5 +1,6 @@
 package com.example.Dynamo_Backend.entities;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -66,6 +67,9 @@ public class DrawingCodeProcess {
     private long createdDate;
     @Column(name = "updatedDate", nullable = false)
     private long updatedDate;
+
+    private LocalDate logDate;
+    private String shiftCode;
 
     @Column(name = "status", nullable = false)
     private Integer status;

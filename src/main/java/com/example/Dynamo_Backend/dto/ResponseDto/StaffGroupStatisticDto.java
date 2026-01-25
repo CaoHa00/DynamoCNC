@@ -17,9 +17,9 @@ public class StaffGroupStatisticDto {
     private Integer staffCount;
     private Float workingHours;
     private Float workingRate;
-    private Integer manufacturingPoints;
+    private Long manufacturingPoints;
     private Float mpRate;
-    private Integer processCount;
+    private Long processCount;
     private Float processRate;
     private Float totalKpi;
     private Float kpiRate;

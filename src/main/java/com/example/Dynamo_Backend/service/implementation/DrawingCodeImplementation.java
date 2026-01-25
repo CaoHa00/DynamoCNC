@@ -112,4 +112,5 @@ public class DrawingCodeImplementation implements DrawingCodeService {
         List<DrawingCode> drawingCodes = drawingCodeRepository.findAllByStatus(1);
         return drawingCodes.stream().map(DrawingCodeMapper::mapToDrawingCodeDto).toList();
     }
+
 }

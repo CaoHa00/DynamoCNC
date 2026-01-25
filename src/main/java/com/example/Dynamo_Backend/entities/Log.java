@@ -14,9 +14,12 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Index;
 
 @Entity
-@Table(name = "log")
+@Table(name = "log", indexes = {
+        @Index(name = "idx_log_machine_time", columnList = "machine_id, time_stamp")
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,11 +33,6 @@ public class Log {
     private Long timeStamp;
     @Column(name = "status", nullable = false)
     private String status;
-
-    // @ManyToOne
-    // @JoinColumn(name = "process_id", nullable = true)
-    // @JsonBackReference(value = "stats-process")
-    // private DrawingCodeProcess drawingCodeProcess;
 
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = true)

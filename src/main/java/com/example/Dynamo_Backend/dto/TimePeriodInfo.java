@@ -1,5 +1,7 @@
 package com.example.Dynamo_Backend.dto;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,5 +17,7 @@ public class TimePeriodInfo {
     private long day; // nullable if isMonth=true
     private Long startDate;
     private Long endDate;
+    private LocalDate start;
+    private LocalDate end;
     private Integer weekOfYear;
 }

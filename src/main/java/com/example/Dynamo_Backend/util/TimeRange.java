@@ -16,34 +16,37 @@ import com.example.Dynamo_Backend.exception.BusinessException;
 
 public class TimeRange {
     public static TimePeriodInfo getRangeTypeAndWeek(GroupEfficiencyRequestDto dto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
-        LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
-        Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
-        Long endTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getEndDate());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate start = LocalDate.parse(dto.getStartDate(), formatter);
+        LocalDate end = LocalDate.parse(dto.getEndDate(), formatter);
+        // Long startTimestamp =
+        // DateTimeUtil.convertStringToTimestamp(dto.getStartDate().concat("12:00:00"));
+        // Long endTimestamp =
+        // DateTimeUtil.convertStringToTimestamp(dto.getEndDate().concat("12:00:00"));
         long days = ChronoUnit.DAYS.between(start, end) + 1;
         if (days <= 7) {
             int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
             int week = start.get(WeekFields.ISO.weekOfYear());
-            return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp, week);
+            return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, null, null,
+                    start, end, week);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
-            return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp, null);
+            return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, null, null, start, end,
+                    null);
         } else if (days == 365 || days == 366) {
-            return new TimePeriodInfo(false, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp, 52);
+            return new TimePeriodInfo(false, null, start.getMonthValue(), start.getYear(), days, null, null, start, end,
+                    52);
         } else {
             throw new BusinessException("Invalid date range");
         }
     }
 
     public static TimePeriodInfo getRangeTypeAndWeek(StatisticRequestDto dto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDate start = LocalDateTime.parse(dto.getStartDate(), formatter).toLocalDate();
-        LocalDate end = LocalDateTime.parse(dto.getEndDate(), formatter).toLocalDate();
-        Long startTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
-        Long endTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getEndDate());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate start = LocalDate.parse(dto.getStartDate(), formatter);
+        LocalDate end = LocalDate.parse(dto.getEndDate(), formatter);
+        // Long startTimestamp =
+        // DateTimeUtil.convertStringToTimestamp(dto.getStartDate());
+        // Long endTimestamp = DateTimeUtil.convertStringToTimestamp(dto.getEndDate());
         long days = ChronoUnit.DAYS.between(start, end) + 1;
         if (days < 1 || days > 31) {
             throw new BusinessException("Invalid date range");
@@ -51,26 +54,30 @@ public class TimeRange {
         if (days <= 7) {
             int weekOfMonth = start.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
             int weekOfYear = start.get(WeekFields.ISO.weekOfYear());
-            return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp, weekOfYear);
+            return new TimePeriodInfo(false, weekOfMonth, start.getMonthValue(), start.getYear(), days, null,
+                    null, start,
+                    end, weekOfYear);
         } else if (start.getDayOfMonth() == 1 && end.equals(start.withDayOfMonth(start.lengthOfMonth()))) {
             int weekOfYear = end.get(WeekFields.ISO.weekOfYear());
-            return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, startTimestamp,
-                    endTimestamp, null);
+            return new TimePeriodInfo(true, null, start.getMonthValue(), start.getYear(), days, null,
+                    null, start,
+                    end, null);
         } else {
             throw new BusinessException("Invalid date range");
         }
     }
 
+    // check lai
     public static TimePeriodInfo getPreviousTimeRange(TimePeriodInfo dto) {
-        LocalDate prevStart = Instant.ofEpochMilli(dto.getStartDate())
-                .atZone(ZoneId.systemDefault()).toLocalDate().minusDays(dto.getDay());
-        LocalDate prevEnd = Instant.ofEpochMilli(dto.getEndDate())
-                .atZone(ZoneId.systemDefault()).toLocalDate().minusDays(dto.getDay());
+
+        LocalDate prevStart = dto.getStart().minusDays(dto.getDay());
+        LocalDate prevEnd = dto.getEnd().minusDays(dto.getDay());
 
         // Set start at 00:00:00 and end at 23:59:59
-        Long previousStartTime = prevStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        Long previousEndTime = prevEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        // Long previousStartTime =
+        // prevStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        // Long previousEndTime = prevEnd.atTime(23, 59,
+        // 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
         if (dto.isMonth()) {
             int previousMonth = dto.getMonth() - 1;
@@ -80,7 +87,7 @@ public class TimeRange {
                 previousYear--;
             }
             return new TimePeriodInfo(true, null, previousMonth, previousYear, dto.getDay(),
-                    previousStartTime, previousEndTime, null);
+                    dto.getStartDate(), dto.getEndDate(), prevStart, prevEnd, null);
         } else {
             int previousWeek = dto.getWeekOfYear() - 1;
             int previousMonth = dto.getMonth();
@@ -99,7 +106,7 @@ public class TimeRange {
             }
             // tạm
             return new TimePeriodInfo(false, previousWeek, previousMonth, previousYear, dto.getDay(),
-                    previousStartTime, previousEndTime, previousWeek);
+                    dto.getStartDate(), dto.getEndDate(), prevStart, prevEnd, previousWeek);
         }
     }
 
@@ -120,9 +127,12 @@ public class TimeRange {
         }
         if (weekStart == null || weekEnd == null)
             return null;
-        long startMillis = weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long endMillis = weekEnd.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        // long startMillis =
+        // weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        // long endMillis = weekEnd.atTime(23, 59,
+        // 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         return new TimePeriodInfo(false, week, monthInfo.getMonth(), monthInfo.getYear(),
-                (long) (weekEnd.toEpochDay() - weekStart.toEpochDay() + 1), startMillis, endMillis, null);
+                (long) (weekEnd.toEpochDay() - weekStart.toEpochDay() + 1), monthInfo.getStartDate(),
+                monthInfo.getEndDate(), firstDay, lastDay, null);
     }
 }

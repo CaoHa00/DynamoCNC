@@ -37,4 +37,31 @@ public class DateTimeUtil {
                 .atZone(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
+
+    public static Long convertLocalDateTimeToLong(LocalDateTime localDateTime) {
+        return localDateTime
+                .atZone(ZoneId.systemDefault()) // hoặc ZoneId.of("Asia/Ho_Chi_Minh")
+                .toInstant()
+                .toEpochMilli();
+    }
+
+    public static LocalDateTime convertLongToLocalDateTime(Long timestamp) {
+        return Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault()) // hoặc ZoneId.of("Asia/Ho_Chi_Minh")
+                .toLocalDateTime();
+    }
+
+    public static LocalDate convertLongToLocalDate(Long timestamp) {
+        return Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault()) // hoặc ZoneId.of("Asia/Ho_Chi_Minh")
+                .toLocalDate();
+    }
+
+    public static Long convertLocalDateToLong(LocalDate localDate) {
+        return localDate
+                .atStartOfDay(ZoneId.systemDefault()) // 00:00:00
+                .toInstant()
+                .toEpochMilli();
+    }
+
 }

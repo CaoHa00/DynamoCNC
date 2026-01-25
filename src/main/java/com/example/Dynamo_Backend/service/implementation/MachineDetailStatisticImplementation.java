@@ -5,8 +5,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -15,27 +17,25 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.Dynamo_Backend.dto.MachineDailySummaryByMachine;
 import com.example.Dynamo_Backend.dto.StaffDto;
 import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.dto.RequestDto.GroupEfficiencyRequestDto;
 import com.example.Dynamo_Backend.dto.RequestDto.StatisticRequestDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessDto;
+import com.example.Dynamo_Backend.dto.ResponseDto.HistoryProcessFlatDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineDetailStatisticDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.MachineEfficiencyResponseDto;
-import com.example.Dynamo_Backend.entities.DrawingCodeProcess;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
 import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.MachineKpi;
-import com.example.Dynamo_Backend.entities.OperateHistory;
-import com.example.Dynamo_Backend.entities.ProcessTime;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.MachineKpiMapper;
 import com.example.Dynamo_Backend.repository.GroupKpiRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
+import com.example.Dynamo_Backend.repository.MachineDailyRepository;
 import com.example.Dynamo_Backend.repository.MachineKpiRepository;
-
-import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.DrawingCodeProcessRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.repository.OperateHistoryRepository;
@@ -56,9 +56,6 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         private MachineKpiRepository machineKpiRepository;
 
         @Autowired
-        private CurrentStatusRepository currentStatusRepository;
-
-        @Autowired
         ProcessTimeService processTimeService;
 
         @Autowired
@@ -74,48 +71,71 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
         @Autowired
         private ReportService reportService;
 
-        public MachineDetailStatisticDto calculateMachineTime(Integer machineId, TimePeriodInfo timePeriodInfo) {
+        @Autowired
+        private MachineDailyRepository dailyRepository;
 
+        // checked
+        public MachineDetailStatisticDto calculateMachineTime(Integer machineId, TimePeriodInfo timePeriodInfo,
+                        String shiftCode) {
+                List<Integer> machineIds = new ArrayList<>();
                 Machine machine = machineRepository.findById(machineId)
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail statistic with ID: " + machineId));
+                machineIds.add(machineId);
                 Float totalRunTime = 0f;
                 Float totalStopTime = 0f;
                 Float totalPgTime = 0f;
                 Float totalErrorTime = 0f;
                 Float totalOffsetTime = 0f;
-                Integer numberOfProcesses = machine.getDrawingCodeProcesses().stream()
-                                .filter(process -> process.getStartTime() <= timePeriodInfo.getEndDate()
-                                                && process.getEndTime() >= timePeriodInfo.getStartDate())
-                                .toList().size();
-                List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
-                                machineId, timePeriodInfo.getStartDate(),
-                                timePeriodInfo.getEndDate());
-                totalErrorTime += activeTime.get(1) + activeTime.get(2);
-                totalPgTime += activeTime.get(3);
-                totalOffsetTime += activeTime.get(4);
-                totalStopTime += activeTime.get(5) + activeTime.get(6);
+                Float totalEmptyTime = 0F;
+                MachineDailySummaryByMachine daily = dailyRepository.sumByMachines(machineIds,
+                                timePeriodInfo.getStart(), timePeriodInfo.getEnd(), shiftCode);
+                Long quantity = daily.quantity();
+                Integer numberOfProcesses = 0;
+                if (quantity != null && quantity >= Integer.MIN_VALUE && quantity <= Integer.MAX_VALUE) {
+                        numberOfProcesses = quantity.intValue();
+                }
+                if (daily.errorSeconds() != null) {
+                        totalErrorTime = daily.errorSeconds() / 3600f;
+                }
+                if (daily.runPgSeconds() != null) {
+                        totalPgTime = daily.runPgSeconds() / 3600f;
+                }
+                if (daily.runOffsetSeconds() != null) {
+                        totalOffsetTime = daily.runOffsetSeconds() / 3600f;
+                }
+                if (daily.stopSeconds() != null) {
+                        totalStopTime = daily.stopSeconds() / 3600f;
+                }
+                if (daily.emptySeconds() != null) {
+                        totalEmptyTime = daily.emptySeconds() / 3600f;
+                }
+
                 totalRunTime = totalPgTime + totalOffsetTime;
+
                 return new MachineDetailStatisticDto(machineId, machine.getMachineName(), totalRunTime, 0f,
                                 totalStopTime, 0f,
+                                totalEmptyTime, 0f,
                                 totalPgTime, 0f,
                                 totalErrorTime, 0f,
                                 numberOfProcesses, 0f, totalOffsetTime);
         }
 
+        // checked
         @Override
         public MachineDetailStatisticDto getMachineDetailStatistic(StatisticRequestDto requestDto) {
-                String startDate = requestDto.getStartDate().concat(" 00:00:00");
-                String endDate = requestDto.getEndDate().concat(" 23:59:59");
+                String startDate = requestDto.getStartDate();
+                String endDate = requestDto.getEndDate();
                 requestDto.setStartDate(startDate);
                 requestDto.setEndDate(endDate);
 
                 TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
                 TimePeriodInfo previousTimePeriodInfo = TimeRange.getPreviousTimeRange(timePeriodInfo);
 
-                MachineDetailStatisticDto current = calculateMachineTime(requestDto.getId(), timePeriodInfo);
+                MachineDetailStatisticDto current = calculateMachineTime(requestDto.getId(), timePeriodInfo,
+                                requestDto.getShiftCode());
                 MachineDetailStatisticDto previous = calculateMachineTime(requestDto.getId(),
-                                previousTimePeriodInfo);
+                                previousTimePeriodInfo, requestDto.getShiftCode());
 
                 if (previous.getTotalRunTime() != 0) {
                         current.setRunTimeRate(
@@ -132,6 +152,11 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                         (current.getTotalPgTime() - previous.getTotalPgTime())
                                                         / previous.getTotalPgTime() * 100);
                 }
+                if (previous.getTotalEmptyTime() != 0) {
+                        current.setEmptyTimeRate(
+                                        (current.getTotalEmptyTime() - previous.getTotalEmptyTime())
+                                                        / previous.getTotalEmptyTime() * 100);
+                }
                 if (previous.getTotalErrorTime() != 0) {
                         current.setErrorTimeRate(
                                         (current.getTotalErrorTime() - previous.getTotalErrorTime())
@@ -144,62 +169,60 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 return current;
         }
 
+        // checked
         @Override
         public List<HistoryProcessDto> getMachineHistoryProcess(StatisticRequestDto requestDto) {
-                String startDate = requestDto.getStartDate().concat(" 00:00:00");
-                String endDate = requestDto.getEndDate().concat(" 23:59:59");
-                requestDto.setStartDate(startDate);
-                requestDto.setEndDate(endDate);
 
                 TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
+
                 Machine machine = machineRepository.findById(requestDto.getId())
                                 .orElseThrow(() -> new BusinessException(
                                                 "Machine not found when get detail history with ID: "
                                                                 + requestDto.getId()));
 
-                List<DrawingCodeProcess> processes = drawingCodeProcessRepository
-                                .findCompletedProcessesByMachineAndTime(machine.getMachineId(),
-                                                timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
+                List<HistoryProcessFlatDto> flats = drawingCodeProcessRepository.findHistoryFlat(
+                                machine.getMachineId(),
+                                timePeriodInfo.getStart(),
+                                timePeriodInfo.getEnd(),
+                                requestDto.getShiftCode());
 
-                List<HistoryProcessDto> historyProcessDtos = new ArrayList<>();
-                for (DrawingCodeProcess process : processes) {
-                        System.out.println(process.getProcessId());
-                        List<StaffDto> dto = new ArrayList<>();
-                        String status = "Completed";
-                        List<OperateHistory> histories = operateHistoryRepository
-                                        .findByDrawingCodeProcess_processId(process.getProcessId());
-                        for (OperateHistory operateHistory : histories) {
-                                StaffDto staffDto = new StaffDto();
-                                staffDto.setStaffId(operateHistory.getStaff().getStaffId());
-                                staffDto.setStaffName(operateHistory.getStaff().getShortName());
-                                dto.add(staffDto);
-                        }
+                Map<String, List<HistoryProcessFlatDto>> grouped = flats.stream().collect(Collectors.groupingBy(
+                                HistoryProcessFlatDto::processId));
 
-                        String endTime = process.getEndTime() < process.getStartTime()
-                                        ? DateTimeUtil.convertTimestampToString(
-                                                        System.currentTimeMillis())
-                                        : DateTimeUtil.convertTimestampToString(process.getEndTime());
-                        HistoryProcessDto history = new HistoryProcessDto(
-                                        process.getOrderDetail().getOrderCode(),
-                                        process.getPartNumber(),
-                                        process.getStepNumber(),
-                                        DateTimeUtil.convertTimestampToString(process.getStartTime()),
+                List<HistoryProcessDto> result = new ArrayList<>();
+
+                for (List<HistoryProcessFlatDto> group : grouped.values()) {
+                        HistoryProcessFlatDto first = group.get(0);
+
+                        List<StaffDto> staffs = group.stream()
+                                        .filter(f -> f.staffId() != null)
+                                        .map(f -> new StaffDto(f.shortName()))
+                                        .distinct()
+                                        .toList();
+
+                        String endTime = first.endTime() < first.startTime()
+                                        ? DateTimeUtil.convertTimestampToString(System.currentTimeMillis())
+                                        : DateTimeUtil.convertTimestampToString(first.endTime());
+
+                        HistoryProcessDto dto = new HistoryProcessDto(
+                                        first.orderCode(),
+                                        first.partNumber(),
+                                        first.stepNumber(),
+                                        DateTimeUtil.convertTimestampToString(first.startTime()),
                                         endTime,
-                                        machine.getMachineName(),
-                                        dto,
-                                        status);
-                        historyProcessDtos.add(history);
+                                        first.machineName(),
+                                        staffs,
+                                        "Completed");
+
+                        result.add(dto);
                 }
-                return historyProcessDtos;
+
+                return result;
         }
 
+        // chưa check report, time
         @Override
         public MachineEfficiencyResponseDto getMachineEfficiency(StatisticRequestDto requestDto) {
-                String startDate = requestDto.getStartDate().concat(" 00:00:00"); // Should be "2025-07-21"
-                String endDate = requestDto.getEndDate().concat(" 23:59:59");
-                requestDto.setStartDate(startDate);
-                requestDto.setEndDate(endDate);
-
                 TimePeriodInfo timePeriodInfo = TimeRange.getRangeTypeAndWeek(requestDto);
                 Float operationalEfficiency = 0f;
                 Float pgEfficiency = 0f;
@@ -239,30 +262,52 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                                 timePeriodInfo.getYear());
                         }
                 }
-                List<DrawingCodeProcess> processes = drawingCodeProcessRepository
-                                .findCompletedProcessesByMachineAndTime(machine.getMachineId(),
-                                                timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
-                for (DrawingCodeProcess process : processes) {
+                List<Integer> machineIds = new ArrayList<>();
+                machineIds.add(machine.getMachineId());
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate start = LocalDate.parse(requestDto.getStartDate(), formatter);
+                LocalDate end = LocalDate.parse(requestDto.getEndDate(), formatter);
+                MachineDailySummaryByMachine sum = dailyRepository.sumByMachines(machineIds, start, end,
+                                requestDto.getShiftCode());
+                Float a = sum.mainProductPgSeconds() / 3600f;
+                float b = sum.electricPgSeconds() / 3600f;
+                float c = sum.otherSeconds() / 3600f;
 
-                        ProcessTime processTime = process.getProcessTime();
-                        if (processTime == null)
-                                processTime = processTimeService.calculateProcessTime(process);
-                        processPgTime += processTime.getPgTime();
-                        if (process.getProcessType().equals("SP_Chính")
-                                        || process.getProcessType().equals("Điện cực")) {
-                                mainAndElectricProductPgTime += processTime.getPgTime();
-                        } else {
-                                otherProductPgTime += processTime.getPgTime();
-                        }
-                }
-                List<Float> activeTime = machineRepository.calculateDurationsByStatusAndRange(
-                                machine.getMachineId(), timePeriodInfo.getStartDate(),
-                                timePeriodInfo.getEndDate());
-                totalPgTime = activeTime.get(3);
-                totalOffsetTime = activeTime.get(4);
-                totalRunTime = activeTime.get(3) + totalOffsetTime;
+                processPgTime = (sum.mainProductPgSeconds() / 3600f) + (sum.electricPgSeconds() / 3600f)
+                                + (sum.otherSeconds() / 3600f);
+                mainAndElectricProductPgTime = (sum.mainProductPgSeconds() / 3600f) + (sum.electricPgSeconds() / 3600f);
+                otherProductPgTime = (sum.otherSeconds() / 3600f);
+
+                totalPgTime = sum.runPgSeconds() / 3600f;
+                totalOffsetTime = sum.runOffsetSeconds() / 3600f;
+                totalRunTime = totalPgTime + totalOffsetTime;
+                // List<DrawingCodeProcess> processes = drawingCodeProcessRepository
+                // .findCompletedProcessesByMachineAndTime(machine.getMachineId(),
+                // timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
+                // for (DrawingCodeProcess process : processes) {
+
+                // ProcessTime processTime = process.getProcessTime();
+                // if (processTime == null)
+                // processTime = processTimeService.calculateProcessTime(process);
+                // processPgTime += processTime.getPgTime();
+                // if (process.getProcessType().equals("SP_Chính")
+                // || process.getProcessType().equals("Điện cực")) {
+                // mainAndElectricProductPgTime += processTime.getPgTime();
+                // } else {
+                // otherProductPgTime += processTime.getPgTime();
+                // }
+                // }
+                // List<Float> activeTime =
+                // machineRepository.calculateDurationsByStatusAndRange(
+                // machine.getMachineId(), timePeriodInfo.getStartDate(),
+                // timePeriodInfo.getEndDate());
+                // totalPgTime = activeTime.get(3);
+                // totalOffsetTime = activeTime.get(4);
+                // totalRunTime = activeTime.get(3) + totalOffsetTime;
                 float workingHourReal = 0;
                 int reportTime = 0;
+
+                // check sau
                 Long fromDate = timePeriodInfo.getStartDate();
                 Long toDate = timePeriodInfo.getEndDate();
                 if (timePeriodInfo.isMonth()) {
@@ -276,7 +321,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                         timePeriodInfo.getYear())
                                         .orElseGet(GroupKpi::new);
                 }
-                reportTime = reportService.calculateReport(fromDate, toDate);
+                reportTime = reportService.calculateReport(fromDate, toDate, requestDto.getShiftCode());
                 workingHourReal = groupKpi.getWorkingHour() + reportTime;
                 if (timePeriodInfo.getDay() == 1) {
                         workingHourReal = workingHourReal / 7;
@@ -291,7 +336,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 if (mainAndElectricProductPgTime > 0) {
                         valueEfficiency = (mainAndElectricProductPgTime / processPgTime) * 100;
                 }
-                if (totalPgTime > 0) {
+                if (processPgTime > 0) {
                         otherLoss = otherProductPgTime / processPgTime * 100;
                 }
                 if (operationalEfficiency > 0 && pgEfficiency > 0 && valueEfficiency > 0) {
@@ -343,10 +388,12 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                         timePeriodInfo.getMonth() + "/"
                                         + timePeriodInfo.getYear() + ".xlsx";
                         for (int week = 1; week <= 4; week++) {
-                                TimePeriodInfo weekInfo = TimeRange.buildWeekTimePeriodInfo(timePeriodInfo, week);
+                                TimePeriodInfo weekInfo = TimeRange.buildWeekTimePeriodInfo(timePeriodInfo,
+                                                week);
                                 if (weekInfo == null)
                                         continue;
-                                MachineDetailStatisticDto stats = calculateMachineTime(requestDto.getId(), weekInfo);
+                                MachineDetailStatisticDto stats = calculateMachineTime(requestDto.getId(),
+                                                weekInfo, requestDto.getShiftCode());
                                 StatisticRequestDto weekDto = requestDto;
                                 weekDto.setStartDate(Instant.ofEpochMilli(weekInfo.getStartDate())
                                                 .atZone(ZoneId.systemDefault()).toLocalDate().format(dateFormatter));
@@ -391,7 +438,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                 MachineEfficiencyResponseDto eff = getMachineEfficiency(dayDto);
 
                                 TimePeriodInfo dayInfo = TimeRange.getRangeTypeAndWeek(dayDto);
-                                MachineDetailStatisticDto stats = calculateMachineTime(requestDto.getId(), dayInfo);
+                                MachineDetailStatisticDto stats = calculateMachineTime(requestDto.getId(),
+                                                dayInfo, requestDto.getShiftCode());
                                 Row row = sheet.createRow(rowIdx++);
                                 row.createCell(0).setCellValue(day.format(dateFormatter));
                                 row.createCell(1).setCellValue(stats.getTotalRunTime());
@@ -411,7 +459,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 titleRow.createCell(4).setCellValue(title.replace(".xlsx", ""));
                 try {
                         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-                        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                        response.setHeader("Content-Disposition", "attachment; filename=" +
+                                        fileName);
                         workbook.write(response.getOutputStream());
                         response.flushBuffer();
                 } catch (Exception e) {
@@ -480,10 +529,15 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                                         continue;
                                                 MachineDetailStatisticDto stats = calculateMachineTime(
                                                                 machine.getMachineId(),
-                                                                weekInfo);
+                                                                weekInfo, requestDto.getShiftCode());
                                                 StatisticRequestDto weekDto = new StatisticRequestDto(
                                                                 group.getGroupId(),
-                                                                machine.getMachineId(), null, null);
+                                                                machine.getMachineId(),
+                                                                DateTimeUtil.convertTimestampToString(
+                                                                                weekInfo.getStartDate()),
+                                                                DateTimeUtil.convertTimestampToString(
+                                                                                weekInfo.getEndDate()),
+                                                                requestDto.getShiftCode());
                                                 weekDto.setStartDate(Instant.ofEpochMilli(weekInfo.getStartDate())
                                                                 .atZone(ZoneId.systemDefault()).toLocalDate()
                                                                 .format(dateFormatter));
@@ -535,7 +589,7 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                                                 TimePeriodInfo dayInfo = TimeRange.getRangeTypeAndWeek(dayDto);
                                                 MachineDetailStatisticDto stats = calculateMachineTime(
                                                                 machine.getMachineId(),
-                                                                dayInfo);
+                                                                dayInfo, requestDto.getShiftCode());
                                                 Row row = sheet.createRow(rowIdx++);
                                                 row.createCell(0).setCellValue(day.format(dateFormatter));
                                                 row.createCell(1).setCellValue(stats.getTotalRunTime());
@@ -558,7 +612,8 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 titleRow.createCell(4).setCellValue(title.replace(".xlsx", ""));
                 try {
                         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-                        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                        response.setHeader("Content-Disposition", "attachment; filename=" +
+                                        fileName);
                         workbook.write(response.getOutputStream());
                         response.flushBuffer();
                 } catch (Exception e) {

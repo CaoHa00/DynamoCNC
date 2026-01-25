@@ -152,9 +152,9 @@ public class ReportImplementation implements ReportService {
         }
 
         @Override
-        public Integer calculateReport(Long startDate, Long endDate) {
+        public Integer calculateReport(Long startDate, Long endDate, String shiftCode) {
                 Integer reportTime = 0;
-                reportTime = reportRepository.getTotalHourDiff(startDate, endDate);
+                reportTime = reportRepository.getTotalHourDiff(startDate, endDate, shiftCode);
                 return reportTime;
         }
 }

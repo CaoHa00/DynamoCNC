@@ -7,10 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.flywaydb.core.internal.util.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -338,4 +340,64 @@ public class OrderDetailImplementation implements OrderDetailService {
         });
     }
 
+    @Override
+    public void importExcel1(MultipartFile file) {
+
+        try {
+            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+
+            List<OrderDetail> list = new ArrayList<>();
+
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) { // bỏ header
+                Row row = sheet.getRow(i);
+                if (row == null)
+                    continue;
+
+                OrderDetail od = new OrderDetail();
+
+                od.setOrderDetailId(getString(row, 0));
+                od.setCreatedDate(getLong(row, 1));
+                od.setOrderCode(getString(row, 2));
+                od.setOrderType(getString(row, 3));
+                od.setPgTimeGoal(getInt(row, 4));
+                String groupId = getString(row, 8);
+                Group group = groupRepository.findById(getString(row, 8)).orElse(null);
+                od.setManagerGroup(group);
+                od.setNumberOfStep(getInt(row, 10));
+                od.setOffice(getString(row, 11));
+                od.setQuantity(getInt(row, 5));
+                od.setUpdatedDate(getLong(row, 6));
+                od.setStatus(getInt(row, 12));
+                od.setProgress(getInt(row, 13));
+                list.add(od);
+            }
+
+            orderDetailRepository.saveAll(list);
+            workbook.close();
+        } catch (Exception e) {
+            throw new BusinessException(e.getMessage());
+        }
+    }
+
+    // ===== Helper methods =====
+
+    private String getString(Row row, int index) {
+        Cell cell = row.getCell(index);
+        return cell == null ? null : cell.toString().trim();
+    }
+
+    private Long getLong(Row row, int index) {
+        Cell cell = row.getCell(index);
+        if (cell == null)
+            return null;
+        return (long) cell.getNumericCellValue();
+    }
+
+    private Integer getInt(Row row, int index) {
+        Cell cell = row.getCell(index);
+        if (cell == null)
+            return null;
+        return (int) cell.getNumericCellValue();
+    }
 }

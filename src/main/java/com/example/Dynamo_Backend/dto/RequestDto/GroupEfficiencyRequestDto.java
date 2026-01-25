@@ -11,4 +11,5 @@ public class GroupEfficiencyRequestDto {
     private String groupId;
     private String startDate;
     private String endDate;
+    private String shiftCode;
 }

@@ -14,6 +14,8 @@ public class MachineDetailStatisticDto {
     private Float runTimeRate;
     private Float totalStopTime;
     private Float stopTimeRate;
+    private Float totalEmptyTime;
+    private Float emptyTimeRate;
     private Float totalPgTime;
     private Float pgTimeRate;
     private Float totalErrorTime;

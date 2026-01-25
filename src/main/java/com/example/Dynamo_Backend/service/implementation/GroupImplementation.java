@@ -181,29 +181,39 @@ public class GroupImplementation implements GroupService {
 
     @Override
     public GroupResponseDto getGroupByMachineId(String payload) {
-        int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
-        int currentYear = LocalDate.now().getYear();
-        String[] arr = payload.split("-");
-        String machineId = arr[0];
-        Integer machineIdInt = Integer.parseInt(machineId) + 1;
-        String machineStr = String.format("%02d", machineIdInt);
-        Group group = groupRepository.findLatestByMachineId(machineIdInt, currentMonth, currentYear)
-                .orElseThrow(() -> new ResourceNotFoundException("Group not found for machineId: " + machineStr));
+        if (!payload.contains("*")) {
+            int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+            int currentYear = LocalDate.now().getYear();
+            String[] arr = payload.split("-");
+            String machineId = arr[0];
+            Integer machineIdInt = Integer.parseInt(machineId) + 1;
+            String machineStr = String.format("%02d", machineIdInt);
+            Group group = groupRepository.findLatestByMachineId(machineIdInt, currentMonth, currentYear)
+                    .orElseThrow(() -> new ResourceNotFoundException("Group not found for machineId: " + machineStr));
 
-        return GroupMapper.mapToGroupResponseDto(group);
+            return GroupMapper.mapToGroupResponseDto(group);
+        } else {
+            return null;
+        }
+
     }
 
     @Override
     public GroupResponseDto getGroupByStaffId(String payload) {
-        int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
-        int currentYear = LocalDate.now().getYear();
-        String[] arr = payload.split("-");
-        String machineId = arr[0];
-        Integer machineIdInt = Integer.parseInt(machineId) + 1;
-        CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
-        List<Group> group = groupRepository.findLatestByStaffId(currentStatus.getStaffId(), currentMonth, currentYear);
-        if (group.size() > 0) {
-            return GroupMapper.mapToGroupResponseDto(group.get(0));
+        if (!payload.contains("*")) {
+            int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
+            int currentYear = LocalDate.now().getYear();
+            String[] arr = payload.split("-");
+            String machineId = arr[0];
+            Integer machineIdInt = Integer.parseInt(machineId) + 1;
+            CurrentStatus currentStatus = currentStatusRepository.findByMachineId(machineIdInt);
+            List<Group> group = groupRepository.findLatestByStaffId(currentStatus.getStaffId(), currentMonth,
+                    currentYear);
+            if (group.size() > 0) {
+                return GroupMapper.mapToGroupResponseDto(group.get(0));
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
