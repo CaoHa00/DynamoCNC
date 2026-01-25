@@ -2,6 +2,7 @@ CREATE TABLE machine_segment (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
 
     machine_id INT NOT NULL,
+    staff_id VARCHAR(255) NULL,
     status NVARCHAR(10) NOT NULL,
 
     start_time DATETIME2 NOT NULL,
