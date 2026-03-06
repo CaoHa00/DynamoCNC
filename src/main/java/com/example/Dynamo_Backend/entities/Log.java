@@ -34,6 +34,8 @@ public class Log {
     @Column(name = "status", nullable = false)
     private String status;
 
+    private String processId;
+
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = true)
     @JsonBackReference(value = "stats-staff")

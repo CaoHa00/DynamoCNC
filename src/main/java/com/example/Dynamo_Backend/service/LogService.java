@@ -8,7 +8,7 @@ import com.example.Dynamo_Backend.entities.Machine;
 import com.example.Dynamo_Backend.entities.Staff;
 
 public interface LogService {
-    void addLog(CurrentStatus currrentStatus, Machine machine, Staff staff, Long timestamp);
+    void addLog(CurrentStatus currrentStatus, Machine machine, Staff staff, Long timestamp, String processId);
 
     // LogDto updateLog(String statsId, LogDto statsDto);
 
@@ -18,5 +18,5 @@ public interface LogService {
 
     List<LogDto> getAllLog();
 
-    void reSegment();
+    void reSegment(String startDate, List<Integer> machineId);
 }

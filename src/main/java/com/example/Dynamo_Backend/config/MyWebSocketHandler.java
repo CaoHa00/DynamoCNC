@@ -58,22 +58,24 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    public static void sendMachineStatusByGroupToClients(List<CurrentStatusResponseDto> currentStatusDtos)
-            throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonMessage = objectMapper.writeValueAsString(
-                new java.util.HashMap<String, Object>() {
-                    {
-                        put("type", "status");
-                        put("data", currentStatusDtos);
-                    }
-                });
-        for (WebSocketSession session : sessions) {
-            if (session.isOpen()) {
-                session.sendMessage(new TextMessage(jsonMessage));
-            }
-        }
-    }
+    // public static void
+    // sendMachineStatusByGroupToClients(List<CurrentStatusResponseDto>
+    // currentStatusDtos)
+    // throws IOException {
+    // ObjectMapper objectMapper = new ObjectMapper();
+    // String jsonMessage = objectMapper.writeValueAsString(
+    // new java.util.HashMap<String, Object>() {
+    // {
+    // put("type", "status");
+    // put("data", currentStatusDtos);
+    // }
+    // });
+    // for (WebSocketSession session : sessions) {
+    // if (session.isOpen()) {
+    // session.sendMessage(new TextMessage(jsonMessage));
+    // }
+    // }
+    // }
 
     public static void sendMachineStatusToClients(List<CurrentStatusDto> currentStatusDtos) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -91,12 +93,14 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    public static void sendStaffStatusToClients(List<ListCurrentStaffStatusDto> currentStatusDtos) throws IOException {
+    public static void sendStaffStatusToClients(List<ListCurrentStaffStatusDto> currentStatusDtos, String groupId)
+            throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonMessage = objectMapper.writeValueAsString(
                 new java.util.HashMap<String, Object>() {
                     {
                         put("type", "staff");
+                        put("groupId", groupId);
                         put("data", currentStatusDtos);
                     }
                 });

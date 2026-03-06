@@ -24,7 +24,6 @@ public class MachineDailyService {
         private final ProcessTimeShiftRepository processRepo;
 
         public void updateDailyTime(MachineSegment seg) {
-
                 Integer machineId = seg.getMachineId();
                 LocalDate logDate = seg.getLogDate();
                 String shiftCode = seg.getShiftCode();
@@ -63,17 +62,11 @@ public class MachineDailyService {
                                         daily.getRunPgSeconds() + duration);
                         case "R2" -> daily.setRunOffsetSeconds(
                                         daily.getRunOffsetSeconds() + duration);
-                        case "S1" -> daily.setStopSeconds(
+                        case "S1", "S2" -> daily.setStopSeconds(
                                         daily.getStopSeconds() + duration);
-                        case "S2" -> daily.setStopSeconds(
-                                        daily.getStopSeconds() + duration);
-                        case "E1" -> daily.setErrorSeconds(
+                        case "E1", "E2", "E3" -> daily.setErrorSeconds(
                                         daily.getErrorSeconds() + duration);
-                        case "E2" -> daily.setErrorSeconds(
-                                        daily.getErrorSeconds() + duration);
-                        case "E3" -> daily.setErrorSeconds(
-                                        daily.getErrorSeconds() + duration);
-                        case "0" -> daily.setEmptySeconds(
+                        case "0", "00" -> daily.setEmptySeconds(
                                         daily.getEmptySeconds() + duration);
                 }
                 if (seg.getProcessType() != null && seg.getStatus().contains("R")) {
@@ -161,6 +154,53 @@ public class MachineDailyService {
 
                 }
 
+        }
+
+        public void updateDailyTime1(LocalDate logDate, Integer machineId) {
+
+                String[] status = { "R1", "R2", "S1", "S2", "E1", "E2", "E3", "0", "00" };
+                String[] shiftCode = { "CA_NGAY", "CA_DEM" };
+
+                for (String shift : shiftCode) {
+
+                        MachineDaily daily = dailyRepo
+                                        .findByMachineIdAndLogDateAndShiftCode(
+                                                        machineId, logDate, shift)
+                                        .orElse(null);
+
+                        if (daily == null)
+                                continue;
+
+                        long runPg = 0;
+                        long runOffset = 0;
+                        long stop = 0;
+                        long error = 0;
+                        long empty = 0;
+
+                        for (String st : status) {
+
+                                long duration = segmentRepo
+                                                .sumDurationByCondition(
+                                                                logDate, shift, st, machineId);
+
+                                switch (st) {
+                                        case "R1" -> runPg = duration;
+                                        case "R2" -> runOffset = duration;
+                                        case "S1", "S2" -> stop += duration;
+                                        case "E1", "E2", "E3" -> error += duration;
+                                        case "0", "00" -> empty += duration;
+                                }
+                        }
+
+                        // 🔥 set sau khi đã cộng xong
+                        daily.setRunPgSeconds(runPg);
+                        daily.setRunOffsetSeconds(runOffset);
+                        daily.setStopSeconds(stop);
+                        daily.setErrorSeconds(error);
+                        daily.setEmptySeconds(empty);
+
+                        dailyRepo.save(daily);
+                }
         }
 
 }

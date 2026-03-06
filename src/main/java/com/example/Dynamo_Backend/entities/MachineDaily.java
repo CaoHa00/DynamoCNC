@@ -20,7 +20,6 @@ public class MachineDaily {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
-
         private Integer machineId;
         private LocalDate logDate;
         private String shiftCode;

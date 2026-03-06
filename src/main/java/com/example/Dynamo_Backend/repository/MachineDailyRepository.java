@@ -1,6 +1,7 @@
 package com.example.Dynamo_Backend.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,10 @@ public interface MachineDailyRepository extends JpaRepository<MachineDaily, Long
             Integer machineId,
             LocalDate logDate,
             String shiftCode);
+
+    void deleteByMachineIdAndLogDate(
+            Integer machineId,
+            LocalDate date);
 
     @Query("""
                 SELECT new com.example.Dynamo_Backend.dto.MachineDailySummaryByMachine(
@@ -108,5 +113,23 @@ public interface MachineDailyRepository extends JpaRepository<MachineDaily, Long
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("shiftCode") String shiftCode);
+
+    @Query("""
+                SELECT m
+                FROM MachineDaily m
+                WHERE(
+                       :shiftCode IS NULL
+                       OR :shiftCode = 'FULL'
+                        OR m.shiftCode = :shiftCode
+                      )
+                  AND m.machineId IN :machineIds
+                  AND m.logDate BETWEEN :fromDate AND :toDate
+                ORDER BY m.logDate, m.machineId
+            """)
+    List<MachineDaily> findByShiftAndMachinesAndDateRange(
+            @Param("shiftCode") String shiftCode,
+            @Param("machineIds") List<Integer> machineIds,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate);
 
 }

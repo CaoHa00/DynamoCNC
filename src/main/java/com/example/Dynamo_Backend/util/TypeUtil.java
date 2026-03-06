@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TypeUtil {
-    public static String typeOfProcess(String type) {
-        return "0";
-    }
 
     public static HashMap<String, Float> buildStatusHourMap(List<Object[]> results) {
         HashMap<String, Float> map = new HashMap<>();
@@ -26,4 +23,5 @@ public class TypeUtil {
 
         return map;
     }
+
 }

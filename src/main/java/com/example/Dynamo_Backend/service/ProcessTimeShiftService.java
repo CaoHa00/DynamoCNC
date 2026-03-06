@@ -77,8 +77,10 @@ public class ProcessTimeShiftService {
         entity.setQuantity(
                 entity.getQuantity() + 1);
         processTimeShiftRepository.save(entity);
+        machineDailyService.updateDailyQuantity(entity);
     }
 
+    // chạy lại data
     @Transactional
     public void reCalculateProcess(
             DrawingCodeProcess process) {
@@ -131,6 +133,7 @@ public class ProcessTimeShiftService {
         entity.setQuantity(
                 entity.getQuantity() + 1);
         processTimeShiftRepository.save(entity);
+        machineDailyService.updateDailyQuantity(entity);
     }
 
 }

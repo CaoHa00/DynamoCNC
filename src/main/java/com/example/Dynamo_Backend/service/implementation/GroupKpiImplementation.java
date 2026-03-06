@@ -256,7 +256,7 @@ public class GroupKpiImplementation implements GroupKpiService {
                 dto.setOffice(prevKpi.getOffice());
                 dto.setWorkingHourGoal(prevKpi.getWorkingHourGoal());
                 dto.setWorkingHourDifference(prevKpi.getWorkingHourDifference());
-                dto.setWorkingHour(0.0f);
+                dto.setWorkingHour(prevKpi.getWorkingHour());
             } else {
                 dto.setOffice("Main Office");
                 dto.setWorkingHourGoal(0.0f);

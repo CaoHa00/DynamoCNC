@@ -15,8 +15,8 @@ public class StaffGroupStatisticDto {
     private String groupId;
     private String groupName;
     private Integer staffCount;
-    private Float workingHours;
-    private Float workingRate;
+    private Long pgHour;
+    private Float pgRate;
     private Long manufacturingPoints;
     private Float mpRate;
     private Long processCount;

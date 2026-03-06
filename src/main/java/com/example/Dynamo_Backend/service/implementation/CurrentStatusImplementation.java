@@ -35,6 +35,7 @@ import com.example.Dynamo_Backend.service.LogService;
 import com.example.Dynamo_Backend.service.MachineSegmentServiceImplementation;
 import com.example.Dynamo_Backend.util.DateTimeUtil;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -54,6 +55,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
 
     private final StaffKpiRepository staffKpiRepository;
 
+    @Transactional
     @Override
     public void addCurrentStatus(String payload) {
         if (!payload.contains("*")) {
@@ -70,52 +72,59 @@ public class CurrentStatusImplementation implements CurrentStatusService {
             if (currentStatus == null) {
                 currentStatus = new CurrentStatus();
             }
+            if (!currentStatus.getStatus().equals(arr[1])) {
+                CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
+                if (currentStaff != null && currentStaff.getStaff() != null) {
+                    currentStatus.setStaffId(currentStaff.getStaff().getId());
+                } else {
+                    currentStatus.setStaffId(null);
+                }
+                DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
+                        .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
+                String processId = null;
+                if (drawingCodeProcess != null) {
+                    currentStatus.setProcessId(drawingCodeProcess.getProcessId());
+                    processId = drawingCodeProcess.getProcessId();
+                } else {
+                    currentStatus.setProcessId(null);
+                }
+                currentStatus.setMachineId(machineIdInt);
+                currentStatus.setStatus(arr[1]);
+                if (arr.length < 3) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String nowStr = now.now().format(formatter);
+                    currentStatus.setTime(nowStr);
+                    if (currentStatus.getStatus().contains("R")) {
+                        currentStatus.setLastChangeAt(DateTimeUtil.convertLocalDateTimeToLong(now));
+                    }
+                } else {
+                    currentStatus.setTime(arr[2]);
+                }
 
-            CurrentStaff currentStaff = currentStaffRepository.findByMachine_MachineId(machineIdInt);
-            if (currentStaff != null && currentStaff.getStaff() != null) {
-                currentStatus.setStaffId(currentStaff.getStaff().getId());
-            } else {
-                currentStatus.setStaffId(null);
-            }
-            DrawingCodeProcess drawingCodeProcess = drawingCodeProcessRepository
-                    .findByMachine_MachineIdAndProcessStatus(machineIdInt, 2);
-            if (drawingCodeProcess != null) {
-                currentStatus.setProcessId(drawingCodeProcess.getProcessId());
-            } else {
-                currentStatus.setProcessId(null);
-            }
-            currentStatus.setMachineId(machineIdInt);
-            currentStatus.setStatus(arr[1]);
-            if (arr.length < 3) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String nowStr = now.now().format(formatter);
-                currentStatus.setTime(nowStr);
-            } else {
-                currentStatus.setTime(arr[2]);
+                logService.addLog(currentStatus, machine,
+                        currentStaff != null ? currentStaff.getStaff() : null,
+                        DateTimeUtil.convertLocalDateTimeToLong(now), processId);
+                currentStatusRepository.save(currentStatus);
+                if (drawingCodeProcess != null) {
+                    machineSegmentService.handleNewEvent(machine.getMachineId(), currentStatus.getStatus(), now,
+                            drawingCodeProcess.getProcessId(), drawingCodeProcess.getProcessType());
+                } else {
+                    machineSegmentService.handleNewEvent(machine.getMachineId(), currentStatus.getStatus(), now, null,
+                            null);
+                }
+
+                List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
+                try {
+                    // MyWebSocketHandler.sendMachineStatusToClients(currentStatuses.stream()
+                    // .map(CurrentStatusMapper::mapToCurrentStatusDto).toList());
+                    MyWebSocketHandler.sendMachineStatusToClients(
+                            currentStatuses.stream().map(currentStatusMapper::mapToCurrentStatusDto)
+                                    .toList());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
-            logService.addLog(currentStatus, machine,
-                    currentStaff != null ? currentStaff.getStaff() : null,
-                    DateTimeUtil.convertLocalDateTimeToLong(now));
-            currentStatusRepository.save(currentStatus);
-            if (drawingCodeProcess != null) {
-                machineSegmentService.handleNewEvent(machine.getMachineId(), currentStatus.getStatus(), now,
-                        drawingCodeProcess.getProcessId(), drawingCodeProcess.getProcessType());
-            } else {
-                machineSegmentService.handleNewEvent(machine.getMachineId(), currentStatus.getStatus(), now, null,
-                        null);
-            }
-
-            List<CurrentStatus> currentStatuses = currentStatusRepository.findAll();
-            try {
-                // MyWebSocketHandler.sendMachineStatusToClients(currentStatuses.stream()
-                // .map(CurrentStatusMapper::mapToCurrentStatusDto).toList());
-                MyWebSocketHandler.sendMachineStatusToClients(
-                        currentStatuses.stream().map(currentStatusMapper::mapToCurrentStatusDto)
-                                .toList());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
     }
@@ -201,6 +210,7 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                                 .findById(currentStatus.getProcessId())
                                 .orElse(null)
                         : null;
+                Long duration = drawingCodeProcess != null ? drawingCodeProcess.getDuration() : 0;
                 String drawingCodeName = drawingCodeProcess != null
                         ? drawingCodeProcess.getOrderDetail().getOrderCode()
                         : null;
@@ -219,7 +229,9 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                         pgTime,
                         startTime,
                         currentStatus.getTime(),
-                        currentStatus.getStatus());
+
+                        currentStatus.getStatus(), duration,
+                        currentStatus.getLastChangeAt());
                 result.add(responseDto);
             } else {
                 CurrentStatusResponseDto responseDto = new CurrentStatusResponseDto(
@@ -229,8 +241,8 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                         null,
                         null,
                         null,
-                        null,
-                        null);
+                        null, null,
+                        null, 0l);
                 result.add(responseDto);
             }
         }
@@ -267,6 +279,10 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                     String drawingCodeName = drawingCodeProcess != null
                             ? drawingCodeProcess.getOrderDetail().getOrderCode()
                             : null;
+                    Long duration = 0L;
+                    if (drawingCodeProcess != null) {
+                        duration = drawingCodeProcess.getDuration();
+                    }
                     Integer pgTime = drawingCodeProcess != null
                             ? drawingCodeProcess.getPgTime()
                             : null;
@@ -283,7 +299,8 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                             pgTime,
                             startTime,
                             currentStatus.getTime(),
-                            currentStatus.getStatus());
+                            currentStatus.getStatus(), duration,
+                            currentStatus.getLastChangeAt());
                     result.add(responseDto);
                 }
             } else {
@@ -295,7 +312,8 @@ public class CurrentStatusImplementation implements CurrentStatusService {
                         null,
                         null,
                         null,
-                        null);
+                        null,
+                        null, 0l);
                 result.add(responseDto);
             }
             ListCurrentStaffStatusDto dto = new ListCurrentStaffStatusDto();

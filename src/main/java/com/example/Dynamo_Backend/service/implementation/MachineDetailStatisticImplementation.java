@@ -63,8 +63,6 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
 
         @Autowired
         private GroupRepository groupRepository;
-        @Autowired
-        private OperateHistoryRepository operateHistoryRepository;
 
         @Autowired
         private DrawingCodeProcessRepository drawingCodeProcessRepository;
@@ -269,9 +267,6 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 LocalDate end = LocalDate.parse(requestDto.getEndDate(), formatter);
                 MachineDailySummaryByMachine sum = dailyRepository.sumByMachines(machineIds, start, end,
                                 requestDto.getShiftCode());
-                Float a = sum.mainProductPgSeconds() / 3600f;
-                float b = sum.electricPgSeconds() / 3600f;
-                float c = sum.otherSeconds() / 3600f;
 
                 processPgTime = (sum.mainProductPgSeconds() / 3600f) + (sum.electricPgSeconds() / 3600f)
                                 + (sum.otherSeconds() / 3600f);
@@ -281,29 +276,6 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 totalPgTime = sum.runPgSeconds() / 3600f;
                 totalOffsetTime = sum.runOffsetSeconds() / 3600f;
                 totalRunTime = totalPgTime + totalOffsetTime;
-                // List<DrawingCodeProcess> processes = drawingCodeProcessRepository
-                // .findCompletedProcessesByMachineAndTime(machine.getMachineId(),
-                // timePeriodInfo.getStartDate(), timePeriodInfo.getEndDate());
-                // for (DrawingCodeProcess process : processes) {
-
-                // ProcessTime processTime = process.getProcessTime();
-                // if (processTime == null)
-                // processTime = processTimeService.calculateProcessTime(process);
-                // processPgTime += processTime.getPgTime();
-                // if (process.getProcessType().equals("SP_Chính")
-                // || process.getProcessType().equals("Điện cực")) {
-                // mainAndElectricProductPgTime += processTime.getPgTime();
-                // } else {
-                // otherProductPgTime += processTime.getPgTime();
-                // }
-                // }
-                // List<Float> activeTime =
-                // machineRepository.calculateDurationsByStatusAndRange(
-                // machine.getMachineId(), timePeriodInfo.getStartDate(),
-                // timePeriodInfo.getEndDate());
-                // totalPgTime = activeTime.get(3);
-                // totalOffsetTime = activeTime.get(4);
-                // totalRunTime = activeTime.get(3) + totalOffsetTime;
                 float workingHourReal = 0;
                 int reportTime = 0;
 
@@ -323,8 +295,10 @@ public class MachineDetailStatisticImplementation implements MachineDetailStatis
                 }
                 reportTime = reportService.calculateReport(fromDate, toDate, requestDto.getShiftCode());
                 workingHourReal = groupKpi.getWorkingHour() + reportTime;
-                if (timePeriodInfo.getDay() == 1) {
+                if (timePeriodInfo.getDay() == 1 && requestDto.getShiftCode().equals("FULL")) {
                         workingHourReal = workingHourReal / 7;
+                } else {
+                        workingHourReal = workingHourReal / 14;
                 }
                 if (groupKpi.getWorkingHour() != null && groupKpi.getWorkingHour() > 0) {
                         operationalEfficiency = (totalRunTime / workingHourReal) * 100;

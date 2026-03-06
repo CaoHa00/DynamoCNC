@@ -46,16 +46,16 @@ public class MQTTConfig {
         MqttConnectOptions options = new MqttConnectOptions();
 
         // options.setServerURIs(new String[] { "tcp://10.60.253.11:1883" });
-        options.setServerURIs(new String[] { "tcp://172.21.200.20:1883" });
-        // options.setServerURIs(new String[] {
-        // "ssl://7b4d336ebd84424cb04e1c2900fe72d0.s1.eu.hivemq.cloud:8883" });
+        // options.setServerURIs(new String[] { "tcp://172.21.200.20:1883" });
+        options.setServerURIs(new String[] {
+                "ssl://7b4d336ebd84424cb04e1c2900fe72d0.s1.eu.hivemq.cloud:8883" });
         // 172.21.200.20
         options.setCleanSession(true);
         options.setAutomaticReconnect(true);
-        // options.setUserName("iic_mqtt");
-        // options.setPassword("Vsiic_2024".toCharArray());
-        options.setUserName("PLC1");
-        options.setPassword("PLC1".toCharArray());
+        options.setUserName("iic_mqtt");
+        options.setPassword("Vsiic_2024".toCharArray());
+        // options.setUserName("PLC1");
+        // options.setPassword("PLC1".toCharArray());
         factory.setConnectionOptions(options);
         return factory;
     }
@@ -108,13 +108,18 @@ public class MQTTConfig {
                             String jsonMessage = objectMapper.writeValueAsString(
                                     new java.util.HashMap<String, Object>() {
                                         {
-                                            put("type", groupDto.getGroupName().concat("-status"));
+                                            put("type", "GROUP_STATUS");
+                                            put("groupId", groupDto.getGroupId());
                                             put("data", statusList);
                                             put("countStatus", statusCount);
                                         }
                                     });
                             MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
-                            MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+                            if (groupDto1 != null) {
+                                listStaffStatus = currentStatusService
+                                        .getCurrentStaffStatusByGroupId(groupDto1.getGroupId());
+                                MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus, groupDto1.getGroupId());
+                            }
 
                             // String statusCountJson = objectMapper.writeValueAsString(
                             // Map.of("type", groupDto.getGroupName().concat("-countStatus"), "data",

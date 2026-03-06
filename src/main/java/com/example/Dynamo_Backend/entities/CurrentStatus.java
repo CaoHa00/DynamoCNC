@@ -32,4 +32,5 @@ public class CurrentStatus {
     private String time;
     @Column(name = "status", nullable = false)
     private String status;
+    private Long lastChangeAt;
 }

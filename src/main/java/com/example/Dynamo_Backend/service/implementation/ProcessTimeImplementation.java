@@ -126,6 +126,7 @@ public class ProcessTimeImplementation implements ProcessTimeService {
         // .sumTimesByOrderDetailId(drawingCodeProcess.getOrderDetail().getOrderDetailId());
     }
 
+    // chạy lại data
     @Override
     public void calculateProcessTime1(DrawingCodeProcess drawingCodeProcess, ProcessTime processTime) {
         List<Log> logs = logRepository.findByMachine_machineIdAndTimeStampBetweenOrderByTimeStampAsc(

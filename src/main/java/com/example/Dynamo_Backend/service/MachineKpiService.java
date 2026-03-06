@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
+import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 
 public interface MachineKpiService {
     MachineKpiDto addMachineKpi(MachineKpiDto machineKpiDto);
@@ -20,5 +21,7 @@ public interface MachineKpiService {
     List<MachineKpiDto> getMachineKpis();
 
     void importMachineKpiFromExcel(MultipartFile file);
+
+    List<Integer> determineMachineByMonthOrWeek(String groupId, TimePeriodInfo timePeriodInfo);
 
 }

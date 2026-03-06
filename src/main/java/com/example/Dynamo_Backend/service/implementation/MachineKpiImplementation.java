@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Dynamo_Backend.dto.MachineKpiDto;
+import com.example.Dynamo_Backend.dto.TimePeriodInfo;
 import com.example.Dynamo_Backend.entities.Group;
 
 import com.example.Dynamo_Backend.entities.Machine;
@@ -242,6 +243,20 @@ public class MachineKpiImplementation implements MachineKpiService {
         System.out.println("Monthly Machine KPI creation completed. Created " +
                 createdCount + " new KPIs for " + year
                 + "-" + month);
+    }
+
+    @Override
+    public List<Integer> determineMachineByMonthOrWeek(String groupId, TimePeriodInfo timePeriodInfo) {
+        List<MachineKpi> kpiList = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(
+                groupId,
+                timePeriodInfo.getMonth(),
+                timePeriodInfo.getYear());
+
+        return kpiList.stream()
+                .map(kpi -> kpi.getMachine().getMachineId())
+                .distinct()
+                .toList();
+
     }
 
 }

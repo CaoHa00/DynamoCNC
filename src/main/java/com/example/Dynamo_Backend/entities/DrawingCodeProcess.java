@@ -84,6 +84,8 @@ public class DrawingCodeProcess {
     @Column(name = "is_plan", nullable = false)
     private Integer isPlan;
 
+    private Long duration = 0L;
+
     @ManyToOne()
     @JoinColumn(name = "order_detail_id", nullable = false)
     @JsonBackReference

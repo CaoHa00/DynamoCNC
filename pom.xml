@@ -60,6 +60,20 @@
 		</dependency>
 		<dependency>
 			<groupId>
+				mysql
+			</groupId>
+			<artifactId>
+				mysql-connector-java
+			</artifactId>
+			<version>
+				8.0.33
+			</version>
+			<scope>
+				runtime
+			</scope>
+		</dependency>
+		<dependency>
+			<groupId>
 				org.bouncycastle
 			</groupId>
 			<artifactId>
@@ -207,14 +221,16 @@
 				0.11.5
 			</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>
-				org.flywaydb
-			</groupId>
-			<artifactId>
-				flyway-core
-			</artifactId>
-		</dependency> -->
+		<!--
+		<dependency>
+		<groupId>
+		org.flywaydb
+		</groupId>
+		<artifactId>
+		flyway-core
+		</artifactId>
+		</dependency>
+		-->
 		<!-- SQL Server -->
 		<dependency>
 			<groupId>

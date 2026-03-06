@@ -19,4 +19,6 @@ public class CurrentStatusResponseDto {
     private Long startTime;
     private String time;
     private String status;
+    private Long duration;
+    private Long lastStatusChangeAt;
 }

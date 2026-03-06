@@ -28,8 +28,6 @@ import com.example.Dynamo_Backend.dto.ResponseDto.StaffGroupStatisticDto;
 import com.example.Dynamo_Backend.dto.ResponseDto.StaffSummary;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.GroupKpi;
-import com.example.Dynamo_Backend.entities.OperateHistory;
-import com.example.Dynamo_Backend.entities.Report;
 import com.example.Dynamo_Backend.entities.StaffKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.mapper.StaffKpiMapper;
@@ -69,7 +67,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                 group.getGroupId(), timePeriod.getMonth(), timePeriod.getYear());
 
         if (staffKpiList.isEmpty()) {
-            return new StaffGroupStatisticDto(null, null, 0, 0f, 0f, 0L, 0f, 0L, 0f, 0f, 0f,
+            return new StaffGroupStatisticDto(null, null, 0, 0l, 0f, 0L, 0f, 0L, 0f, 0f, 0f,
                     staffKpiList.stream().map(StaffKpiMapper::mapToStaffDto).toList());
         }
         Long processCount = 0L;
@@ -91,9 +89,10 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
 
         StaffSummary summary = operateHistoryRepository.getStaffKpi(timePeriod.getStart(), timePeriod.getEnd(),
                 staffIds);
+
         totalPgTime = summary.getTotalPgTime() / 60;
         processCount = summary.getTotalProcess();
-        totalWorkingHours = summary.getTotalDurationSeconds() / 3600f;
+        totalWorkingHours = summary.getTotalDurationSeconds() / 2 / 3600f;
         totalManufactoringPoints = summary.getTotalManufacturingPoint();
 
         totalKpi = (float) ((totalManufactoringPoints * 6) / staffIds.size()) + (totalPgTime / staffIds.size());
@@ -102,7 +101,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
                 group.getGroupId(), previousTime.getMonth(), previousTime.getYear());
         if (previousStaffKpiList.isEmpty()) {
             return new StaffGroupStatisticDto(group.getGroupId(), group.getGroupName(), 0,
-                    totalWorkingHours, 0f, totalManufactoringPoints, 0f, 0L, 0f, 0f, 0f,
+                    totalPgTime, 0f, totalManufactoringPoints, 0f, 0L, 0f, 0f, 0f,
                     staffKpiList.stream().map(StaffKpiMapper::mapToStaffDto).toList());
         }
 
@@ -120,7 +119,7 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
         previousTotalKpi = (float) ((previousTotalManufactoringPoints * 6) / staffIds.size())
                 + (previousTotalPgTime / staffIds.size());
 
-        Float workingRate = 0f;
+        Float pgRate = 0f;
         Float mpRate = 0f;
         Float kpiRate = 0f;
         Float processRate = 0f;
@@ -131,14 +130,14 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             processRate = (float) ((processCount - previousProcessCount) / previousProcessCount) * 100;
         }
         if (previousTotalWorkingHours != 0) {
-            workingRate = ((totalWorkingHours - previousTotalWorkingHours) / previousTotalWorkingHours) * 100;
+            pgRate = (float) ((totalPgTime - previousTotalPgTime) / previousTotalPgTime) * 100;
         }
         if (previousTotalManufactoringPoints != 0) {
             mpRate = ((totalManufactoringPoints - previousTotalManufactoringPoints)
                     / (float) previousTotalManufactoringPoints) * 100;
         }
         return new StaffGroupStatisticDto(group.getGroupId(), group.getGroupName(), staffCount,
-                totalWorkingHours, workingRate, totalManufactoringPoints, mpRate,
+                totalPgTime, pgRate, totalManufactoringPoints, mpRate,
                 processCount, processRate, totalKpi, kpiRate,
                 staffKpiList.stream().map(StaffKpiMapper::mapToStaffDto).toList());
     }
@@ -196,8 +195,9 @@ public class StaffGroupStatisticImplementation implements GroupStatisticService 
             if (summary.getTotalDurationSeconds() != null) {
                 totalManufactoringPoints = summary.getTotalManufacturingPoint();
                 totalPgTime = summary.getTotalPgTime() / 60;
-                totalWorkingHours = summary.getTotalDurationSeconds() / 3600f;
-                totalMachineTime = summary.getTotalDurationSeconds() / 3600f;
+                totalWorkingHours = summary.getTotalDurationSeconds() / 2 / 3600f;
+                totalMachineTime = summary.getTotalDurationSeconds() / 2 / 3600f;
+
                 uniqueProcesses = summary.getTotalProcess();
 
                 if (totalPgTime != 0f) {

@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Dynamo_Backend.dto.LogDto;
 import com.example.Dynamo_Backend.service.LogService;
+import com.example.Dynamo_Backend.service.MachineSegmentServiceImplementation;
 
 import lombok.AllArgsConstructor;
 
@@ -20,6 +22,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/stats")
 public class LogController {
     public final LogService statsSevice;
+    public final MachineSegmentServiceImplementation segSevice;
 
     @GetMapping
     public ResponseEntity<List<LogDto>> getAllStatss() {
@@ -55,8 +58,16 @@ public class LogController {
     }
 
     @GetMapping("/reSegment")
-    public ResponseEntity<Void> reSeg() {
-        statsSevice.reSegment();
+    public ResponseEntity<Void> reSeg(@RequestParam("startDate") String startDate,
+            @RequestParam List<Integer> machineIds) {
+        statsSevice.reSegment(startDate, machineIds);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/reDaily")
+    public ResponseEntity<Void> reDaily(@RequestParam("date") String date,
+            @RequestParam List<Integer> machineIds) {
+        segSevice.reRunMachineDailyBaseOnSegment(date, machineIds);
         return ResponseEntity.ok().build();
     }
 

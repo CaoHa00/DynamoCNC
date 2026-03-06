@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -487,7 +485,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 }
                                         });
                         MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
-                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus, group.getGroupId());
                         MyWebSocketHandler.sendMachineStatusToClients(
                                         currentStatuses.stream().map(currentStatusMapper::mapToCurrentStatusDto)
                                                         .toList());
@@ -582,7 +580,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 }
                                         });
                         MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
-                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus, group.getGroupId());
 
                 } catch (IOException e) {
                         e.printStackTrace();
@@ -932,7 +930,7 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                                                 }
                                         });
                         MyWebSocketHandler.sendGroupStatusToClients(jsonMessage);
-                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus);
+                        MyWebSocketHandler.sendStaffStatusToClients(listStaffStatus, group.getGroupId());
 
                 } catch (IOException e) {
                         e.printStackTrace();
@@ -1249,4 +1247,5 @@ public class DrawingCodeProcessImplementation implements DrawingCodeProcessServi
                         processTimeShiftService.reCalculateProcess(process);
                 }
         }
+
 }

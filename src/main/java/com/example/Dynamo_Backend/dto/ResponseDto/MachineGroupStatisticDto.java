@@ -18,14 +18,14 @@ public class MachineGroupStatisticDto {
     private Float totalStopTime;
     private Float totalPgTime;
     private Float totalOffsetTime;
-    private Float totalSpanTime;
+    private Float totalEmptyTime;
     private Float totalErrorTime;
     private Float errorTimeRate;
     private Float runTimeRate;
     private Float stopTimeRate;
     private Float pgTimeRate;
     private Float offsetTimeRate;
-    private Float spanTimeRate;
+    private Float emptyTimeRate;
     private Integer totalProcesses;
     private Float processRate;
     private Integer totalMachines;
