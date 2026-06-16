@@ -20,11 +20,13 @@ import com.example.Dynamo_Backend.dto.ResponseDto.GroupResponseDto;
 import com.example.Dynamo_Backend.entities.CurrentStatus;
 import com.example.Dynamo_Backend.entities.Group;
 import com.example.Dynamo_Backend.entities.Machine;
+import com.example.Dynamo_Backend.entities.MachineKpi;
 import com.example.Dynamo_Backend.exception.BusinessException;
 import com.example.Dynamo_Backend.exception.ResourceNotFoundException;
 import com.example.Dynamo_Backend.mapper.GroupMapper;
 import com.example.Dynamo_Backend.repository.CurrentStatusRepository;
 import com.example.Dynamo_Backend.repository.GroupRepository;
+import com.example.Dynamo_Backend.repository.MachineKpiRepository;
 import com.example.Dynamo_Backend.repository.MachineRepository;
 import com.example.Dynamo_Backend.service.GroupService;
 
@@ -38,6 +40,9 @@ public class GroupImplementation implements GroupService {
 
     @Autowired
     MachineRepository machineRepository;
+
+    @Autowired
+    MachineKpiRepository machineKpiRepository;
 
     @Autowired
     CurrentStatusRepository currentStatusRepository;
@@ -157,12 +162,12 @@ public class GroupImplementation implements GroupService {
         int currentYear = LocalDate.now().getYear();
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Group not found with ID: " + groupId));
-        List<Machine> machines = machineRepository.findMachinesByGroupIdLatestOrCurrent(group.getGroupId(),
-                currentMonth, currentYear);
+        List<MachineKpi> machines = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(group.getGroupId(),
+                currentYear, currentMonth);
         Map<String, Long> statusCount = machines.stream()
                 .map(machine -> {
                     CurrentStatus status = currentStatusRepository
-                            .findByMachineId(machine.getMachineId());
+                            .findByMachineId(machine.getMachine().getMachineId());
                     if (status == null)
                         return "Other";
                     String rawStatus = status.getStatus();

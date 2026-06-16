@@ -190,7 +190,7 @@ public class MachineKpiImplementation implements MachineKpiService {
     }
 
     @Transactional
-    @Scheduled(cron = "0 0 0 1 * ?") // Runs at 12:00 AM on the 1st of every month
+    @Scheduled(cron = "0 0 1 1 * ?") // Runs at 12:00 AM on the 1st of every month
     public void createMonthlyMachineKpis() {
         LocalDate now = LocalDate.now();
         int year = now.getYear();

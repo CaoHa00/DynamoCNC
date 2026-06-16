@@ -182,13 +182,11 @@ public class CurrentStatusImplementation implements CurrentStatusService {
         int currentMonth = LocalDate.now().getMonthValue(); // 1 = January, 12 = December
         int currentYear = LocalDate.now().getYear();
 
-        List<Machine> machines = machineRepository.findMachinesByGroupIdLatestOrCurrent(groupId, currentMonth,
-                currentYear);
         List<MachineKpi> machineKpis = machineKpiRepository.findByGroup_groupIdAndMonthAndYear(groupId, currentMonth,
                 currentYear);
         List<CurrentStatusResponseDto> result = new ArrayList<>();
 
-        if (machines.isEmpty()) {
+        if (machineKpis.isEmpty()) {
             return List.of(); // Return empty list
         }
         for (MachineKpi machineKpi : machineKpis) {
